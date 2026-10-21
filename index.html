@@ -7,69 +7,136 @@
 <title>Kho bài tập tiếng Anh</title>
 
 <style>
+ @import url('https://googleapis.com');
+ 
 body {
     font-family: Helvetica;
     max-width: 700px;
     margin: 30px auto;
     padding: 15px;
     background: #FFFFFF ;
+	
 }
-h1 {
-    color: #003366;
+h1 {                                /* Heading */
+    
     text-align: center;
-	font-family: Helvetica;
+	font-family: 'Montserrat', sans-serif;
 	font-size: 40px;
+	background: linear-gradient(45deg, #111827, #1E3A8A);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  
 }
-.bai {
-    background: #003366;
-    padding: 18px;
-    margin: 15px 0;
-    border-radius: 10px;
-	color: #FFFFFF ;
-	font-family: Helvetica;
+
+
+.bai {                          /* tiêu đề File Word tải về */
+     /* 1. Thay màu nền xanh đặc thành màu trắng trong suốt (Transparent) */
+  background: rgba(255, 255, 255, 0.65); 
+  
+  /* 2. Thêm một lớp kính mờ phía sau nếu website của bạn có ảnh nền lớn */
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+
+  /* 3. Tạo viền mỏng màu xám/trắng rất nhẹ để định hình khung ô bài tập */
+  border: 1px solid rgba(226, 232, 240, 0.8);
+
+  /* 4. Đổi màu chữ sang xanh Navy đậm để đọc rõ trên nền trong suốt */
+  color: #0b1e36; 
+
+  /* 5. Tạo hiệu ứng BÓNG ĐEN TRANSPARENT (Đổ bóng mờ dịu xung quanh) */
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+
+  /* Các thuộc tính căn lề và bo góc giữ nguyên của bạn */
+  padding: 18px;
+  margin: 15px 0;
+  border-radius: 10px;
+  font-family: Helvetica;
+  transition: transform 0.3s ease, box-shadow 0.3s ease, background 0.3s ease;
 }
-a {
-    display: inline-block;
+
+.bai:hover {
+  transform: translateY(-3px); /* Nhấc nhẹ ô bài tập lên */
+  background: rgba(255, 255, 255, 0.9); /* Nền trắng rõ hơn khi hover */
+  
+  /* Tăng độ đậm của bóng đen xung quanh khi đưa chuột vào */
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.18); 
+}
+
+
+a {                             /* Ô tải về File */
+    display: inline-block;      /* Biến nút bấm thành dạng khối để nhận thuộc tính margin */
+  margin-left: auto;
     background: #FFFFFF;
     color: #003366;
     padding: 10px 15px;
     text-decoration: none;
     border-radius: 6px;
 	font-family: Helvetica;
+	transition: background 0.2s ease, color 0.2s ease, transform 0.2s ease;
 }
-p  {
-color: #003366;
+
+a:hover {
+  background: #696969; /* Đổi màu nền nút sang màu vàng giống thanh mô tả */
+  color: #FFFFFF;      /* Giữ màu chữ xanh đậm rõ nét */
+  transform: scale(1.08); /* Nút bấm hơi phồng to nhẹ lên tạo cảm giác đàn hồi */
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+p  {                           /* Dòng mô tả dưới Heading */
+color:#003366 ;
     text-align: center;
-	font-family: Helvetica;
-	font-size: 20px;
+	font-family: 'Montserrat', sans-serif;
+	font-size: 18px;
+	
+   
+	
+}
+
+
+
+.logo-container {
+  display: flex;
+  justify-content: center; /* Căn giữa theo chiều ngang */
+  align-items: center;     /* Căn giữa theo chiều dọc */
+  padding: 20px 0;         /* Tạo khoảng cách trên dưới cho logo thoáng hơn */
+}
+
+
+/* 2. Logo: Xử lý kích thước nhỏ */
+.small-logo {
+  width: 120px;            /* Tùy chỉnh độ rộng logo theo ý bạn (ví dụ: 80px, 100px, 120px) */
+  height: auto;            /* Tự động tính chiều cao theo chiều rộng để ảnh không bị méo */
+  object-fit: contain;     /* Giữ nguyên tỉ lệ ảnh gốc */
 }
 
 </style>
 </head>
 
 <body>
-
+<div class="logo-container">
+  <img src="logo.png" alt="Logo Website" class="small-logo">
+</div>
 <h1>KHO ĐỀ ĐỘC QUYỀN GEMFAITH</h1>
-<p>Bấm nút "Tải bài tập" để tải bài tập muốn làm về máy</p>
+<p><strong>Bấm nút "TẢI FILE" để tải bài tập muốn làm về máy</strong></p>
 
 <div class="bai">
     <h3>Bài 1: Thì hiện tại đơn</h3>
     <a href="ĐỀ BỔ TRỢ THPTQG SỐ 1 _ PREPARATION FOR MOCK TEST 2.docx" download>
-        TẢI FILE VỀ MÁY
+        <strong> TẢI FILE</strong>
     </a>
 </div>
 
 <div class="bai">
     <h3>Bài 2: Thì hiện tại tiếp diễn</h3>
     <a href="Bai_tap_2.docx" download>
-        TẢI FILE VỀ MÁY
+        <strong> TẢI FILE</strong>
     </a>
 </div>
 
 <div class="bai">
     <h3>Bài 3: Bài tập tổng hợp</h3>
     <a href="Bai_tap_3.docx" download>
-        TẢI FILE VỀ MÁY
+        <strong> TẢI FILE</strong>
     </a>
 </div>
 
