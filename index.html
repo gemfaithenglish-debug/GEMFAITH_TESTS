@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <title>Kho tài liệu GemFaith | Đăng nhập</title>
+    <style>
+        body { 
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; 
+            display: flex; 
+            justify-content: center; 
+            align-items: center; 
+            height: 100vh; 
+            background: linear-gradient(135deg, #ffffff 0%, #f1f5f9 50%, #e2e8f0 100%); 
+            margin: 0;
+            overflow: hidden;
+        }
+		
+        .login-container { 
+            background: rgba(255, 255, 255, 0.65); 
+            padding: 45px 35px; 
+            border-radius: 24px; 
+            box-shadow: 0 20px 40px rgba(15, 23, 42, 0.08); 
+            width: 350px; 
+            text-align: center; 
+            backdrop-filter: blur(20px); 
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.7); 
+        }
+        
+        .logo-box { 
+            width: 90px; 
+            height: 90px; 
+            margin: 0 auto 25px auto; 
+            border-radius: 24px; 
+            overflow: hidden; 
+            display: flex; 
+            justify-content: center; 
+            align-items: center; 
+            background: #ffffff; 
+            border: 1px solid rgba(15, 23, 42, 0.05);
+            box-shadow: 0 8px 16px rgba(15, 23, 42, 0.06);
+        }
+        .logo-box img { width: 100%; height: 100%; object-fit: cover; }
+        
+        h2 { 
+            background: linear-gradient(135deg, #1e3a8a 0%, #0f172a 100%);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            color: transparent;
+            margin: 0 0 8px 0; 
+            font-size: 26px; 
+            font-weight: 800;
+            letter-spacing: -0.5px;
+            text-transform: uppercase; 
+        }
+
+        p.subtitle { 
+            color: #64748b; 
+            margin: 0 0 35px 0; 
+            font-size: 14px; 
+            font-weight: 500;
+        }
+        
+        input { 
+            width: 92%; 
+            padding: 13px 12px; 
+            margin: 10px 0; 
+            border: 1px solid #cbd5e1; 
+            border-radius: 12px; 
+            font-size: 14px; 
+            transition: all 0.3s ease; 
+            background: rgba(255, 255, 255, 0.8);
+            color: #0f172a; 
+        }
+        input::placeholder { color: #94a3b8; }
+        input:focus { 
+            border-color: #3b82f6; 
+            outline: none; 
+            background: #ffffff;
+            box-shadow: 0 0 12px rgba(59, 130, 246, 0.25); 
+        }
+        
+        button { 
+            width: 100%; 
+            padding: 14px; 
+            background: linear-gradient(135deg, #1d4ed8 0%, #1e3a8a 100%); 
+            color: white; 
+            border: none; 
+            border-radius: 12px; 
+            font-size: 15px; 
+            cursor: pointer; 
+            font-weight: bold; 
+            margin-top: 20px; 
+            letter-spacing: 0.5px;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); 
+            box-shadow: 0 4px 12px rgba(29, 78, 216, 0.2);
+        }
+        button:hover { 
+            background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%); 
+            transform: translateY(-2px); 
+            box-shadow: 0 6px 20px rgba(37, 99, 235, 0.4); 
+        }
+        button:active { transform: translateY(0); }
+        
+        #error-msg { color: #ef4444; font-size: 14px; margin-top: 18px; min-height: 20px; font-weight: 600; }
+    </style>
+</head>
+<body>
+
+    <div class="login-container">
+        <div class="logo-box">
+            <img src="logo w.png" alt="Logo">
+        </div>
+
+        <h2>ĐĂNG NHẬP TÀI KHOẢN</h2>
+        <p class="subtitle">Nhập Tài khoản GemFaith của bạn.</p>
+        
+        <input type="text" id="username" placeholder="Username">
+        <input type="password" id="password" placeholder="Password">
+        
+        <button onclick="validateLogin()">ĐĂNG NHẬP</button>
+        <div id="error-msg"></div>
+    </div>
+
+    <script>
+        function validateLogin() {
+            // CƠ SỞ DỮ LIỆU: Đã bổ sung thêm Tên Thật (Name) để cá nhân hóa lời chào
+            const studentDatabase = {
+                "ceogemfaith": { pass: "21092008", name: "Chủ tịch Nguyễn Khánh Ngọc" },
+                "admingemfaith": { pass: "22062026", name: "Chủ tịch Phạm Việt Tín" },
+                "cminh": { pass: "minh1234", name: "Nguyễn Cao Minh" },
+                "viettindeptrai": { pass: "toiratdeptry", name: "Nguyễn Thị Chúc Như" },
+				"thanhquy": { pass: "love ronaldo siu", name: "Nguyễn Thanh Quy" },
+				"yeuviettin": { pass: "loveviettin", name: "Trần Bảo Anh" },
+				"bakhitrentunghatbi": { pass: "yeucaominh", name: "Võ Minh Quân" },
+				"TeamoMessi": { pass: "VietTinisMessi", name: "Nguyễn Minh Quân" },
+            };
+
+            const targetPage = "trangchu1.html"; 
+            const userInp = document.getElementById("username").value.trim();
+            const passInp = document.getElementById("password").value;
+            const errorDiv = document.getElementById("error-msg");
+
+            if (studentDatabase.hasOwnProperty(userInp)) {
+                if (studentDatabase[userInp].pass === passInp) {
+                    errorDiv.innerText = ""; 
+                    
+                    // LỆNH MỚI: Lưu tên học sinh vào bộ nhớ trình duyệt trước khi chuyển trang
+                    localStorage.setItem("currentStudentName", studentDatabase[userInp].name);
+                    
+                    window.location.href = targetPage; 
+                } else {
+                    errorDiv.innerText = "Sai mật khẩu!";
+                }
+            } else {
+                errorDiv.innerText = "Tên đăng nhập không tồn tại";
+            }
+        }
+    </script>
+
+    <!-- Các nút liên kết cố định -->
+    <a href="https://google.com" target="_blank" style="position: fixed; bottom: 100px; right: 20px; width: 50px; height: 50px; background: linear-gradient(45deg, #111827, #1E3A8A); border-radius: 50%; overflow: hidden; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2); z-index: 9999; transition: transform 0.2s;" onmouseover="this.style.transform='scale(1.1)'" onmouseout="this.style.transform='scale(1)'">
+        <img src="logo w.png" alt="Nut Moi" style="width: 100%; height: 100%; object-fit: cover;">
+    </a>
+
+    <a href="https://facebook.com" target="_blank" style="position: fixed; bottom: 20px; right: 20px; width: 50px; height: 50px; background-color: #1877F2; border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2); z-index: 9999; transition: transform 0.2s;" onmouseover="this.style.transform='scale(1.1)'" onmouseout="this.style.transform='scale(1)'">
+        <img src="logo f.png" alt="Facebook" style="width: 100%; height: 100%; object-fit: cover;">
+    </a>
+
+</body>
+</html>

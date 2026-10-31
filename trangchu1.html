@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kho Đề & Sách GemFaith</title>
+    <style>
+        /* Đưa toàn bộ nội dung vào chính giữa màn hình */
+        body {
+            margin: 0;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-color: #f8f9fa;
+            font-family: Segoe UI;
+        }
+
+        /* Container chứa 3 ô vuông nằm ngang */
+        .container {
+            display: flex;
+            gap: 15px; /* Khoảng cách giữa các ô vuông */
+        }
+
+        /* Cấu hình thuộc tính chung cho từng ô vuông */
+        .box {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            text-align: center; /* THÊM LỆNH NÀY: Giúp các dòng chữ tự động căn giữa khi bị xuống hàng */
+            padding: 10px;      /* THÊM LỆNH NÀY: Giữ khoảng cách không cho chữ chạm sát viền ô */
+            box-sizing: border-box; /* THÊM LỆNH NÀY: Đảm bảo padding không làm tăng kích thước ô */
+            width: 250px;
+            height: 150px;
+            color: white;
+            text-decoration: none;
+            font-size: 18px;
+            font-weight: bold;
+            border-radius: 16px; /* Bo tròn góc hiện đại */
+            transition: transform 0.3s ease, box-shadow 0.3s ease; /* Hiệu ứng mượt mà */
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2); /* Đổ bóng chữ để dễ đọc hơn */
+        }
+
+        /* Hiệu ứng phóng to và tăng độ đổ bóng khi di chuột vào */
+        .box:hover {
+            transform: translateY(-5px) scale(1.03); /* Nhấc nhẹ ô vuông lên */
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+        }
+
+        /* Tùy chỉnh màu Gradient riêng cho từng ô */
+        
+        /* Ô 1: Xanh dương thép sang Xanh đậm */
+        .box.trang-1 { 
+            background: linear-gradient(135deg, #4682B4 20%, #27408B 100%); 
+        }
+
+        /* Ô 2: Xanh lục bảo sang Xanh ngọc bụi */
+        .box.trang-2 { 
+            background: linear-gradient(135deg, #2E8B57 20%, #7CCD7C 100%); 
+        }
+
+        /* Ô 3: Vàng hoàng kim (Đổi màu chữ sang tối để không bị mờ trên nền sáng) */
+        .box.trang-3 { 
+            background: linear-gradient(135deg, #8B658B 20%, #8B3A62 60%); 
+             /* Đổi chữ thành màu xanh đen để dễ đọc */
+             /* Bỏ đổ bóng chữ trắng để tránh bị nhòe */
+        }
+		
+		
+		/* --- ĐOẠN CSS CHO THANH NGANG ĐẦU TRANG & MENU --- */
+.header-bar {
+    width: 100%;
+    height: 70px;
+    background-color: #ffffff;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+    display: flex;
+    justify-content: space-between; /* Đẩy logo sang trái, menu chữ sang phải */
+    align-items: center;
+    padding: 0 40px; /* Khoảng cách thụt lề từ 2 rìa màn hình */
+    box-sizing: border-box;
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 10000;
+}
+
+.logo-container {
+    display: flex;
+    align-items: center;
+    height: 100%;
+}
+
+.logo-container img {
+    height: 50px;
+    width: auto;
+    object-fit: contain;
+}
+
+/* Menu chứa các mục chữ nằm ngang */
+.nav-menu {
+    display: flex;
+    gap: 30px; /* Khoảng cách giữa các mục chữ */
+}
+
+/* Định dạng cho từng mục chữ chuyển hướng */
+.nav-item {
+    text-decoration: none; /* Xóa gạch chân */
+    color: #333333; /* Màu chữ mặc định */
+    font-size: 16px;
+    font-weight: 600;
+    transition: color 0.2s ease; /* Hiệu ứng đổi màu mượt */
+}
+
+/* Hiệu ứng đổi màu khi di chuột vào chữ */
+.nav-item:hover {
+    color: #27408B; /* Đổi sang màu xanh trùng tone ô vuông 1 */
+}
+
+		
+		
+		.gradient-title {
+    font-size: 55px;            /* Cỡ chữ to nổi bật */
+    font-weight: 800;           /* Nét chữ dày để lộ rõ hoa văn và màu gradient */
+    text-align: center;         /* Căn chính giữa màn hình */
+    margin: 40px auto;          /* Khoảng cách trên dưới */
+    font-family: 'Segoe UI', Arial, sans-serif;
+    letter-spacing: -1px;       /* Thu hẹp khoảng cách chữ một chút để trông hiện đại hơn */
+      margin: 5px auto 10px auto;
+    /* TẠO HIỆU ỨNG CHỮ LỒNG HÌNH NỀN VÀ GRADIENT */
+    /* Bước 1: Chèn hình nền hoa văn đè lên dải màu Navy Gradient */
+    background: url('hoa-van.jpg') center/cover, 
+                linear-gradient(135deg, #2c3e50 0%, #1a1a1a 100%);
+    
+    /* Bước 2: Trộn hình nền hoa văn với màu Navy để tạo chất liệu cách điệu */
+    background-blend-mode: overlay; 
+    
+    /* Bước 3: Cắt hình nền và màu sắc theo khuôn của nét chữ */
+    -webkit-background-clip: text;
+    background-clip: text;
+    
+    /* Bước 4: Giấu màu chữ gốc đi để hiển thị lớp nền vừa cắt ở Bước 3 */
+    -webkit-text-fill-color: transparent;
+    color: transparent;
+
+    /* Đổ bóng nhẹ phía sau để chữ nổi bật lên, không bị chìm vào nền web */
+    filter: drop-shadow(0px 4px 8px rgba(15, 23, 42, 0.15));
+}
+
+		
+		
+		
+		
+		
+		
+    </style>
+	
+	
+	
+</head>
+<body>
+
+
+<!-- --- ĐOẠN HTML CHO THANH ĐẦU TRANG CÓ CHỮ CHUYỂN HƯỚNG --- -->
+<header class="header-bar">
+    <!-- Logo bên trái -->
+    <div class="logo-container">
+        <img src="logo.png" alt="GemFaith Logo">
+    </div>
+    
+    <!-- Các mục chữ chuyển hướng bên phải -->
+    <nav class="nav-menu">
+        <!-- Thay các link href="..." bằng địa chỉ trang web bạn muốn chuyển tới -->
+        <a href="https://sites.google.com/view/gemfaithenglish/trang-ch%E1%BB%A7" target="_blank" class="nav-item">Trang Chủ</a>
+        <a href="trangchu.html" target="_blank" class="nav-item">Kho Đề GemFaith</a>
+        <a href="https://facebook.com" target="_blank" class="nav-item">Kho Sách GemBook</a>
+        <a href="https://google.com" target="_blank" class="nav-item">Tích Điểm GemPoint</a>
+    </nav>
+</header>
+<main style="display: flex; flex-direction: column; align-items: center; margin: auto; padding-top: 100px;">
+<!-- Khung chứa ảnh nền layer phía sau và chữ nổi phía trên -->
+<div class="title-background-layer">
+    <h1 class="gradient-title">Hôm nay bạn muốn làm gì?</h1>
+</div>
+
+
+
+
+    <div class="container">
+        <!-- Thay link tại thuộc tính href="..." bằng địa chỉ web bạn muốn chuyển hướng đến -->
+        <a href="https://sites.google.com/view/gemfaithenglish/trang-ch%E1%BB%A7" target="_blank" class="box trang-1">ĐĂNG KÍ KHÓA HỌC</a>
+        <a href="trangchu.html" target="_blank" class="box trang-2">KHO ĐỀ ĐỘC QUYỀN GEMFAITH</a>
+        <a href="https://facebook.com" target="_blank" class="box trang-3">TÍCH ĐIỂM GEMPOINT</a>
+    </div>
+
+<main>
+ <!-- Nút Web (Đã sửa background-color thành background để nhận màu gradient) -->
+ <a href="https://sites.google.com/view/gemfaithenglish/trang-ch%E1%BB%A7" target="_blank" style="
+    position: fixed;
+    bottom: 100px; /* Tăng lên 80px để đẩy nút này lên trên */
+    right: 20px;  /* Giữ nguyên để thẳng hàng bên phải */
+    width: 50px;
+    height: 50px;
+    background: linear-gradient(45deg, #111827, #1E3A8A); /* Sửa lỗi hiển thị màu gradient */
+    border-radius: 50%;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+    z-index: 9999;
+    transition: transform 0.2s;
+" onmouseover="this.style.transform='scale(1.1)'" onmouseout="this.style.transform='scale(1)'">
+  
+  <!-- Ảnh nút Web -->
+  <img src="logo w.png" alt="Nut Moi" style="width: 80%; height: 80%; object-fit: cover;">
+  
+</a>
+
+ 
+ <!-- Ô FB -->
+<a href="https://www.facebook.com/share/1DdKkXazgM/" target="_blank" style=" 
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    width: 50px;
+    height: 50px;
+    background-color: #1877F2;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+    z-index: 9999;
+    transition: transform 0.2s;
+" onmouseover="this.style.transform='scale(1.1)'" onmouseout="this.style.transform='scale(1)'">
+  
+  <!-- Logo chữ f -->
+    <img src="logo f.png" alt="Facebook" style="width: 80%; height: 80%; object-fit: cover;">
+  
+</a>
+
+
+<!-- ==================== KHỐI LỆNH CHÀO MỪNG CÁ NHÂN HÓA HƠN ==================== -->
+<!-- 1. Giao diện Hộp thoại Chào mừng (Frosted Glass Popup) -->
+<div id="welcomeOverlay" style="
+    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+    background: rgba(15, 23, 42, 0.3); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+    display: flex; justify-content: center; align-items: center;
+    z-index: 99999; opacity: 1; transition: opacity 0.6s ease-in-out;
+">
+    <div style="
+        background: rgba(255, 255, 255, 0.85); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+        padding: 40px 50px; border-radius: 24px; text-align: center;
+        box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.15);
+        border: 1px solid rgba(255, 255, 255, 0.6);
+        transform: scale(1); transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+    " id="welcomeBox">
+        
+        <!-- Biểu tượng Huy hiệu Học tập phát sáng -->
+        <!-- Khối tròn chèn ảnh Logo GemFaith thay cho icon lấp lánh cũ -->
+<div style="width: 75px; height: 75px; border-radius: 50%; overflow: hidden; display: flex; align-items: center; justify-content: center; margin: 0 auto 20px auto; box-shadow: 0 8px 20px rgba(59, 130, 246, 0.2); border: 2px solid rgba(255, 255, 255, 0.8); background-color: #ffffff;">
+    <!-- Thay logo w.png bằng file ảnh logo của bạn nếu dùng tên khác -->
+    <img src="logowelcome.png" alt="GemFaith Logo" style="width: 100%; height: 100%; object-fit: cover;">
+</div>
+
+        
+        <!-- Dòng chữ chào mừng động -->
+        <h3 style="margin: 0 0 8px 0; color: #64748b; font-size: 15px; font-weight: 600; letter-spacing: 0.5px; text-transform: uppercase;">Học viên/ Giáo viên</h3>
+        <h2 id="studentNameDisplay" style="margin: 0 0 15px 0; font-size: 28px; font-weight: 800; background: linear-gradient(135deg, #1e3a8a 0%, #0f172a 100%); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; color: transparent;">Học sinh</h2>
+        <p style="margin: 0; color: #475569; font-size: 14px; font-weight: 500;">Chào mừng Học viên/ Giáo viên đến với Kho Đề & Sách GemFaith</p>
+    </div>
+</div>
+
+<!-- 2. Đoạn xử lý Script tự động lấy tên và kích hoạt hoạt ảnh tắt -->
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        const overlay = document.getElementById("welcomeOverlay");
+        const nameDisplay = document.getElementById("studentNameDisplay");
+        const welcomeBox = document.getElementById("welcomeBox");
+        
+        // Lấy tên học sinh từ bộ nhớ
+        let studentName = localStorage.getItem("currentStudentName");
+        
+        // Nếu không tìm thấy tên (vào trực tiếp không qua đăng nhập), sẽ hiện chữ "Bạn"
+        if (!studentName) {
+            studentName = "Bạn";
+        }
+        
+        // Gán tên vào thẻ hiển thị
+        nameDisplay.innerText = studentName;
+        
+        // Hoạt ảnh xuất hiện nhẹ nhàng (Zoom nhẹ)
+        welcomeBox.style.transform = "scale(1.05)";
+        setTimeout(() => {
+            welcomeBox.style.transform = "scale(1)";
+        }, 100);
+
+        // Sau 3 giây, bắt đầu mờ dần và ẩn hẳn sau 3.6 giây
+        setTimeout(() => {
+            overlay.style.opacity = "0";
+            setTimeout(() => {
+                overlay.style.display = "none";
+            }, 600);
+        }, 3000);
+    });
+</script>
+<!-- ============================================================================= -->
+
+
+</body>
+</html>
