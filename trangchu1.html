@@ -149,7 +149,38 @@
 
 		
 		
-		
+		/* ĐOẠN CSS SỬA LỖI HIỂN THỊ ĐIỆN THOẠI CHO TRANG CHÍNH */
+@media screen and (max-width: 768px) {
+    /* Đổi hướng xếp 3 ô vuông từ hàng ngang sang hàng dọc */
+    .container {
+        flex-direction: column !important; 
+        align-items: center !important;
+        gap: 20px !important;
+        width: 100% !important;
+        padding-left: 20px !important;
+        padding-right: 20px !important;
+        box-sizing: border-box !important;
+    }
+
+    /* Tự động co giãn chiều rộng ô vuông vừa vặn màn hình điện thoại */
+    .box {
+        width: 100% !important; 
+        max-width: 320px !important; /* Giới hạn độ rộng tối đa để ô không bị quá bè */
+        height: 120px !important;   /* Giảm bớt chiều cao một chút cho cân đối */
+    }
+    
+    /* Thu nhỏ thanh chữ ở đầu trang để ôm vừa màn hình dọc */
+    .header-bar {
+        padding: 0 15px !important;
+    }
+    .nav-menu {
+        gap: 12px !important; /* Thu hẹp khoảng cách các chữ menu đầu trang */
+    }
+    .nav-item {
+        font-size: 13px !important; /* Hạ cỡ chữ menu xuống */
+    }
+}
+
 		
 		
 		
