@@ -104,6 +104,22 @@
         button:active { transform: translateY(0); }
         
         #error-msg { color: #ef4444; font-size: 14px; margin-top: 18px; min-height: 20px; font-weight: 600; }
+
+
+/* ĐOẠN CSS SỬA LỖI HIỂN THỊ ĐIỆN THOẠI CHO TRANG ĐĂNG NHẬP */
+@media screen and (max-width: 480px) {
+    .login-container {
+        width: 85% !important; /* Nới rộng ô đăng nhập theo tỷ lệ màn hình điện thoại */
+        padding: 35px 20px !important; /* Thu nhỏ khoảng cách đệm bên trong */
+        border-radius: 16px !important;
+    }
+    h2 {
+        font-size: 22px !important; /* Thu nhỏ tiêu đề một chút để không bị xuống dòng lỗi */
+    }
+}
+
+
+		
     </style>
 </head>
 <body>
