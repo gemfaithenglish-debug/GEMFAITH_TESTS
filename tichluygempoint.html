@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Săn điểm GemPoint</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, sans-serif; }
+        body {
+            background: #eef2f6;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 16px;
+        }
+        .quiz-box {
+            background: #ffffff;
+            width: 100%;
+            max-width: 550px;
+            border-radius: 16px;
+            box-shadow: 0 10px 25px rgba(15, 23, 42, 0.1);
+            overflow: hidden;
+            border: 1px solid #cbd5e1;
+        }
+        .header {
+            background: linear-gradient(135deg, #fef3c7 0%, #fcd34d 50%, #f59e0b 100%);
+            color: black;
+            padding: 16px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+           
+        }
+        .header h1 { font-size: 1.15rem; }
+        
+        /* Khung chứa điểm và logo GemPoint */
+        .gem-badge {
+            background: rgba(255, 255, 255, 0.12);
+            padding: 5px 14px 5px 8px;
+            border-radius: 24px;
+            font-weight: bold;
+            color: black;
+            font-size: 0.95rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            border: 1px solid rgba(147, 197, 253, 0.25);
+        }
+        .gem-logo-header {
+            width: 26px;
+            height: 26px;
+            border-radius: 50%;
+            object-fit: cover;
+            display: block;
+            background: #ffffff;
+        }
+        .gem-logo-inline {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            object-fit: cover;
+            vertical-align: middle;
+            margin-left: 4px;
+            margin-bottom: 2px;
+        }
+        .gem-badge span { color: #ffffff; font-size: 1.1rem; }
+        
+        .bar { height: 4px; width: 0%; background: #3b82f6; }
+        .body { padding: 24px 20px; }
+        .q-num { font-size: 0.85rem; color: #f59e0b; font-weight: bold; margin-bottom: 8px; }
+        .q-text { font-size: 1.15rem; color: #0f172a; font-weight: 600; margin-bottom: 20px; line-height: 1.4; }
+        .opt-list { display: flex; flex-direction: column; gap: 10px; }
+        .opt-btn {
+            background: #f8fafc;
+            border: 1.5px solid #e2e8f0;
+            border-radius: 10px;
+            padding: 14px 16px;
+            text-align: left;
+            font-size: 1rem;
+            color: #0f172a;
+            cursor: pointer;
+            font-weight: 500;
+            transition: 0.2s;
+        }
+        .opt-btn:hover:not(:disabled) { background: #eff6ff; border-color: #3b82f6; }
+        .opt-btn.correct { background: #d1fae5; border-color: #10b981; color: #065f46; }
+        .opt-btn.wrong { background: #fee2e2; border-color: #ef4444; color: #991b1b; }
+        .msg {
+            margin-top: 16px;
+            padding: 10px;
+            border-radius: 8px;
+            text-align: center;
+            font-weight: 600;
+            display: none;
+        }
+        .msg.ok { display: block; background: #ecfdf5; color: #047857; }
+        .msg.no { display: block; background: #fef2f2; color: #b91c1c; }
+
+        /* Khung nút quay về trang trước */
+        .footer-back {
+            padding: 0 20px 22px 20px;
+            display: flex;
+            justify-content: flex-start;
+        }
+        .back-btn {
+            background: linear-gradient(135deg, #f59e0b 0%, #EEAD0E 100%);
+            color: #ffffff;
+            border: none;
+            border-radius: 10px;
+            padding: 10px 18px;
+            font-size: 0.95rem;
+            font-weight: 600;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            box-shadow: 0 4px 10px rgba(245, 158, 11, 0.25);
+            transition: all 0.2s ease;
+        }
+        .back-btn:hover {
+            background: #d97706;
+            transform: translateY(-1px);
+        }
+
+        @media (max-width: 480px) {
+            .header { padding: 14px 16px; }
+            .header h1 { font-size: 1.05rem; }
+            .gem-badge { font-size: 0.85rem; padding: 4px 10px 4px 6px; gap: 6px; }
+            .gem-logo-header { width: 22px; height: 22px; }
+            .body { padding: 20px 16px; }
+            .q-text { font-size: 1.05rem; }
+            .opt-btn { font-size: 0.95rem; padding: 12px 14px; }
+            .footer-back { padding: 0 16px 18px 16px; }
+            .back-btn { font-size: 0.9rem; padding: 9px 15px; }
+        }
+		
+
+    </style>
+</head>
+<body>
+
+<div class="quiz-box">
+    <div class="header">
+        <h1>GEMQUIZ</h1>
+        <div class="gem-badge">
+            <img src="logogempoint.png" alt="GemPoint" class="gem-logo-header">
+            GEMPOINT: <span id="score">0</span>
+        </div>
+    </div>
+    <div class="bar" id="bar"></div>
+    <div class="body">
+        <div class="q-num" id="qNum">CÂU 1</div>
+        <div class="q-text" id="qText">What is the synonym of the word 'Happy'?</div>
+        <div class="opt-list" id="optList"></div>
+        <div class="msg" id="msg"></div>
+    </div>
+    <div class="footer-back">
+        <a href="trangchu1.html" class="back-btn">← Quay về trang trước</a>
+    </div>
+</div>
+
+<script>
+var questions = [
+    {
+        q: "What is the synonym of the word 'Happy'?",
+        a: ["Sad", "Joyful", "Angry", "Tired"],
+        c: 1
+    },
+    {
+        q: "Choose the correct sentence in the Present Simple tense:",
+        a: [
+            "She goes to school every day.",
+            "She going to school every day.",
+            "She go to school every day.",
+            "She is go to school every day."
+        ],
+        c: 0
+    }
+];
+
+var idx = 0;
+var count = 1;
+var gem = 0;
+var lock = false;
+
+function showQ() {
+    lock = false;
+    var bar = document.getElementById("bar");
+    bar.style.transition = "none";
+    bar.style.width = "0%";
+
+    var msg = document.getElementById("msg");
+    msg.className = "msg";
+    msg.innerHTML = "";
+
+    var item = questions[idx];
+    document.getElementById("qNum").innerText = "CÂU " + count;
+    document.getElementById("qText").innerText = item.q;
+
+    var list = document.getElementById("optList");
+    list.innerHTML = "";
+    for (var i = 0; i < item.a.length; i++) {
+        var btn = document.createElement("button");
+        btn.className = "opt-btn";
+        btn.innerText = item.a[i];
+        btn.setAttribute("data-index", i);
+        btn.onclick = function() {
+            checkAns(parseInt(this.getAttribute("data-index")), this);
+        };
+        list.appendChild(btn);
+    }
+}
+
+function checkAns(choice, btn) {
+    if (lock) return;
+    lock = true;
+
+    var item = questions[idx];
+    var btns = document.querySelectorAll(".opt-btn");
+    for (var i = 0; i < btns.length; i++) {
+        btns[i].disabled = true;
+    }
+
+    var msg = document.getElementById("msg");
+    var logoHtml = '<img src="logogempoint.png" alt="Gem" class="gem-logo-inline">';
+    
+    if (choice === item.c) {
+        gem = gem + 1;
+        btn.classList.add("correct");
+        msg.className = "msg ok";
+        msg.innerHTML = "Chính xác! +1 GemPoint " + logoHtml;
+    } else {
+        gem = gem - 0.5;
+        btn.classList.add("wrong");
+        btns[item.c].classList.add("correct");
+        msg.className = "msg no";
+        msg.innerHTML = "Sai rồi! -0.5 GemPoint " + logoHtml;
+    }
+
+    document.getElementById("score").innerText = gem;
+
+    var bar = document.getElementById("bar");
+    bar.offsetHeight;
+    bar.style.transition = "width 1.2s linear";
+    bar.style.width = "100%";
+
+    setTimeout(function() {
+        count++;
+        idx = (idx + 1) % questions.length;
+        showQ();
+    }, 1200);
+}
+
+window.onload = showQ;
+</script>
+
+</body>
+</html>
