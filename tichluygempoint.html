@@ -71,23 +71,14 @@
 
   </div>
 
-  <script>
-    // Link Database trực tiếp của dự án tich-luy-gempoint của bạn
-   const DB_URL = "https://" + "tich-luy-gempoint-default-rtdb" + ".asia-southeast1." + "firebasedatabase.app/students";
+    <script src="questions.js"></script>
 
+  <script>
+    const DB_URL = "https://" + "tich-luy-gempoint-default-rtdb" + ".asia-southeast1." + "firebasedatabase.app/students";
 
     const currentUsername = localStorage.getItem("currentUsername") || "hocvien_test";
     const currentStudentName = localStorage.getItem("currentStudentName") || "Học viên Test";
 
-    var questions = [
-      { q: "What is the synonym of the word 'Happy'?", a: ["Sad", "Joyful", "Angry", "Tired"], c: 1 },
-      { q: "Choose the correct sentence in the Present Simple tense:", a: [
-          "She goes to school every day.",
-          "She going to school every day.",
-          "She go to school every day.",
-          "She is go to school every day."
-        ], c: 0 }
-    ];
 
     var idx = 0;
     var count = 1;
