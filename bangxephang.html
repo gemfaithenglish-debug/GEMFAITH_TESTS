@@ -7,30 +7,199 @@
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, sans-serif; }
     body { background: #eef2f6; min-height: 100vh; display: flex; justify-content: center; align-items: center; padding: 16px; }
-    .lb-box { background: #ffffff; width: 100%; max-width: 550px; border-radius: 16px; box-shadow: 0 10px 25px rgba(15, 23, 42, 0.1); overflow: hidden; border: 1px solid #cbd5e1; }
-    .lb-header { background: linear-gradient(135deg, #fef3c7 0%, #fcd34d 50%, #f59e0b 100%); color: #0f172a; padding: 18px 20px; text-align: center; }
-    .lb-header h2 { font-size: 1.25rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px; }
+    
+    .lb-box { 
+      background: #ffffff; 
+      width: 100%; 
+      max-width: 550px; 
+      border-radius: 16px; 
+      box-shadow: 0 10px 25px rgba(15, 23, 42, 0.1); 
+      overflow: hidden; 
+      border: 1px solid #cbd5e1; 
+    }
+
+    /* Phần đầu trang chứa Logo lớn nổi bật ở giữa */
+    .lb-header { 
+      background: linear-gradient(135deg, #fef3c7 0%, #fcd34d 50%, #f59e0b 100%); 
+      color: #0f172a; 
+      padding: 22px 20px 20px 20px; 
+      text-align: center; 
+    }
+    .lb-logo-wrap {
+      width: 82px;
+      height: 82px;
+      margin: 0 auto 12px auto;
+      background: #ffffff;
+      border-radius: 50%;
+      padding: 6px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      border: 3px solid #fef08a;
+      box-shadow: 0 6px 18px rgba(180, 83, 9, 0.25);
+    }
+    .lb-logo-wrap img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+    }
+    .lb-header h2 { font-size: 1.3rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px; }
     .lb-header p { font-size: 0.85rem; color: #451a03; margin-top: 4px; font-weight: 500; }
-    .lb-list { padding: 16px 20px; display: flex; flex-direction: column; gap: 10px; max-height: 450px; overflow-y: auto; }
-    .lb-item { display: flex; align-items: center; justify-content: space-between; padding: 12px 16px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; }
-    .lb-item.me { background: #eff6ff; border: 1.5px solid #3b82f6; }
-    .lb-item.top-1 { background: #fffbeb; border-color: #f59e0b; }
-    .lb-item.top-2 { background: #f8fafc; border-color: #94a3b8; }
-    .lb-item.top-3 { background: #fff7ed; border-color: #d97706; }
+
+    /* Danh sách xếp hạng */
+    .lb-list { padding: 18px 20px; display: flex; flex-direction: column; gap: 11px; max-height: 450px; overflow-y: auto; }
+    
+    .lb-item { 
+      display: flex; 
+      align-items: center; 
+      justify-content: space-between; 
+      padding: 12px 16px; 
+      background: #f8fafc; 
+      border: 1.5px solid #e2e8f0; 
+      border-radius: 12px; 
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+    .lb-item:hover {
+      transform: translateY(-1px);
+    }
+
+    /* Highlight tài khoản của bạn */
+    .lb-item.me { border-color: #3b82f6; box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2); }
+
+    /* Trang trí đặc biệt cho TOP 1, 2, 3 */
+    .lb-item.top-1 { 
+      background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%); 
+      border: 2px solid #f59e0b; 
+      box-shadow: 0 6px 16px rgba(245, 158, 11, 0.22);
+      padding: 14px 16px;
+    }
+    .lb-item.top-2 { 
+      background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%); 
+      border: 1.5px solid #94a3b8; 
+      box-shadow: 0 4px 12px rgba(148, 163, 184, 0.2);
+    }
+    .lb-item.top-3 { 
+      background: linear-gradient(135deg, #fff7ed 0%, #ffedd5 100%); 
+      border: 1.5px solid #d97706; 
+      box-shadow: 0 4px 12px rgba(217, 119, 6, 0.16);
+    }
+
     .lb-left { display: flex; align-items: center; gap: 12px; }
-    .rank-badge { width: 30px; height: 30px; border-radius: 50%; background: #e2e8f0; color: #334155; font-weight: 800; font-size: 0.9rem; display: flex; justify-content: center; align-items: center; }
-    .top-1 .rank-badge { background: #f59e0b; color: #ffffff; }
-    .top-2 .rank-badge { background: #64748b; color: #ffffff; }
-    .top-3 .rank-badge { background: #b45309; color: #ffffff; }
-    .student-name { font-weight: 600; color: #0f172a; font-size: 0.98rem; }
-    .me-tag { font-size: 0.75rem; background: #3b82f6; color: white; padding: 2px 6px; border-radius: 6px; margin-left: 6px; }
-    .lb-score { display: flex; align-items: center; gap: 6px; font-weight: 800; font-size: 1.05rem; color: #d97706; background: #fef3c7; padding: 5px 12px; border-radius: 20px; }
+    
+    .rank-badge { 
+      width: 32px; 
+      height: 32px; 
+      border-radius: 50%; 
+      background: #e2e8f0; 
+      color: #334155; 
+      font-weight: 800; 
+      font-size: 0.92rem; 
+      display: flex; 
+      justify-content: center; 
+      align-items: center; 
+      flex-shrink: 0;
+    }
+    .top-1 .rank-badge { 
+      background: linear-gradient(135deg, #fbbf24 0%, #d97706 100%); 
+      color: #ffffff; 
+      box-shadow: 0 0 10px rgba(245, 158, 11, 0.6);
+      font-size: 1.05rem;
+    }
+    .top-2 .rank-badge { 
+      background: linear-gradient(135deg, #94a3b8 0%, #475569 100%); 
+      color: #ffffff; 
+      box-shadow: 0 2px 6px rgba(100, 116, 139, 0.4);
+    }
+    .top-3 .rank-badge { 
+      background: linear-gradient(135deg, #d97706 0%, #92400e 100%); 
+      color: #ffffff; 
+      box-shadow: 0 2px 6px rgba(180, 83, 9, 0.4);
+    }
+
+    .student-name { font-weight: 600; color: #0f172a; font-size: 0.98rem; display: flex; align-items: center; flex-wrap: wrap; gap: 4px; }
+    .top-1 .student-name { font-weight: 800; color: #78350f; font-size: 1.03rem; }
+    .top-2 .student-name { font-weight: 700; color: #1e293b; }
+    .top-3 .student-name { font-weight: 700; color: #7c2d12; }
+
+    .me-tag { font-size: 0.72rem; background: #3b82f6; color: white; padding: 2px 7px; border-radius: 6px; font-weight: 700; margin-left: 4px; }
+    
+    .lb-score { 
+      display: flex; 
+      align-items: center; 
+      gap: 6px; 
+      font-weight: 800; 
+      font-size: 1.05rem; 
+      color: #d97706; 
+      background: #fef3c7; 
+      padding: 5px 12px; 
+      border-radius: 20px; 
+      flex-shrink: 0;
+    }
+    .top-1 .lb-score { background: #ffffff; border: 1.5px solid #f59e0b; color: #b45309; box-shadow: 0 2px 6px rgba(245, 158, 11, 0.2); }
     .lb-score img { width: 20px; height: 20px; border-radius: 50%; object-fit: cover; }
     
     /* Khu vực 2 nút bấm ở đáy khung */
-    .lb-footer { padding: 0 20px 20px 20px; display: flex; justify-content: space-between; align-items: center; gap: 10px; }
-    .back-btn { background: linear-gradient(135deg, #f59e0b 0%, #EEAD0E 100%); color: #ffffff; border: none; border-radius: 10px; padding: 10px 16px; font-size: 0.95rem; font-weight: 600; text-decoration: none; display: inline-flex; align-items: center; }
-    .quiz-btn { background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%); color: #ffffff; border: none; border-radius: 10px; padding: 10px 16px; font-size: 0.95rem; font-weight: 600; text-decoration: none; display: inline-flex; align-items: center; }
+    .lb-footer { padding: 0 20px 22px 20px; display: flex; justify-content: space-between; align-items: center; gap: 10px; }
+    
+    .back-btn { 
+      background: linear-gradient(135deg, #f59e0b 0%, #EEAD0E 100%); 
+      color: #ffffff; 
+      border: none; 
+      border-radius: 10px; 
+      padding: 10px 16px; 
+      font-size: 0.95rem; 
+      font-weight: 600; 
+      text-decoration: none; 
+      display: inline-flex; 
+      align-items: center; 
+      box-shadow: 0 4px 10px rgba(245, 158, 11, 0.25);
+      transition: all 0.2s ease;
+    }
+    .back-btn:hover { background: #d97706; transform: translateY(-1px); }
+
+    /* Nút Làm tiếp Quiz đồng bộ hiệu ứng vệt sáng như nút BXH */
+    .quiz-btn { 
+      position: relative;
+      overflow: hidden;
+      background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%); 
+      color: #0f172a; 
+      border: 1.5px solid #f59e0b; 
+      border-radius: 12px; 
+      padding: 10px 18px; 
+      font-size: 0.95rem; 
+      font-weight: 700; 
+      letter-spacing: 0.2px;
+      text-decoration: none; 
+      display: inline-flex; 
+      align-items: center; 
+      box-shadow: 0 4px 12px rgba(245, 158, 11, 0.18), 0 1px 3px rgba(15, 23, 42, 0.08);
+      transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+    .quiz-btn::after {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: -120%;
+      width: 60%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(251, 191, 36, 0.28), transparent);
+      transform: skewX(-25deg);
+      transition: left 0.55s ease;
+    }
+    .quiz-btn:hover {
+      background: #fffbeb;
+      color: #b45309;
+      border-color: #d97706;
+      transform: translateY(-2px) scale(1.02);
+      box-shadow: 0 6px 18px rgba(245, 158, 11, 0.28);
+    }
+    .quiz-btn:hover::after {
+      left: 140%;
+    }
+    .quiz-btn:active {
+      transform: translateY(0) scale(0.98);
+    }
+
     .loading { text-align: center; color: #64748b; padding: 20px; font-size: 0.95rem; }
   </style>
 </head>
@@ -38,22 +207,25 @@
 
   <div class="lb-box">
     <div class="lb-header">
-      <h2>🏆 Bảng Xếp Hạng GemPoint</h2>
-      <p>Cập nhật tự động theo thành tích học viên</p>
+      <div class="lb-logo-wrap">
+        <img src="logobxh.png" alt="Logo Bảng Xếp Hạng">
+      </div>
+      <h2>Bảng Xếp Hạng GemPoint</h2>
+      <p>Nơi vinh danh những Học viên xuất sắc nhất của GemFaith</p>
     </div>
+
     <div class="lb-list" id="leaderboardList">
       <div class="loading">Đang tải bảng xếp hạng...</div>
     </div>
+
     <div class="lb-footer">
       <a href="trangchu1.html" class="back-btn">← Quay về trang chủ</a>
-      <a href="tichluygempoint.html" class="quiz-btn">Làm tiếp Quiz →</a>
+      <a href="tichluygempoint.html" class="quiz-btn">Tích điểm tiếp →</a>
     </div>
   </div>
 
   <script>
-    // Link Database chuẩn xác của bạn (đã sửa lại đúng địa chỉ)
     const DB_URL = "https://" + "tich-luy-gempoint-default-rtdb" + ".asia-southeast1." + "firebasedatabase.app/students.json";
-
     const currentUsername = localStorage.getItem("currentUsername");
 
     async function loadLeaderboard() {
@@ -67,7 +239,6 @@
           return;
         }
 
-        // Chuyển dữ liệu thành danh sách và sắp xếp điểm từ cao xuống thấp
         const students = Object.keys(data).map(username => ({
           username: username,
           name: data[username].name || username,
@@ -79,14 +250,29 @@
         students.forEach((st, index) => {
           const rank = index + 1;
           const isMe = (st.username === currentUsername);
-          let topClass = rank === 1 ? "top-1" : (rank === 2 ? "top-2" : (rank === 3 ? "top-3" : ""));
+          
+          let topClass = "";
+          let rankIcon = rank;
+          let crownIcon = "";
+
+          if (rank === 1) {
+            topClass = "top-1";
+            rankIcon = "🥇";
+            crownIcon = "👑";
+          } else if (rank === 2) {
+            topClass = "top-2";
+            rankIcon = "🥈";
+          } else if (rank === 3) {
+            topClass = "top-3";
+            rankIcon = "🥉";
+          }
 
           listEl.innerHTML += `
             <div class="lb-item ${topClass} ${isMe ? 'me' : ''}">
               <div class="lb-left">
-                <div class="rank-badge">${rank}</div>
+                <div class="rank-badge">${rankIcon}</div>
                 <div class="student-name">
-                  ${st.name}
+                  ${st.name} ${crownIcon}
                   ${isMe ? '<span class="me-tag">You</span>' : ''}
                 </div>
               </div>
