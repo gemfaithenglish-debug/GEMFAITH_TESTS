@@ -327,6 +327,42 @@
     <script src="questions.js"></script>
 
   <script>
+  const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+
+function playTone(freq, type, startTime, duration, vol = 0.2) {
+  if (audioCtx.state === 'suspended') audioCtx.resume();
+  const osc = audioCtx.createOscillator();
+  const gain = audioCtx.createGain();
+  osc.type = type;
+  osc.frequency.setValueAtTime(freq, startTime);
+  gain.gain.setValueAtTime(vol, startTime);
+  gain.gain.exponentialRampToValueAtTime(0.01, startTime + duration);
+  osc.connect(gain);
+  gain.connect(audioCtx.destination);
+  osc.start(startTime);
+  osc.stop(startTime + duration);
+}
+
+// Âm thanh khi bấm chọn đáp án
+function soundSelect() {
+  playTone(520, 'sine', audioCtx.currentTime, 0.07, 0.15);
+}
+
+// Âm thanh khi trả lời ĐÚNG (Ting - Ting vui tai)
+function soundCorrect() {
+  const now = audioCtx.currentTime;
+  playTone(587.33, 'triangle', now, 0.15, 0.25);        // Nốt D5
+  playTone(880.00, 'triangle', now + 0.12, 0.35, 0.25); // Nốt A5
+}
+
+// Âm thanh khi trả lời SAI
+function soundWrong() {
+  const now = audioCtx.currentTime;
+  playTone(220, 'sawtooth', now, 0.25, 0.12);
+}
+
+  
+  
     const DB_URL = "https://" + "tich-luy-gempoint-default-rtdb" + ".asia-southeast1." + "firebasedatabase.app/students";
 
     const currentUsername = localStorage.getItem("currentUsername") || "hocvien_test";
@@ -396,9 +432,44 @@
       }
     }
 
+       // --- BỘ TẠO ÂM THANH WEB AUDIO API ---
+    
+
+    function playTone(freq, type, startTime, duration, vol = 0.2) {
+      if (audioCtx.state === 'suspended') audioCtx.resume();
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      osc.type = type;
+      osc.frequency.setValueAtTime(freq, startTime);
+      gain.gain.setValueAtTime(vol, startTime);
+      gain.gain.exponentialRampToValueAtTime(0.01, startTime + duration);
+      osc.connect(gain);
+      gain.connect(audioCtx.destination);
+      osc.start(startTime);
+      osc.stop(startTime + duration);
+    }
+
+    function soundSelect() {
+      playTone(520, 'sine', audioCtx.currentTime, 0.07, 0.15);
+    }
+
+    function soundCorrect() {
+      const now = audioCtx.currentTime;
+      playTone(587.33, 'triangle', now, 0.15, 0.25);
+      playTone(880.00, 'triangle', now + 0.12, 0.35, 0.25);
+    }
+
+    function soundWrong() {
+      const now = audioCtx.currentTime;
+      playTone(220, 'sawtooth', now, 0.25, 0.12);
+    }
+
+    // --- HÀM KIỂM TRA ĐÁP ÁN ĐÃ KÍCH HOẠT ÂM THANH ---
     async function checkAns(choice, btn) {
       if (lock) return;
       lock = true;
+      soundSelect(); // Phát tiếng click ngay khi chọn đáp án
+
       var item = questions[idx];
       var btns = document.querySelectorAll(".opt-btn");
       for (var i = 0; i < btns.length; i++) {
@@ -407,16 +478,17 @@
       var msg = document.getElementById("msg");
       var logoHtml = '<img src="logogempoint.png" alt="Gem" class="gem-logo-inline">';
       
-            // Lấy mức điểm riêng của câu hỏi (nếu câu nào quên ghi thì tự lấy mặc định +1 và -0.5)
       var winPoint = (item.plus !== undefined) ? item.plus : 1;
       var losePoint = (item.minus !== undefined) ? item.minus : 0.5;
 
       if (choice === item.c) {
-        gem = Math.round((gem + winPoint) * 100) / 100; // Làm tròn tránh lỗi số thập phân lẻ
+        soundCorrect(); // Phát tiếng Ting-Ting khi đúng
+        gem = Math.round((gem + winPoint) * 100) / 100;
         btn.classList.add("correct");
         msg.className = "msg ok";
         msg.innerHTML = "Chính xác! +" + winPoint + " GemPoint " + logoHtml;
       } else {
+        soundWrong(); // Phát tiếng trầm khi sai
         gem = Math.round((gem - losePoint) * 100) / 100;
         btn.classList.add("wrong");
         btns[item.c].classList.add("correct");
@@ -424,8 +496,17 @@
         msg.innerHTML = "Sai rồi! -" + losePoint + " GemPoint " + logoHtml;
       }
 
-      
       document.getElementById("score").innerText = gem;
+
+      // Hiệu ứng nảy khung điểm GemPoint
+      var badge = document.querySelector(".gem-badge");
+      if (badge) {
+        badge.classList.remove("score-up", "score-down");
+        void badge.offsetWidth;
+        badge.classList.add(choice === item.c ? "score-up" : "score-down");
+        setTimeout(() => badge.classList.remove("score-up", "score-down"), 600);
+      }
+
       await saveScoreToDB(gem);
 
       var bar = document.getElementById("bar");
@@ -439,7 +520,7 @@
       }, 1200);
     }
 
-        // Hàm xáo trộn ngẫu nhiên danh sách câu hỏi
+    // Hàm xáo trộn ngẫu nhiên danh sách câu hỏi
     function shuffleQuestions(array) {
       for (let i = array.length - 1; i > 0; i--) {
         const j = Math.floor(Math.random() * (i + 1));
@@ -448,13 +529,12 @@
     }
 
     window.onload = async function() {
-      shuffleQuestions(questions); // Xáo trộn câu hỏi ngay khi vừa vào trang
+      shuffleQuestions(questions);
       showQ();
       await loadScoreFromDB();
     };
 
-  
-      // Mở bảng voucher
+    // Mở bảng voucher
     function openVoucher() {
       document.getElementById("voucherModal").classList.add("show");
     }
