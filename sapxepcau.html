@@ -1,0 +1,469 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sắp Xếp Câu GemPoint</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, sans-serif; }
+    body { background: #eef2f6; min-height: 100vh; display: flex; justify-content: center; align-items: center; padding: 16px; }
+    
+    .quiz-box { background: #ffffff; width: 100%; max-width: 550px; border-radius: 16px; box-shadow: 0 10px 25px rgba(15, 23, 42, 0.1); overflow: hidden; border: 1px solid #cbd5e1; }
+    
+    .header { background: linear-gradient(135deg, #fef3c7 0%, #fcd34d 50%, #f59e0b 100%); color: black; padding: 16px 20px; display: flex; justify-content: space-between; align-items: center; }
+    .header h1 { font-size: 1.15rem; font-weight: 800; letter-spacing: 0.3px; }
+    .header-right { display: flex; align-items: center; gap: 8px; }
+
+    .help-btn { width: 30px; height: 30px; border-radius: 50%; background: rgba(255, 255, 255, 0.9); color: #b45309; border: 1.5px solid #f59e0b; font-size: 0.95rem; font-weight: 800; cursor: pointer; display: flex; justify-content: center; align-items: center; box-shadow: 0 2px 6px rgba(15, 23, 42, 0.15); transition: all 0.2s ease; flex-shrink: 0; }
+    .help-btn:hover { background: #ffffff; transform: scale(1.08); }
+
+    .gem-badge { position: relative; overflow: hidden; background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%); padding: 6px 16px 6px 8px; border-radius: 30px; font-weight: 800; color: #fde68a; font-size: 0.9rem; letter-spacing: 0.5px; display: flex; align-items: center; gap: 8px; border: 2px solid #fef08a; box-shadow: 0 4px 15px rgba(15, 23, 42, 0.25), inset 0 1px 1px rgba(255, 255, 255, 0.2); transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.25s ease; }
+    .gem-badge::after { content: ""; position: absolute; top: 0; left: -100%; width: 60%; height: 100%; background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.28), transparent); transform: skewX(-25deg); animation: gemShine 3.5s infinite; }
+    @keyframes gemShine { 0%, 65% { left: -100%; } 100% { left: 160%; } }
+    .gem-logo-header { width: 28px; height: 28px; border-radius: 50%; object-fit: cover; display: block; background: #ffffff; border: 1.5px solid #fbbf24; box-shadow: 0 0 8px rgba(251, 191, 36, 0.7); }
+    .gem-logo-inline { width: 20px; height: 20px; border-radius: 50%; object-fit: cover; vertical-align: middle; margin-left: 4px; margin-bottom: 2px; }
+    .gem-badge span { color: #ffffff; font-size: 1.15rem; font-weight: 900; text-shadow: 0 0 10px rgba(251, 191, 36, 0.8); }
+    .gem-badge.score-up { transform: scale(1.12); border-color: #34d399; box-shadow: 0 0 18px rgba(16, 185, 129, 0.65); }
+    .gem-badge.score-up span { color: #34d399; }
+    .gem-badge.score-down { transform: scale(0.95); border-color: #f87171; box-shadow: 0 0 15px rgba(239, 68, 68, 0.6); }
+    .gem-badge.score-down span { color: #f87171; }
+
+    .bar { height: 4px; width: 0%; background: #3b82f6; }
+    .body { padding: 24px 20px; }
+    
+    .q-header-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+    .q-num { font-size: 0.85rem; color: #f59e0b; font-weight: bold; }
+    .q-point-tag { font-size: 0.78rem; background: #fef3c7; color: #b45309; padding: 3px 9px; border-radius: 12px; font-weight: 700; border: 1px solid #fde68a; }
+    
+    .q-text { font-size: 1.1rem; color: #0f172a; font-weight: 600; margin-bottom: 6px; line-height: 1.4; }
+    .q-hint { font-size: 0.88rem; color: #64748b; margin-bottom: 16px; font-style: italic; }
+
+    .answer-zone {
+      min-height: 76px;
+      background: #f8fafc;
+      border: 2px dashed #cbd5e1;
+      border-radius: 12px;
+      padding: 12px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      align-items: center;
+      margin-bottom: 18px;
+      transition: all 0.2s ease;
+    }
+    .answer-zone.correct-zone { background: #d1fae5; border: 2px solid #10b981; }
+    .answer-zone.wrong-zone { background: #fee2e2; border: 2px solid #ef4444; }
+    .zone-placeholder { color: #94a3b8; font-size: 0.9rem; pointer-events: none; width: 100%; text-align: center; }
+
+    .word-bank {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      justify-content: center;
+      min-height: 48px;
+      margin-bottom: 20px;
+    }
+
+    .word-chip {
+      background: #ffffff;
+      border: 1.5px solid #cbd5e1;
+      border-bottom-width: 3px;
+      border-radius: 10px;
+      padding: 8px 14px;
+      font-size: 0.98rem;
+      font-weight: 600;
+      color: #0f172a;
+      cursor: pointer;
+      user-select: none;
+      transition: all 0.15s ease;
+    }
+    .word-chip:hover:not(:disabled) {
+      background: #eff6ff;
+      border-color: #3b82f6;
+      transform: translateY(-2px);
+    }
+    .word-chip:active:not(:disabled) {
+      transform: translateY(1px);
+      border-bottom-width: 1.5px;
+    }
+    .word-chip.in-answer {
+      background: #fef3c7;
+      border-color: #f59e0b;
+      color: #78350f;
+    }
+    .word-chip.used {
+      opacity: 0.25;
+      pointer-events: none;
+      background: #e2e8f0;
+    }
+
+    .action-row { display: flex; gap: 10px; }
+    .clear-btn {
+      flex: 1;
+      background: #f1f5f9;
+      color: #475569;
+      border: 1.5px solid #cbd5e1;
+      border-radius: 10px;
+      padding: 12px;
+      font-size: 0.95rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: 0.2s;
+    }
+    .clear-btn:hover:not(:disabled) { background: #e2e8f0; color: #0f172a; }
+    
+    .check-btn {
+      flex: 2;
+      background: linear-gradient(135deg, #fef3c7 0%, #fcd34d 50%, #f59e0b 100%);
+      color: #ffffff;
+      border: none;
+      border-radius: 10px;
+      padding: 12px;
+      font-size: 0.98rem;
+      font-weight: 700;
+      cursor: pointer;
+      box-shadow: 0 4px 12px rgba(37, 99, 235, 0.25);
+      transition: 0.2s;
+    }
+    .check-btn:hover:not(:disabled) { background: linear-gradient(135deg, #fef3c7 0%, #fcd34d 50%, #f59e0b 100%); transform: translateY(-1px); }
+    .check-btn:disabled, .clear-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+    .msg { margin-top: 16px; padding: 12px; border-radius: 8px; text-align: center; font-weight: 600; display: none; line-height: 1.4; }
+    .msg.ok { display: block; background: #ecfdf5; color: #047857; border: 1px solid #a7f3d0; }
+    .msg.no { display: block; background: #fef2f2; color: #b91c1c; border: 1px solid #fecaca; }
+
+    .footer-back { padding: 0 20px 22px 20px; display: flex; justify-content: space-between; align-items: center; gap: 10px; }
+    .back-btn { background: linear-gradient(135deg, #f59e0b 0%, #EEAD0E 100%); color: #ffffff; border: none; border-radius: 10px; padding: 10px 16px; font-size: 0.95rem; font-weight: 600; cursor: pointer; text-decoration: none; display: inline-flex; align-items: center; gap: 6px; box-shadow: 0 4px 10px rgba(245, 158, 11, 0.25); transition: all 0.2s ease; }
+    .back-btn:hover { background: #d97706; transform: translateY(-1px); }
+    
+    .rank-btn { position: relative; overflow: hidden; background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%); color: #0f172a; border: 1.5px solid #f59e0b; border-radius: 12px; padding: 7px 16px 7px 9px; font-size: 0.95rem; font-weight: 700; letter-spacing: 0.2px; cursor: pointer; text-decoration: none; display: inline-flex; align-items: center; gap: 9px; box-shadow: 0 4px 12px rgba(245, 158, 11, 0.18), 0 1px 3px rgba(15, 23, 42, 0.08); transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1); }
+    .rank-logo { width: 28px; height: 28px; border-radius: 50%; object-fit: contain; background: #ffffff; padding: 2px; border: 1px solid #fde68a; flex-shrink: 0; }
+    .rank-btn::after { content: ""; position: absolute; top: 0; left: -120%; width: 60%; height: 100%; background: linear-gradient(90deg, transparent, rgba(251, 191, 36, 0.25), transparent); transform: skewX(-25deg); transition: left 0.55s ease; }
+    .rank-btn:hover { background: #fffbeb; color: #b45309; border-color: #d97706; transform: translateY(-2px) scale(1.02); box-shadow: 0 6px 18px rgba(245, 158, 11, 0.28); }
+    .rank-btn:hover::after { left: 140%; }
+
+    .voucher-modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); display: none; justify-content: center; align-items: center; padding: 20px; z-index: 9999; }
+    .voucher-modal.show { display: flex; animation: fadeIn 0.2s ease; }
+    .voucher-content { position: relative; background: #ffffff; padding: 8px; border-radius: 16px; max-width: 360px; width: 92%; box-shadow: 0 15px 35px rgba(0, 0, 0, 0.3); border: 2px solid #fcd34d; }
+    .voucher-content img { width: 100%; height: auto; max-height: 75vh; object-fit: contain; border-radius: 10px; display: block; }
+    .close-voucher { position: absolute; top: -12px; right: -12px; width: 32px; height: 32px; border-radius: 50%; background: #ef4444; color: #ffffff; border: 2px solid #ffffff; font-size: 1rem; font-weight: bold; cursor: pointer; display: flex; justify-content: center; align-items: center; box-shadow: 0 4px 10px rgba(0, 0, 0, 0.25); }
+    @keyframes fadeIn { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
+
+    @media (max-width: 480px) {
+      .header { padding: 14px 16px; }
+      .header h1 { font-size: 1.05rem; }
+      .gem-badge { font-size: 0.85rem; padding: 4px 10px 4px 6px; gap: 6px; }
+      .gem-logo-header { width: 22px; height: 22px; }
+      .body { padding: 20px 16px; }
+      .footer-back { padding: 0 16px 18px 16px; }
+      .back-btn, .rank-btn { font-size: 0.88rem; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="quiz-box">
+    <div class="header">
+      <h1>GEMSCRAMBLE</h1>
+      <div class="header-right">
+        <button class="help-btn" onclick="openVoucher()" title="Bảng đổi quà GemPoint">?</button>
+        <div class="gem-badge">
+		
+		          <img src="logogempoint.png" alt="GemPoint" class="gem-logo-header">
+          GEMPOINT: <span id="score">0</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="bar" id="bar"></div>
+
+    <div class="body">
+      <div class="q-header-row">
+        <div class="q-num" id="qNum">CÂU 1</div>
+        <div class="q-point-tag" id="qPointTag"></div>
+      </div>
+      
+      <div class="q-text">Sắp xếp các từ sau thành câu hoàn chỉnh:</div>
+      <div class="q-hint" id="qHint">Gợi ý nghĩa: ...</div>
+
+      <div class="answer-zone" id="answerZone">
+        <span class="zone-placeholder">Bấm vào các từ bên dưới để ghép câu...</span>
+      </div>
+
+      <div class="word-bank" id="wordBank"></div>
+
+      <div class="action-row">
+        <button class="clear-btn" id="clearBtn" onclick="resetCurrentSentence()">↺ Xếp lại</button>
+        <button class="check-btn" id="checkBtn" onclick="checkSentence()">Check đáp án</button>
+      </div>
+
+      <div class="msg" id="msg"></div>
+    </div>
+
+    <div class="footer-back">
+      <a href="tichluyhome.html" class="back-btn">← Quay về trang trước</a>
+      <a href="bangxephang.html" class="rank-btn">
+        <img src="logobxh.png" alt="BXH" class="rank-logo">
+        Bảng xếp hạng
+      </a>
+    </div>
+  </div>
+
+  <div class="voucher-modal" id="voucherModal" onclick="closeVoucher(event)">
+    <div class="voucher-content">
+      <button class="close-voucher" onclick="closeVoucherBtn()">✕</button>
+      <img src="bangvouchergempoint.jpg" alt="Bảng Voucher GemPoint">
+    </div>
+  </div>
+
+  <script>
+    const DB_URL = "https://" + "tich-luy-gempoint-default-rtdb" + ".asia-southeast1." + "firebasedatabase.app/students";
+    const currentUsername = localStorage.getItem("currentUsername") || "hocvien_test";
+    const currentStudentName = localStorage.getItem("currentStudentName") || "Học viên Test";
+
+    var sentences = [
+      {
+        sentence: "She has worked in this company for five years.",
+        hint: "Cô ấy đã làm việc ở công ty này được 5 năm rồi.",
+        plus: 6,
+        minus: 4
+      },
+      {
+        sentence: "If it rains tomorrow we will cancel the picnic.",
+        hint: "Nếu ngày mai trời mưa, chúng tôi sẽ hủy buổi dã ngoại.",
+        plus: 6,
+        minus: 4
+      },
+      {
+        sentence: "The more you practice speaking the more confident you become.",
+        hint: "Bạn càng luyện nói nhiều, bạn càng trở nên tự tin hơn.",
+        plus: 6,
+        minus: 4
+      },
+      {
+        sentence: "Many companies are trying to reduce their carbon footprint.",
+        hint: "Nhiều công ty đang cố gắng giảm lượng khí thải carbon của họ.",
+        plus: 6,
+        minus: 4
+      },
+      {
+        sentence: "Despite the heavy rain they decided to go hiking.",
+        hint: "Mặc dù trời mưa to, họ vẫn quyết định đi leo núi.",
+        plus: 6,
+        minus: 4
+      },
+      {
+        sentence: "By the time we arrived the movie had already started.",
+        hint: "Vào lúc chúng tôi tới nơi, bộ phim đã bắt đầu rồi.",
+        plus: 6,
+        minus: 4
+      },
+      {
+        sentence: "Regular exercise helps reduce the risk of heart disease.",
+        hint: "Tập thể dục thường xuyên giúp giảm nguy cơ mắc bệnh tim.",
+        plus: 6,
+        minus: 4
+      },
+      {
+        sentence: "The rapid development of AI has changed modern workplaces.",
+        hint: "Sự phát triển nhanh chóng của AI đã thay đổi nơi làm việc hiện đại.",
+        plus: 6,
+        minus: 4
+      }
+    ];
+
+    var idx = 0;
+    var count = 1;
+    var gem = 0;
+    var lock = false;
+    var bankWords = [];
+    var selectedIndices = [];
+
+    async function loadScoreFromDB() {
+      try {
+        const res = await fetch(`${DB_URL}/${currentUsername}.json`);
+        const data = await res.json();
+        if (data && typeof data.gempoint === "number") {
+          gem = data.gempoint;
+        } else {
+          await saveScoreToDB(0);
+        }
+        document.getElementById("score").innerText = gem;
+      } catch (err) {
+        console.error("Lỗi tải điểm:", err);
+      }
+    }
+
+    async function saveScoreToDB(newGem) {
+      try {
+        await fetch(`${DB_URL}/${currentUsername}.json`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            name: currentStudentName,
+            gempoint: newGem,
+            lastUpdated: new Date().toLocaleString("vi-VN")
+          })
+        });
+      } catch (err) {
+        console.error("Lỗi lưu điểm:", err);
+      }
+    }
+
+    function shuffleArray(arr) {
+      let copy = [...arr];
+      for (let i = copy.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [copy[i], copy[j]] = [copy[j], copy[i]];
+      }
+      return copy;
+    }
+
+    function showSentence() {
+      lock = false;
+      selectedIndices = [];
+
+      var bar = document.getElementById("bar");
+      bar.style.transition = "none";
+      bar.style.width = "0%";
+
+      var msg = document.getElementById("msg");
+      msg.className = "msg";
+      msg.innerHTML = "";
+
+      var ansZone = document.getElementById("answerZone");
+      ansZone.className = "answer-zone";
+
+      document.getElementById("clearBtn").disabled = false;
+      document.getElementById("checkBtn").disabled = false;
+
+      var item = sentences[idx];
+      document.getElementById("qNum").innerText = "CÂU " + count;
+      document.getElementById("qPointTag").innerText = "Trị Giá: " + item.plus + "GP" + " , Sai Trừ: " + item.minus + "GP";
+      document.getElementById("qHint").innerText = "Gợi ý: " + item.hint;
+
+      var originalWords = item.sentence.split(" ");
+      do {
+        bankWords = shuffleArray(originalWords);
+      } while (bankWords.join(" ") === item.sentence && originalWords.length > 1);
+
+      renderWords();
+    }
+
+    function renderWords() {
+      var ansZone = document.getElementById("answerZone");
+      var bankZone = document.getElementById("wordBank");
+
+      ansZone.innerHTML = "";
+      if (selectedIndices.length === 0) {
+        ansZone.innerHTML = '<span class="zone-placeholder">Bấm vào các từ bên dưới để ghép câu...</span>';
+      } else {
+        selectedIndices.forEach((wordIdx, posInAns) => {
+          var btn = document.createElement("button");
+          btn.className = "word-chip in-answer";
+          btn.innerText = bankWords[wordIdx];
+          btn.disabled = lock;
+          btn.onclick = function() {
+            if (lock) return;
+            selectedIndices.splice(posInAns, 1);
+            renderWords();
+          };
+          ansZone.appendChild(btn);
+        });
+      }
+
+      bankZone.innerHTML = "";
+      bankWords.forEach((word, wordIdx) => {
+        var btn = document.createElement("button");
+        btn.className = "word-chip";
+        btn.innerText = word;
+        if (selectedIndices.includes(wordIdx)) {
+          btn.classList.add("used");
+        }
+        btn.disabled = lock || selectedIndices.includes(wordIdx);
+        btn.onclick = function() {
+          if (lock) return;
+          selectedIndices.push(wordIdx);
+          renderWords();
+        };
+        bankZone.appendChild(btn);
+      });
+    }
+
+    function resetCurrentSentence() {
+      if (lock) return;
+      selectedIndices = [];
+      renderWords();
+    }
+
+    async function checkSentence() {
+      if (lock) return;
+      if (selectedIndices.length === 0) {
+        alert("Bạn hãy chọn các từ để ghép thành câu trước khi kiểm tra nhé!");
+        return;
+      }
+
+      lock = true;
+      document.getElementById("clearBtn").disabled = true;
+      document.getElementById("checkBtn").disabled = true;
+      renderWords();
+
+      var item = sentences[idx];
+      var userSentence = selectedIndices.map(i => bankWords[i]).join(" ");
+      var ansZone = document.getElementById("answerZone");
+      var msg = document.getElementById("msg");
+      var logoHtml = '<img src="logogempoint.png" alt="Gem" class="gem-logo-inline">';
+
+      var isCorrect = (userSentence === item.sentence);
+
+      if (isCorrect) {
+        gem = Math.round((gem + item.plus) * 100) / 100;
+        ansZone.classList.add("correct-zone");
+        msg.className = "msg ok";
+        msg.innerHTML = "Chính xác! +" + item.plus + " GemPoint " + logoHtml;
+      } else {
+        gem = Math.round((gem - item.minus) * 100) / 100;
+        ansZone.classList.add("wrong-zone");
+        msg.className = "msg no";
+        msg.innerHTML = "Chưa đúng! -" + item.minus + " GemPoint " + logoHtml + "<br><span style='font-size:0.88rem; color:#0f172a;'>Đáp án đúng: <b>" + item.sentence + "</b></span>";
+      }
+
+      document.getElementById("score").innerText = gem;
+      var badge = document.querySelector(".gem-badge");
+      badge.classList.remove("score-up", "score-down");
+      void badge.offsetWidth;
+      badge.classList.add(isCorrect ? "score-up" : "score-down");
+      setTimeout(() => badge.classList.remove("score-up", "score-down"), 600);
+
+      await saveScoreToDB(gem);
+
+      var delayTime = isCorrect ? 1400 : 2600;
+      var bar = document.getElementById("bar");
+      bar.offsetHeight;
+      bar.style.transition = "width " + (delayTime / 1000) + "s linear";
+      bar.style.width = "100%";
+
+      setTimeout(function() {
+        count++;
+        idx = (idx + 1) % sentences.length;
+        showSentence();
+      }, delayTime);
+    }
+
+    function openVoucher() { document.getElementById("voucherModal").classList.add("show"); }
+    function closeVoucherBtn() { document.getElementById("voucherModal").classList.remove("show"); }
+    function closeVoucher(event) {
+      if (event.target.id === "voucherModal") {
+        document.getElementById("voucherModal").classList.remove("show");
+      }
+    }
+
+    window.onload = async function() {
+      sentences = shuffleArray(sentences);
+      showSentence();
+      await loadScoreFromDB();
+    };
+  </script>
+</body>
+</html>
+

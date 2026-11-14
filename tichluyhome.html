@@ -1,0 +1,517 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Trung Tâm Săn Điểm GemPoint</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    }
+
+    body {
+      background: radial-gradient(circle at top center, #f8fafc 0%, #e2e8f0 100%);
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 24px 16px;
+      color: #000000;
+    }
+
+    /* Khung tổng thể phong cách cao cấp */
+    .hub-container {
+      background: #ffffff;
+      width: 100%;
+      max-width: 760px;
+      border-radius: 28px;
+      box-shadow: 0 24px 50px rgba(15, 23, 42, 0.1), 0 1px 3px rgba(15, 23, 42, 0.05);
+      overflow: hidden;
+      border: 1px solid #cbd5e1;
+    }
+
+    /* Phần Header vàng champagne ánh kim, chữ đen tương phản cao */
+    .hub-header {
+      background: linear-gradient(135deg, #fef9c3 0%, #fde047 50%, #facc15 100%);
+      padding: 26px 28px 34px 28px;
+      position: relative;
+      border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+    }
+
+    .hub-header::before {
+      content: "";
+      position: absolute;
+      top: -40px;
+      right: -40px;
+      width: 180px;
+      height: 180px;
+      background: radial-gradient(circle, rgba(255, 255, 255, 0.5) 0%, transparent 70%);
+      border-radius: 50%;
+      pointer-events: none;
+    }
+
+    /* Thanh điều hướng trên cùng */
+    .top-nav {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 22px;
+      gap: 12px;
+      position: relative;
+      z-index: 2;
+    }
+
+    /* Thẻ tên học viên nền trắng kính mờ, chữ đen */
+    .student-pill {
+      background: rgba(255, 255, 255, 0.88);
+      backdrop-filter: blur(8px);
+      color: #000000;
+      padding: 7px 16px;
+      border-radius: 30px;
+      font-size: 0.9rem;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      border: 1px solid rgba(0, 0, 0, 0.08);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.04);
+    }
+
+    /* Ví GemPoint nền trắng viền vàng sang trọng, chữ đen */
+    .gem-wallet {
+      background: #ffffff;
+      color: #000000;
+      padding: 6px 18px 6px 8px;
+      border-radius: 30px;
+      font-weight: 800;
+      font-size: 0.92rem;
+      letter-spacing: 0.3px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      border: 1.5px solid #eab308;
+      box-shadow: 0 6px 16px rgba(202, 138, 4, 0.18);
+    }
+
+    .gem-wallet img {
+      width: 26px;
+      height: 26px;
+      border-radius: 50%;
+      object-fit: cover;
+    }
+
+    .gem-wallet span {
+      color: #000000;
+      font-size: 1.15rem;
+      font-weight: 900;
+    }
+
+    /* Khu vực Logo chính không khung thô cứng, đổ bóng 3D hào quang */
+    .brand-hero {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      position: relative;
+      z-index: 2;
+    }
+
+    .main-logo-wrap {
+      position: relative;
+      width: 120px;
+      height: 120px;
+      margin-bottom: 14px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      transition: transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+
+    .main-logo-wrap::before {
+      content: "";
+      position: absolute;
+      width: 108px;
+      height: 108px;
+      background: radial-gradient(circle, rgba(255, 255, 255, 0.95) 0%, rgba(255, 255, 255, 0) 72%);
+      border-radius: 50%;
+      z-index: 0;
+    }
+
+    .main-logo-wrap img {
+      position: relative;
+      z-index: 1;
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      filter: drop-shadow(0 12px 18px rgba(15, 23, 42, 0.22));
+    }
+
+    .main-logo-wrap:hover {
+      transform: translateY(-4px) scale(1.06);
+    }
+
+    .brand-hero h1 {
+      font-size: 1.6rem;
+      font-weight: 900;
+      color: #000000;
+      text-transform: uppercase;
+      letter-spacing: 0.6px;
+    }
+
+    .brand-hero p {
+      font-size: 0.95rem;
+      color: #18181b;
+      font-weight: 500;
+      margin-top: 5px;
+    }
+
+    /* Phần thân chứa 3 khung hoạt động */
+    .hub-body {
+      padding: 28px 28px 24px 28px;
+      background: #ffffff;
+    }
+
+    .section-title {
+      font-size: 0.85rem;
+      font-weight: 800;
+      color: #000000;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 18px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .section-title::before {
+      content: "";
+      width: 8px;
+      height: 8px;
+      background: #eab308;
+      border-radius: 50%;
+    }
+
+    .section-title::after {
+      content: "";
+      flex: 1;
+      height: 1px;
+      background: linear-gradient(90deg, #cbd5e1 0%, transparent 100%);
+    }
+
+    /* Lưới 3 khung thẻ */
+    .cards-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 18px;
+    }
+
+    .activity-card {
+      background: #f8fafc;
+      border: 1.5px solid #e2e8f0;
+      border-radius: 20px;
+      overflow: hidden;
+      text-decoration: none;
+      color: #000000;
+      display: flex;
+      flex-direction: column;
+      transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+      box-shadow: 0 4px 12px rgba(15, 23, 42, 0.03);
+    }
+
+    .activity-card:hover {
+      transform: translateY(-6px);
+      border-color: #eab308;
+      background: #ffffff;
+      box-shadow: 0 16px 30px rgba(234, 179, 8, 0.18), 0 4px 10px rgba(0, 0, 0, 0.04);
+    }
+
+    /* Khung ảnh đại diện của từng thẻ */
+    .card-thumb {
+      width: 100%;
+      height: 140px;
+      background: #e2e8f0;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .card-thumb img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transition: transform 0.45s ease;
+    }
+
+    .activity-card:hover .card-thumb img {
+      transform: scale(1.07);
+    }
+
+    /* Nhãn điểm nền trắng viền vàng, chữ đen */
+    .card-badge {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      background: rgba(255, 255, 255, 0.95);
+      color: #000000;
+      font-size: 0.72rem;
+      font-weight: 800;
+      padding: 4px 10px;
+      border-radius: 20px;
+      border: 1px solid #eab308;
+      box-shadow: 0 3px 8px rgba(0, 0, 0, 0.12);
+    }
+
+    .card-info {
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      flex: 1;
+      justify-content: space-between;
+    }
+
+    .card-info h3 {
+      font-size: 1.05rem;
+      font-weight: 800;
+      color: #000000;
+      margin-bottom: 6px;
+    }
+
+    .card-info p {
+      font-size: 0.84rem;
+      color: #27272a;
+      line-height: 1.45;
+      margin-bottom: 14px;
+    }
+
+    .card-action {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 100%;
+      padding: 9px 12px;
+      background: #e2e8f0;
+      color: #000000;
+      font-size: 0.86rem;
+      font-weight: 700;
+      border-radius: 12px;
+      transition: all 0.25s ease;
+    }
+
+    .activity-card:hover .card-action {
+      background: linear-gradient(135deg, #fde047 0%, #facc15 100%);
+      color: #000000;
+      box-shadow: 0 4px 12px rgba(250, 204, 21, 0.35);
+    }
+
+    /* Thanh nút điều hướng dưới đáy */
+    .hub-footer {
+      padding: 6px 28px 26px 28px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      background: #ffffff;
+    }
+
+    .btn-back {
+      background: #f1f5f9;
+      color: #000000;
+      border: 1px solid #cbd5e1;
+      text-decoration: none;
+      padding: 10px 18px;
+      border-radius: 12px;
+      font-size: 0.92rem;
+      font-weight: 700;
+      transition: all 0.2s ease;
+    }
+
+    .btn-back:hover {
+      background: #e2e8f0;
+      transform: translateY(-1px);
+    }
+
+    /* Nút Bảng xếp hạng đồng bộ hiệu ứng vệt sáng */
+    .btn-bxh {
+      position: relative;
+      overflow: hidden;
+      background: linear-gradient(135deg, #ffffff 0%, #fefce8 100%);
+      color: #000000;
+      border: 1.5px solid #eab308;
+      text-decoration: none;
+      padding: 8px 18px 8px 10px;
+      border-radius: 12px;
+      font-size: 0.92rem;
+      font-weight: 800;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      box-shadow: 0 4px 14px rgba(234, 179, 8, 0.18);
+      transition: all 0.25s ease;
+    }
+
+    .btn-bxh::after {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: -120%;
+      width: 60%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(250, 204, 21, 0.35), transparent);
+      transform: skewX(-25deg);
+      transition: left 0.55s ease;
+    }
+
+    .btn-bxh:hover {
+      transform: translateY(-2px);
+      background: #fef9c3;
+      box-shadow: 0 6px 18px rgba(234, 179, 8, 0.3);
+    }
+
+    .btn-bxh:hover::after {
+      left: 140%;
+    }
+
+    .btn-bxh img {
+      width: 26px;
+      height: 26px;
+      border-radius: 50%;
+      object-fit: contain;
+      background: #ffffff;
+    }
+
+    /* Tối ưu cho màn hình điện thoại */
+    @media (max-width: 640px) {
+      .cards-grid {
+        grid-template-columns: 1fr;
+      }
+      .card-thumb {
+        height: 155px;
+      }
+      .top-nav {
+        flex-direction: column;
+        align-items: stretch;
+      }
+      .student-pill, .gem-wallet {
+        justify-content: center;
+      }
+      .hub-header {
+        padding: 22px 18px 28px 18px;
+      }
+      .hub-body, .hub-footer {
+        padding-left: 18px;
+        padding-right: 18px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="hub-container">
+    <!-- HEADER -->
+    <div class="hub-header">
+      <div class="top-nav">
+        <div class="student-pill">
+          <span id="studentNameDisplay">Học viên GemFaith</span>
+        </div>
+        <div class="gem-wallet">
+          <img src="logogempoint.png" alt="Gem">
+		            GEMPOINT: <span id="currentScoreDisplay">0</span>
+        </div>
+      </div>
+
+      <div class="brand-hero">
+        <div class="main-logo-wrap">
+          <img src="logogempoint.png" alt="Logo GemPoint">
+        </div>
+        <h1>Tích Điểm GemPoint</h1>
+        <p>Với cơ hội nhận Voucher và Giảm học phí lên tới hơn 50%</p>
+      </div>
+    </div>
+
+    <!-- BODY: 3 KHUNG HOẠT ĐỘNG -->
+    <div class="hub-body">
+      <div class="section-title">Chọn chế độ thử thách</div>
+
+      <div class="cards-grid">
+        <a href="tichluygempoint.html" class="activity-card">
+          <div class="card-thumb">
+            <img src="bannergemquiz.jpg" alt="GemQuiz">
+            <span class="card-badge">HOT</span>
+          </div>
+          <div class="card-info">
+            <div>
+              <h3>GemQuiz</h3>
+              <p>Trả lời trắc nghiệm các câu hỏi về Ngữ Pháp, từ vựng B1/B2 để tích GemPoint</p>
+            </div>
+            <div class="card-action">Tham gia →</div>
+          </div>
+        </a>
+
+        <a href="sapxepcau.html" class="activity-card">
+          <div class="card-thumb">
+            <img src="bannergemscramble.jpg" alt="GemScramble">
+            <span class="card-badge">NEW</span>
+          </div>
+          <div class="card-info">
+            <div>
+              <h3>GemScramble</h3>
+              <p>Sắp xếp lại các từ trong câu để săn Voucher</p>
+            </div>
+            <div class="card-action">Tham Gia →</div>
+          </div>
+        </a>
+
+        <a href="quiz_chude3.html" class="activity-card">
+          <div class="card-thumb">
+            <img src="inprogress.jpg" alt="Sắp ra mắt">
+            <span class="card-badge">Chưa ra mắt</span>
+          </div>
+          <div class="card-info">
+            <div>
+              <h3>Chưa ra mắt</h3>
+              <p>GemFaith sẽ sớm ra mắt tính năng này</p>
+            </div>
+            <div class="card-action">Tham Gia →</div>
+          </div>
+        </a>
+      </div>
+    </div>
+
+    <div class="hub-footer">
+      <a href="trangchu1.html" class="btn-back">← Quay về trang chủ</a>
+      <a href="bangxephang.html" class="btn-bxh">
+        <img src="logobxh.png" alt="BXH">
+        Bảng xếp hạng
+      </a>
+    </div>
+  </div>
+
+  <script>
+    const DB_URL = "https://" + "tich-luy-gempoint-default-rtdb" + ".asia-southeast1." + "firebasedatabase.app/students";
+    const currentUsername = localStorage.getItem("currentUsername");
+    const currentStudentName = localStorage.getItem("currentStudentName");
+
+    window.onload = async function() {
+      if (currentStudentName) {
+        document.getElementById("studentNameDisplay").innerText = currentStudentName;
+      }
+
+      if (currentUsername) {
+        try {
+          const res = await fetch(`${DB_URL}/${currentUsername}.json`);
+          const data = await res.json();
+          if (data && typeof data.gempoint === "number") {
+            document.getElementById("currentScoreDisplay").innerText = data.gempoint;
+          }
+        } catch (err) {
+          console.error("Lỗi tải điểm trang chủ GemPoint:", err);
+        }
+      }
+    };
+  </script>
+
+</body>
+</html>
+
