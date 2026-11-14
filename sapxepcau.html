@@ -217,6 +217,40 @@
   </div>
 
   <script>
+  
+      // --- BỘ TẠO ÂM THANH ---
+    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+
+    function playTone(freq, type, startTime, duration, vol = 0.2) {
+      if (audioCtx.state === 'suspended') audioCtx.resume();
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      osc.type = type;
+      osc.frequency.setValueAtTime(freq, startTime);
+      gain.gain.setValueAtTime(vol, startTime);
+      gain.gain.exponentialRampToValueAtTime(0.01, startTime + duration);
+      osc.connect(gain);
+      gain.connect(audioCtx.destination);
+      osc.start(startTime);
+      osc.stop(startTime + duration);
+    }
+
+    function soundSelect() {
+      playTone(520, 'sine', audioCtx.currentTime, 0.07, 0.15);
+    }
+
+    function soundCorrect() {
+      const now = audioCtx.currentTime;
+      playTone(587.33, 'triangle', now, 0.15, 0.25);
+      playTone(880.00, 'triangle', now + 0.12, 0.35, 0.25);
+    }
+
+    function soundWrong() {
+      const now = audioCtx.currentTime;
+      playTone(220, 'sawtooth', now, 0.25, 0.12);
+    }
+
+  
     const DB_URL = "https://" + "tich-luy-gempoint-default-rtdb" + ".asia-southeast1." + "firebasedatabase.app/students";
     const currentUsername = localStorage.getItem("currentUsername") || "hocvien_test";
     const currentStudentName = localStorage.getItem("currentStudentName") || "Học viên Test";
@@ -485,6 +519,7 @@
           btn.disabled = lock;
           btn.onclick = function() {
             if (lock) return;
+			soundSelect(); 
             selectedIndices.splice(posInAns, 1);
             renderWords();
           };
@@ -503,6 +538,7 @@
         btn.disabled = lock || selectedIndices.includes(wordIdx);
         btn.onclick = function() {
           if (lock) return;
+		  soundSelect();
           selectedIndices.push(wordIdx);
           renderWords();
         };
@@ -537,11 +573,13 @@
       var isCorrect = (userSentence === item.sentence);
 
       if (isCorrect) {
+	    soundCorrect();
         gem = Math.round((gem + item.plus) * 100) / 100;
         ansZone.classList.add("correct-zone");
         msg.className = "msg ok";
         msg.innerHTML = "Chính xác! +" + item.plus + " GemPoint " + logoHtml;
       } else {
+	  soundWrong(); 
         gem = Math.round((gem - item.minus) * 100) / 100;
         ansZone.classList.add("wrong-zone");
         msg.className = "msg no";
