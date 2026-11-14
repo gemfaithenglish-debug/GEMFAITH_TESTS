@@ -513,36 +513,44 @@
   </script>
 
 <script>
-  const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-
+<script>
+  // Khởi tạo âm thanh an toàn, không làm kẹt chuyển trang trên điện thoại
+  let audioCtx = null;
   function playClickSound() {
-    if (audioCtx.state === 'suspended') audioCtx.resume();
-    const osc = audioCtx.createOscillator();
-    const gain = audioCtx.createGain();
-    osc.type = 'sine';
-    osc.frequency.setValueAtTime(600, audioCtx.currentTime);
-    osc.frequency.exponentialRampToValueAtTime(900, audioCtx.currentTime + 0.08);
-    
-    gain.gain.setValueAtTime(0.15, audioCtx.currentTime);
-    gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.08);
+    try {
+      if (!audioCtx) {
+        const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+        if (AudioContextClass) audioCtx = new AudioContextClass();
+      }
+      if (!audioCtx) return;
+      if (audioCtx.state === 'suspended') audioCtx.resume();
+      
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(600, audioCtx.currentTime);
+      osc.frequency.exponentialRampToValueAtTime(900, audioCtx.currentTime + 0.08);
+      
+      gain.gain.setValueAtTime(0.15, audioCtx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.08);
 
-    osc.connect(gain);
-    gain.connect(audioCtx.destination);
-    osc.start();
-    osc.stop(audioCtx.currentTime + 0.08);
+      osc.connect(gain);
+      gain.connect(audioCtx.destination);
+      osc.start();
+      osc.stop(audioCtx.currentTime + 0.08);
+    } catch (err) {
+      // Bỏ qua lỗi âm thanh nếu điện thoại chặn
+    }
   }
 
-  // Tự động gắn âm thanh cho tất cả thẻ chọn trò chơi và nút bấm
+  // Phát tiếng click nhẹ mà vẫn cho trình duyệt chuyển trang tự nhiên 100%
   document.querySelectorAll('.activity-card, .btn-back, .btn-bxh').forEach(el => {
-    el.addEventListener('click', function(e) {
-      e.preventDefault(); // Chờ 100ms để nghe trọn tiếng click trước khi chuyển trang
-      const targetUrl = this.getAttribute('href');
+    el.addEventListener('click', function() {
       playClickSound();
-      setTimeout(() => {
-        window.location.href = targetUrl;
-      }, 110);
     });
   });
+</script>
+
 </script>
 
 
