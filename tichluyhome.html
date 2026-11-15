@@ -404,11 +404,52 @@
         padding-right: 18px;
       }
     }
+	
+	/* Thanh thông báo người chơi khác đang tăng/giảm điểm trực tiếp */
+.live-feed-bar {
+  background: linear-gradient(90deg, #0f172a 0%, #1e293b 100%);
+  color: #f8fafc;
+  padding: 8px 16px;
+  font-size: 0.84rem;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  border-bottom: 1px solid #334155;
+  transition: background 0.3s ease;
+}
+
+.live-dot {
+  width: 8px;
+  height: 8px;
+  background: #22c55e;
+  border-radius: 50%;
+  box-shadow: 0 0 8px #22c55e;
+  animation: pulseDot 1.5s infinite;
+  flex-shrink: 0;
+}
+
+@keyframes pulseDot {
+  0% { transform: scale(0.95); opacity: 0.7; }
+  50% { transform: scale(1.25); opacity: 1; }
+  100% { transform: scale(0.95); opacity: 0.7; }
+}
+
+.live-feed-bar.flash-up { background: linear-gradient(90deg, #065f46 0%, #047857 100%); }
+.live-feed-bar.flash-down { background: linear-gradient(90deg, #7f1d1d 0%, #991b1b 100%); }
+
+
   </style>
 </head>
 <body>
 
   <div class="hub-container">
+  <div class="live-feed-bar" id="liveFeedBar">
+  <span class="live-dot"></span>
+  <span id="liveFeedText">Connecting to other students...</span>
+</div>
+
     <!-- HEADER -->
     <div class="hub-header">
       <div class="top-nav">
@@ -546,6 +587,90 @@
       playClickSound();
     });
   });
+  
+  
+  // --- HỆ THỐNG THEO DÕI NGƯỜI CHƠI KHÁC TRỰC TIẾP (LIVE FEED) ---
+const ALL_STUDENTS_URL = "https://" + "tich-luy-gempoint-default-rtdb" + ".asia-southeast1." + "firebasedatabase.app/students.json";
+let lastScoresSnapshot = {};
+let isFirstLoadFeed = true;
+
+async function watchOtherPlayers() {
+  const feedText = document.getElementById("liveFeedText");
+  const feedBar = document.getElementById("liveFeedBar");
+  if (!feedText || !feedBar) return;
+
+  try {
+    const res = await fetch(ALL_STUDENTS_URL + "?t=" + Date.now());
+    const data = await res.json();
+    if (!data) return;
+
+    const myUser = localStorage.getItem("currentUsername");
+
+    // Lần đầu mở trang: lưu lại mốc điểm hiện tại của tất cả mọi người
+    if (isFirstLoadFeed) {
+      let topName = "";
+      let topScore = -9999;
+
+      Object.keys(data).forEach(u => {
+        const pt = Number(data[u].gempoint || 0);
+        lastScoresSnapshot[u] = pt;
+        if (pt > topScore) {
+          topScore = pt;
+          topName = data[u].name || u;
+        }
+      });
+
+      feedText.innerHTML = `Current Top 1 GemPoint Hunter: <b>${topName}</b> (${topScore} GemPoint)`;
+      isFirstLoadFeed = false;
+      return;
+    }
+
+    // Các lần kiểm tra sau: phát hiện xem ai vừa tăng hoặc giảm điểm
+    Object.keys(data).forEach(u => {
+      const newPt = Number(data[u].gempoint || 0);
+      const oldPt = lastScoresSnapshot[u];
+      const playerName = data[u].name || u;
+
+      if (oldPt !== undefined && newPt !== oldPt) {
+        const diff = Math.round((newPt - oldPt) * 100) / 100;
+        lastScoresSnapshot[u] = newPt;
+
+        // Chỉ báo thông báo nổi bật khi NGƯỜI CHƠI KHÁC (B, C, D...) thay đổi điểm
+        if (u !== myUser) {
+          feedBar.classList.remove("flash-up", "flash-down");
+          void feedBar.offsetWidth;
+
+          if (diff > 0) {
+            feedBar.classList.add("flash-up");
+            feedText.innerHTML = `<b>${playerName}</b> just gains <b>+${diff} GemPoint</b> (Total: ${newPt})`;
+          } else {
+            feedBar.classList.add("flash-down");
+            feedText.innerHTML = `<b>${playerName}</b> loses <b>${diff} GemPoint</b> (Total: ${newPt})`;
+          }
+
+          setTimeout(() => {
+            feedBar.classList.remove("flash-up", "flash-down");
+          }, 2500);
+        }
+      } else if (oldPt === undefined) {
+        // Người chơi mới vừa tham gia
+        lastScoresSnapshot[u] = newPt;
+        if (u !== myUser) {
+          feedText.innerHTML = `👋 <b>${playerName}</b> have just started hunting GemPoint!`;
+        }
+      }
+    });
+  } catch (err) {
+    console.error("Lỗi cập nhật Live Feed:", err);
+  }
+}
+
+// Quét dữ liệu người chơi khác tự động mỗi 3 giây
+watchOtherPlayers();
+setInterval(watchOtherPlayers, 3000);
+
+  
+  
 </script>
 
 </script>
