@@ -427,18 +427,19 @@
       <a href="khosach.html">Kho Sách GemBook</a>
       <a href="tichluyhome.html">Tích Điểm GemPoint</a>
     </nav>
-
-   <button type="button" onclick="openAvatarPicker()" title="Bấm để đổi Avatar" style="display: inline-flex; align-items: center; gap: 8px; background: #f1f5f9; border: 1.5px solid #cbd5e1; padding: 4px 12px 4px 5px; border-radius: 24px; cursor: pointer; font-weight: 700; font-size: 0.88rem; color: #0f172a;">
-  <img src="https://dicebear.com" alt="Avatar" class="user-avatar-img" style="width: 28px; height: 28px; border-radius: 50%; object-fit: cover; border: 1.5px solid #3b82f6; background: #fff;">
-  <span id="navStudentName">Học viên</span>
-  <span style="font-size: 0.72rem; color: #2563eb;">Sửa avatar</span>
-</button>
+    <div class="nav-user">
+      <button type="button" onclick="openAvatarPicker()" title="Bấm để đổi Avatar" style="display: inline-flex; align-items: center; gap: 8px; background: #f1f5f9; border: 1.5px solid #cbd5e1; padding: 4px 12px 4px 5px; border-radius: 24px; cursor: pointer; font-weight: 700; font-size: 0.88rem; color: #0f172a;">
+        <div class="user-avatar-slot" data-size="28"></div>
+        <span id="navStudentName">Học viên</span>
+        <span style="font-size: 0.72rem; color: #2563eb;">Sửa avatar</span>
+      </button>
 
       <a href="tichluyhome.html" class="nav-gem-pill" title="Săn điểm ngay!">
         <img src="logogempoint.png" alt="Gem">
         <span id="navGemScore">0</span>
       </a>
     </div>
+
   </header>
 
   <!-- 3. NỘI DUNG CHÍNH -->
@@ -495,29 +496,6 @@
   <footer class="site-footer">
     © 2026 GemFaith Center. Nền tảng học tập & tích lũy điểm thưởng nội bộ.
   </footer>
-
-   <!-- Nút Web (Đã sửa background-color thành background để nhận màu gradient) -->
- <a href="https://sites.google.com/view/gemfaithenglish/trang-ch%E1%BB%A7" target="_blank" style="
-    position: fixed;
-    bottom: 100px; /* Tăng lên 80px để đẩy nút này lên trên */
-    right: 20px;  /* Giữ nguyên để thẳng hàng bên phải */
-    width: 50px;
-    height: 50px;
-    background: linear-gradient(45deg, #111827, #1E3A8A); /* Sửa lỗi hiển thị màu gradient */
-    border-radius: 50%;
-    overflow: hidden;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
-    z-index: 9999;
-    transition: transform 0.2s;
-" onmouseover="this.style.transform='scale(1.1)'" onmouseout="this.style.transform='scale(1)'">
-  
-  <!-- Ảnh nút Web -->
-  <img src="logo w.png" alt="Nut Moi" style="width: 80%; height: 80%; object-fit: cover;">
-  
-</a>
 
  
  <!-- Ô FB -->
