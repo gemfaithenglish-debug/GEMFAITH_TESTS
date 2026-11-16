@@ -2,12 +2,13 @@
 // DANH SÁCH AVATAR CHO HỌC VIÊN CHỌN (Bạn có thể thêm/sửa link ảnh tại đây)
 // =========================================================================
 const AVATAR_LIST = [
-  { id: "avt1", name: "Gấu Gemmy", desc: "Common", url: "avatargaubasic.jpg" },
+  { id: "avt1", name: "Gấu Gemmy", desc: "Cổ điển", url: "avatargaubasic.jpg" },
   { id: "avt2", name: "Gấu Dracula", desc: "Halloween 2026", url: "avatarhalloween2026.jpg" },
-  { id: "avt3", name: "Gấu Lowkey", desc: "Hướng Nội", url: "avatarlowkey.jpg" },
+  { id: "avt3", name: "Gấu Lowkey", desc: "Hướng Nội", url: "avatarlowkey.png" },
   { id: "avt4", name: "Gấu Gemball", desc: "Fan Argentina", url: "gemball.jpg" },
   { id: "avt5", name: "Gấu Gemball", desc: "Fan Portugal", url: "gemball2.jpg" },
-  { id: "avt6", name: "Gấu Gemine", desc: "Thế giới Pixel", url: "avatargemine.jpg" }
+  { id: "avt6", name: "Gấu Geminton", desc: "Cao thủ Cầu lông", url: "avatargeminton.png" },
+  { id: "avt7", name: "Cozy Christmas", desc: "Christmas 2026", url: "Christmas.png" }
 ];
 
 const DEFAULT_AVATAR = AVATAR_LIST[0].url;
