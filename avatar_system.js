@@ -13,15 +13,18 @@ const AVATAR_LIST = [
 
   // Nhóm dùng GemPoint để mua (Có hiệu ứng lấp lánh sáng bóng)
   { id: "avt6", name: "Gấu Geminton", desc: "Cao thủ Cầu lông", url: "avatargeminton.png", type: "buy", cost: 2000, shiny: true },
-  { id: "avt4", name: "Gấu Gemball", desc: "Fan Argentina", url: "gemball.jpg", type: "buy", cost: 3000, shiny: true },
-  { id: "avt5", name: "Gấu Gemball", desc: "Fan Portugal", url: "gemball2.jpg", type: "buy", cost: 3000, shiny: true },
-  { id: "avt8", name: "Gấu Gemball", desc: "Fan Spain", url: "gemball3.png", type: "buy", cost: 3000, shiny: true },
-  { id: "avt8", name: "Cặp Gấu Hạnh Phúc", desc: "Chan chứa tình yêu", url: "gemlove.png", type: "buy", cost: 2500, shiny: true },
+  { id: "avt4", name: "Gấu Gemball", desc: "Fan Argentina", url: "gemball.jpg", type: "buy", cost: 2000, shiny: true },
+  { id: "avt5", name: "Gấu Gemball", desc: "Fan Portugal", url: "gemball2.jpg", type: "buy", cost: 2000, shiny: true },
+  { id: "avt8", name: "Gấu Gemball", desc: "Fan Spain", url: "gemball3.png", type: "buy", cost: 2000, shiny: true },
+  { id: "avt9", name: "Cặp Gấu Hạnh Phúc", desc: "Chan chứa tình yêu", url: "gemlove.png", type: "buy", cost: 3000, shiny: true },
+   { id: "avt9", name: "Gấu Gemdino", desc: "Khủng Long Xanh", url: "gemdino.jpg", type: "buy", cost: 3000, shiny: true },
 
   // Nhóm mở khóa theo mốc điểm (Có hiệu ứng lấp lánh sáng bóng)
-   { id: "avt3", name: "Gấu Lowkey", desc: "Hướng Nội", url: "avatarlowkey.png", type: "free", type: "milestone", minGem: 500 , shiny: true},
-   { id: "avt2", name: "Gấu Dracula", desc: "Halloween 2026", url: "avatarhalloween2026.jpg", type: "milestone", minGem: 1500, shiny: true  },
-  { id: "avt7", name: "Cozy Christmas", desc: "Christmas 2026", url: "Christmas.png", type: "milestone", minGem: 3000, shiny: true }
+   { id: "avt3", name: "Gấu Lowkey", desc: "Hướng Nội", url: "avatarlowkey.png", type: "free", type: "milestone", minGem: 1000 , shiny: true},
+  { id: "avt7", name: "Cozy Christmas", desc: "Christmas 2026", url: "Christmas.png", type: "milestone", minGem: 3000, shiny: true },
+  { id: "avt10", name: "Gấu Gempling", desc: "Ghiền Há Cảo", url: "gempling.jpg", type: "milestone", minGem: 5000, shiny: true },
+   { id: "avt11", name: "Gấu Gemchick", desc: "Ghiền McDonald's", url: "gemchick.jpg", type: "milestone", minGem: 7000, shiny: true },
+     { id: "avt2", name: "Gấu Dracula", desc: "Halloween 2026", url: "avatarhalloween2026.jpg", type: "milestone", minGem: 10000, shiny: true  }
 ];
 
 const DEFAULT_AVATAR = AVATAR_LIST[0].url;
