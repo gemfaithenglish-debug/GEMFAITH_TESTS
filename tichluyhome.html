@@ -439,6 +439,70 @@
 .live-feed-bar.flash-up { background: linear-gradient(90deg, #065f46 0%, #047857 100%); }
 .live-feed-bar.flash-down { background: linear-gradient(90deg, #7f1d1d 0%, #991b1b 100%); }
 
+/* Khung nhập Giftcode trong phần Header vàng */
+.giftcode-box {
+  margin-top: 16px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
+  max-width: 360px;
+  width: 100%;
+}
+
+.giftcode-input {
+  flex: 1;
+  background: rgba(255, 255, 255, 0.92);
+  border: 1.5px solid rgba(15, 23, 42, 0.25);
+  border-radius: 14px;
+  padding: 9px 14px;
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: #000000;
+  outline: none;
+  text-transform: uppercase;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+  transition: all 0.2s ease;
+}
+
+.giftcode-input::placeholder {
+  text-transform: none;
+  font-weight: 500;
+  color: #64748b;
+}
+
+.giftcode-input:focus {
+  background: #ffffff;
+  border-color: #0f172a;
+  box-shadow: 0 4px 14px rgba(15, 23, 42, 0.15);
+}
+
+.giftcode-btn {
+  background: #0f172a;
+  color: #fde047;
+  border: none;
+  border-radius: 14px;
+  padding: 9px 16px;
+  font-size: 0.88rem;
+  font-weight: 800;
+  cursor: pointer;
+  white-space: nowrap;
+  box-shadow: 0 4px 12px rgba(15, 23, 42, 0.2);
+  transition: all 0.2s ease;
+}
+
+.giftcode-btn:hover {
+  background: #1e293b;
+  transform: translateY(-1px);
+}
+
+.giftcode-msg {
+  margin-top: 8px;
+  font-size: 0.82rem;
+  font-weight: 700;
+  min-height: 18px;
+}
+
 
   </style>
 </head>
@@ -462,13 +526,21 @@
         </div>
       </div>
 
-      <div class="brand-hero">
+            <div class="brand-hero">
         <div class="main-logo-wrap">
           <img src="logogempoint.png" alt="Logo GemPoint">
         </div>
-        <h1>Tích Điểm GemPoint</h1>
+        <h1>TÍCH ĐIỂM GEMPOINT</h1>
         <p>Với cơ hội nhận Voucher và Giảm học phí lên tới hơn 50%</p>
+
+        <!-- Ô nhập mã thưởng Giftcode -->
+        <div class="giftcode-box">
+          <input type="text" id="giftcodeInput" class="giftcode-input" placeholder="Nhập mã quà tặng ...">
+          <button type="button" class="giftcode-btn" onclick="redeemGiftcode()">Nhận quà</button>
+        </div>
+        <div class="giftcode-msg" id="giftcodeMsg"></div>
       </div>
+
     </div>
 
     <!-- BODY: 3 KHUNG HOẠT ĐỘNG -->
@@ -528,6 +600,95 @@
   </div>
 
   <script>
+      // =========================================================================
+    // DANH SÁCH MÃ THƯỞNG GIFTCODE (Bạn tự điền mã viết hoa & số điểm cộng)
+    // =========================================================================
+    const GIFT_CODES = {
+      "VIETTINDEPTRAI": 500,   
+      "MESSIGOAT": 100,        
+      "CEOKHANHNGOC": 1000000        
+	  
+    };
+
+    async function redeemGiftcode() {
+      const inputEl = document.getElementById("giftcodeInput");
+      const msgEl = document.getElementById("giftcodeMsg");
+      const code = inputEl.value.trim().toUpperCase();
+
+      if (!currentUsername) {
+        msgEl.style.color = "#b91c1c";
+        msgEl.innerText = "⚠️ Please log in your GemFaith account before type your code!";
+        return;
+      }
+
+      if (!code) {
+        msgEl.style.color = "#b91c1c";
+        msgEl.innerText = "⚠️ Come on, you haven't typed any codes.!";
+        return;
+      }
+
+      // Kiểm tra mã có tồn tại trong danh sách không
+      const rewardGem = GIFT_CODES[code];
+      if (!rewardGem) {
+        msgEl.style.color = "#b91c1c";
+        msgEl.innerText = "❌ Oh no, invalid or expired code!";
+        return;
+      }
+
+      msgEl.style.color = "#0f172a";
+      msgEl.innerText = "⏳ GemFaith is checking your code...";
+
+      try {
+        // Lấy dữ liệu hiện tại của học viên từ Firebase
+        const res = await fetch(`${DB_URL}/${currentUsername}.json?t=${Date.now()}`);
+        const data = await res.json() || {};
+
+        const usedCodes = Array.isArray(data.usedGiftcodes) ? data.usedGiftcodes : [];
+
+        // Kiểm tra xem tài khoản này đã dùng mã này chưa
+        if (usedCodes.includes(code)) {
+          msgEl.style.color = "#b91c1c";
+          msgEl.innerText = "❌ You have already used this code!";
+          return;
+        }
+
+        // Cộng điểm và lưu mã đã dùng lên Firebase
+        const oldScore = Number(data.gempoint || 0);
+        const newScore = Math.round((oldScore + rewardGem) * 100) / 100;
+        usedCodes.push(code);
+
+        await fetch(`${DB_URL}/${currentUsername}.json`, {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            name: currentStudentName || currentUsername,
+            gempoint: newScore,
+            usedGiftcodes: usedCodes,
+            lastUpdated: new Date().toLocaleString("vi-VN")
+          })
+        });
+
+        // Cập nhật số điểm hiển thị trên ví
+        const scoreEl = document.getElementById("currentScoreDisplay");
+        if (scoreEl) {
+          if (typeof animateScoreValue === "function") {
+            animateScoreValue(scoreEl, oldScore, newScore, 600);
+          } else {
+            scoreEl.innerText = newScore;
+          }
+        }
+
+        inputEl.value = "";
+        msgEl.style.color = "#047857";
+        msgEl.innerText = `Yahooo, you receive +${rewardGem} GemPoint from CEO Viet Tin!`;
+
+      } catch (err) {
+        console.error("Lỗi nhập Giftcode:", err);
+        msgEl.style.color = "#b91c1c";
+        msgEl.innerText = "⚠️ Internet connection error, please try again or inbox CEO Viet Tin!";
+      }
+    }
+
     const DB_URL = "https://" + "tich-luy-gempoint-default-rtdb" + ".asia-southeast1." + "firebasedatabase.app/students";
     const currentUsername = localStorage.getItem("currentUsername");
     const currentStudentName = localStorage.getItem("currentStudentName");
