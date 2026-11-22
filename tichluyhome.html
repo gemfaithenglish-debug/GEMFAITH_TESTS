@@ -503,6 +503,147 @@
   min-height: 18px;
 }
 
+       /* Thẻ GemSphere nền Tím Gradient Đậm + Chữ Trắng + Hiệu ứng Sáng Bóng */
+    .activity-card.sphere-card {
+      position: relative;
+      overflow: hidden;
+      background: linear-gradient(135deg, #2e1065 0%, #5b21b6 55%, #7c3aed 100%);
+      border: 2px solid #c4b5fd;
+      color: #ffffff;
+      box-shadow: 0 12px 28px rgba(91, 33, 182, 0.35), inset 0 1px 1px rgba(255, 255, 255, 0.3);
+    }
+
+    /* Hiệu ứng vệt sáng bóng lướt ngang liên tục */
+    .activity-card.sphere-card::after {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: -130%;
+      width: 65%;
+      height: 100%;
+      background: linear-gradient(
+        90deg,
+        transparent 0%,
+        rgba(255, 255, 255, 0.08) 35%,
+        rgba(255, 255, 255, 0.32) 50%,
+        rgba(255, 255, 255, 0.08) 65%,
+        transparent 100%
+      );
+      transform: skewX(-25deg);
+      animation: sphereCardShine 3.8s infinite;
+      pointer-events: none;
+      z-index: 2;
+    }
+
+    @keyframes sphereCardShine {
+      0%, 60% { left: -130%; }
+      100% { left: 160%; }
+    }
+
+    .activity-card.sphere-card:hover {
+      transform: translateY(-6px);
+      border-color: #fde047;
+      background: linear-gradient(135deg, #3b0764 0%, #6d28d9 50%, #8b5cf6 100%);
+      box-shadow: 0 18px 36px rgba(124, 58, 237, 0.5), 0 0 15px rgba(196, 181, 253, 0.6);
+    }
+
+    /* Đổi toàn bộ chữ tiêu đề & mô tả sang màu trắng sắc nét */
+    .activity-card.sphere-card .card-info h3 {
+      color: #ffffff;
+      text-shadow: 0 2px 6px rgba(0, 0, 0, 0.25);
+    }
+
+    .activity-card.sphere-card .card-info p {
+      color: #ede9fe;
+    }
+
+    /* Nhãn góc trên ảnh */
+    .activity-card.sphere-card .card-badge {
+      background: rgba(15, 23, 42, 0.85);
+      color: #fde047;
+      border: 1px solid #c4b5fd;
+    }
+
+    /* Nút hành động nổi bật trên nền tím đậm */
+    .activity-card.sphere-card .card-action {
+      background: white;
+      color: #8C63A4;
+      font-weight: 800;
+      box-shadow: 0 4px 12px rgba(250, 204, 21, 0.3);
+    }
+
+    .activity-card.sphere-card:hover .card-action {
+      background: #ffffff;
+      color: #4c1d95;
+      box-shadow: 0 6px 16px rgba(255, 255, 255, 0.45);
+    }
+	
+/* Thẻ đặc biệt Toshi Densetsu: Nền nâu đậm + Chữ trắng + Hiệu ứng rùng rợn */
+.mansion-card {
+  position: relative;
+  overflow: hidden;
+  background: linear-gradient(155deg, #3b1c12 0%, #240f08 55%, #120604 100%) !important;
+  border: 1.5px solid #78350f !important;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.45), inset 0 0 24px rgba(185, 28, 28, 0.35);
+}
+
+.mansion-card:hover {
+  border-color: #ef4444 !important;
+  box-shadow: 0 14px 32px rgba(153, 27, 27, 0.45), inset 0 0 32px rgba(220, 38, 38, 0.5);
+}
+
+/* Luồng ánh sáng ma mị quét chéo trên toàn thẻ */
+.mansion-card::before {
+  content: "";
+  position: absolute;
+  top: -50%;
+  left: -130%;
+  width: 70%;
+  height: 200%;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(239, 68, 68, 0.14) 35%,
+    rgba(253, 224, 71, 0.25) 50%,
+    rgba(239, 68, 68, 0.14) 65%,
+    transparent 100%
+  );
+  transform: rotate(25deg);
+  animation: eerieMansionSweep 4.5s infinite ease-in-out;
+  pointer-events: none;
+  z-index: 3;
+}
+
+@keyframes eerieMansionSweep {
+  0%   { left: -130%; }
+  45%  { left: 150%; }
+  100% { left: 150%; }
+}
+
+/* Chữ trắng sắc nét & nút trắng giống hệt GemSphere */
+.mansion-card .card-info h3,
+.mansion-card .card-info p {
+  color: #ffffff !important;
+  text-shadow: 0 2px 5px rgba(0, 0, 0, 0.85);
+}
+
+.mansion-card .card-badge {
+  background: rgba(153, 27, 27, 0.92) !important;
+  color: #ffffff !important;
+  border: 1px solid #f87171;
+}
+
+.mansion-card .card-action {
+  background: #ffffff !important;
+  color: #3b1c12 !important;
+  font-weight: 800;
+}
+
+.mansion-card:hover .card-action {
+  background: #fef2f2 !important;
+  color: #991b1b !important;
+}
+
 
   </style>
 </head>
@@ -575,6 +716,58 @@
             <div class="card-action">Tham Gia →</div>
           </div>
         </a>
+		
+		        <!-- KHUNG THẺ CLAN ĐỒNG BỘ GIAO DIỆN -->
+        <div class="activity-card" onclick="openClanModal()" style="cursor: pointer;">
+          <div class="card-thumb">
+            <!-- Thay bằng tên file ảnh banner Clan của bạn -->
+            <img src="bannergemclan.png" alt="Hệ Thống Clan">
+            <span class="card-badge">ALLY</span>
+          </div>
+          <div class="card-info">
+            <div>
+              <h3>Join GemClan</h3>
+              <p>Thành lập Clan với Học viên khác và chinh phục thành tựu Rank và nhận nhân điểm</p>
+            </div>
+            <div class="card-action">Mở bảng Clan →</div>
+          </div>
+        </div>
+
+
+        <!-- KHUNG 3: GEMSPHERE TÍM GRADIENT -->
+        <a href="gemsphere.html" class="activity-card sphere-card">
+          <div class="card-thumb">
+            <!-- Thay bằng tên file ảnh banner GemSphere của bạn -->
+            <img src="bannergemsphere.jpg" alt="GemSphere Arena">
+            <span class="card-badge">ONLINE</span>
+          </div>
+          <div class="card-info">
+            <div>
+              <h3>GemSphere Arena 1.0</h3>
+              <p>Đấu trường Tiếng Anh giữa Học viên. Giành chiến thắng để đoạt GemPoint trực tiếp từ Học viên đối thủ!</p>
+            </div>
+            <div class="card-action">Vào đấu trường →</div>
+          </div>
+        </a>
+
+        <!-- KHUNG 4: TOSHI DENSETSU NÂU ĐẬM KINH DỊ -->
+        <a href="gemisland.html" class="activity-card mansion-card">
+          <div class="card-thumb">
+            <!-- Thay bằng tên file ảnh banner Toshi Densetsu của bạn -->
+            <img src="bannertoshidensetsu.png" alt="Toshi Densetsu">
+            <span class="card-badge">HORROR</span>
+          </div>
+          <div class="card-info">
+            <div>
+              <h3>Toshi Densetsu</h3>
+              <p>Giải mã mật thư Tiếng Anh, thu thập bùa chú &amp; trốn thoát khỏi thế lực tâm linh cùng đồng đội để săn GemPoint!</p>
+            </div>
+            <div class="card-action">Vào trò chơi →</div>
+          </div>
+        </a>
+
+
+
 
         <a href="quiz_chude3.html" class="activity-card">
           <div class="card-thumb">
@@ -605,10 +798,13 @@
     // =========================================================================
     const GIFT_CODES = {
       "VIETTINDEPTRAI": 500,   
-      "MESSIGOAT": 100,    
-      "TEACHERSDAY": 2011, 
-	"LOVE4EVER": 1000, 
-      "CEOKHANHNGOC": 1000000        
+      "MESSIGOAT": 100,        
+      "CEOKHANHNGOC": 1000000, 
+	  "GEMSPHERE": 1000,
+	  "TOSHIDENSETSU": 1000,
+	  "UPDATE1.1": 110,
+	  
+      
 	  
     };
 
@@ -838,6 +1034,8 @@ setInterval(watchOtherPlayers, 3000);
 
 </script>
 
+<script src="invite_listener.js"></script>
+<script src="clan_system.js"></script>
 
 </body>
 </html>
