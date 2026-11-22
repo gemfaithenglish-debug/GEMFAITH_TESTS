@@ -209,7 +209,18 @@
   <div id="bottomHintBar">💡 Gợi ý: Hãy tìm 3 Que Diêm giấu ngẫu nhiên trong các phòng để thắp sáng 3 Ngọn Nến.</div>
   <canvas id="gameCanvas"></canvas>
 
-  <div class="joy-base" id="joyBase"><div class="joy-knob" id="joyKnob"></div></div>
+   <div class="dpad-box" id="dpadBox">
+    <div></div>
+    <button class="dpad-btn" data-dir="up">▲</button>
+    <div></div>
+    <button class="dpad-btn" data-dir="left">◀</button>
+    <div></div>
+    <button class="dpad-btn" data-dir="right">▶</button>
+    <div></div>
+    <button class="dpad-btn" data-dir="down">▼</button>
+    <div></div>
+  </div>
+
   <div class="right-btns">
     <button class="btn-horror" id="btnCross" onclick="toggleCross()">
       <img src="cross.png" alt="Thánh Giá" onerror="this.style.display='none'">
@@ -778,16 +789,49 @@
     });
     window.addEventListener("keyup", e => keys[e.key.toLowerCase()] = false);
 
-    let joyDir = { x: 0, y: 0 };
-    const joyBase = document.getElementById("joyBase"), joyKnob = document.getElementById("joyKnob");
-    joyBase.addEventListener("touchmove", e => {
-      e.preventDefault(); initAudio();
-      const t = e.touches.item(0), r = joyBase.getBoundingClientRect();
-      const dx = t.clientX - (r.left + 51), dy = t.clientY - (r.top + 51), dist = Math.min(32, Math.hypot(dx, dy)), ang = Math.atan2(dy, dx);
-      joyDir.x = (Math.cos(ang) * dist) / 32; joyDir.y = (Math.sin(ang) * dist) / 32;
-      joyKnob.style.transform = `translate(${joyDir.x * 28}px, ${joyDir.y * 28}px)`;
+       let joyDir = { x: 0, y: 0 };
+    const dpadState = { up: false, down: false, left: false, right: false };
+
+    function syncDpadVector() {
+      joyDir.x = (dpadState.right ? 1 : 0) - (dpadState.left ? 1 : 0);
+      joyDir.y = (dpadState.down ? 1 : 0) - (dpadState.up ? 1 : 0);
+    }
+
+    function resetAllMovementInputs() {
+      dpadState.up = dpadState.down = dpadState.left = dpadState.right = false;
+      joyDir = { x: 0, y: 0 };
+      Object.keys(keys).forEach(k => keys[k] = false);
+      document.querySelectorAll(".dpad-btn").forEach(b => b.classList.remove("pressed"));
+    }
+
+    document.querySelectorAll(".dpad-btn").forEach(btn => {
+      const dir = btn.dataset.dir;
+      const press = e => {
+        e.preventDefault();
+        if (typeof initAudio === "function") initAudio();
+        if (e.pointerId !== undefined && btn.setPointerCapture) {
+          try { btn.setPointerCapture(e.pointerId); } catch (_) {}
+        }
+        dpadState[dir] = true;
+        btn.classList.add("pressed");
+        syncDpadVector();
+      };
+      const release = e => {
+        if (e) e.preventDefault();
+        dpadState[dir] = false;
+        btn.classList.remove("pressed");
+        syncDpadVector();
+      };
+
+      btn.addEventListener("pointerdown", press);
+      btn.addEventListener("pointerup", release);
+      btn.addEventListener("pointercancel", release);
+      btn.addEventListener("lostpointercapture", release);
     });
-    joyBase.addEventListener("touchend", () => { joyDir = { x: 0, y: 0 }; joyKnob.style.transform = "translate(0px, 0px)"; });
+
+    // Tự động hủy toàn bộ nút đang giữ nếu thoát tab, mở bảng câu hỏi hoặc mất chạm
+    window.addEventListener("blur", resetAllMovementInputs);
+    document.addEventListener("visibilitychange", () => { if (document.hidden) resetAllMovementInputs(); });
 
     const resize = () => { canvas.width = document.documentElement.clientWidth; canvas.height = document.documentElement.clientHeight; };
     window.addEventListener("resize", resize); resize();
