@@ -3,19 +3,15 @@
 // =========================================================================
 const CLAN_AVATARS = [
   { id: "clan1", name: "Hiệp sĩ bình minh Gemland", url: "hiepsibinhminhgemland.png" },
-  { id: "clan2", name: "Địa ngục la vọng Gemhell", url: "dianguclavonggemhell.png" },
-  { id: "clan3", name: "Huy Hiệu Sói", url: "clan_logo3.png" },
-  { id: "clan4", name: "Huy Hiệu Sư Tử", url: "clan_logo4.png" },
-  { id: "clan5", name: "Huy Hiệu Đại Bàng", url: "clan_logo5.png" },
-  { id: "clan6", name: "Huy Hiệu Vương Miện", url: "clan_logo6.png" }
+  { id: "clan2", name: "Địa ngục la vọng Gemhell", url: "dianguclavonggemhell.png" }
 ];
 
 // Bảng Rank Clan tính theo TỔNG GEMPOINT của tất cả thành viên trong Clan
 const CLAN_RANKS = [
   { minGem: 0,    name: "Tân Binh",     mult: 1.0, cssClass: "clan-rank-0" },
-  { minGem: 1000, name: "Chiến Binh",   mult: 1.1, cssClass: "clan-rank-1" },
-  { minGem: 2500, name: "Tinh Anh",     mult: 1.2, cssClass: "clan-rank-2" },
-  { minGem: 5000, name: "Huyền Thoại",  mult: 1.3, cssClass: "clan-rank-3" } // Tối đa x1.3
+  { minGem: 10000, name: "Chiến Binh",   mult: 1.1, cssClass: "clan-rank-1" },
+  { minGem: 50000, name: "Tinh Anh",     mult: 1.2, cssClass: "clan-rank-2" },
+  { minGem: 100000, name: "Huyền Thoại",  mult: 1.3, cssClass: "clan-rank-3" } // Tối đa x1.3
 ];
 
 const CLAN_CREATE_COST = 500;
