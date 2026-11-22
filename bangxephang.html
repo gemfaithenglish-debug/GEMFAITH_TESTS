@@ -225,13 +225,18 @@
   </div>
 
   <script>
-    const DB_URL = "https://" + "tich-luy-gempoint-default-rtdb" + ".asia-southeast1." + "firebasedatabase.app/students.json";
+        const DB_URL = "https://" + "tich-luy-gempoint-default-rtdb" + ".asia-southeast1." + "firebasedatabase.app/students.json";
     const currentUsername = localStorage.getItem("currentUsername");
 
     async function loadLeaderboard() {
       const listEl = document.getElementById("leaderboardList");
       try {
-        const res = await fetch(DB_URL);
+        // Đồng bộ dữ liệu Clan và Rank Clan trước khi vẽ BXH
+        if (typeof syncClanSystemData === "function") {
+          await syncClanSystemData();
+        }
+
+        const res = await fetch(DB_URL + "?t=" + Date.now());
         const data = await res.json();
 
         if (!data) {
@@ -239,11 +244,13 @@
           return;
         }
 
-              const students = Object.keys(data).map(username => ({
+        const fallbackAvt = (typeof DEFAULT_AVATAR !== "undefined") ? DEFAULT_AVATAR : "avatargaubasic.jpg";
+
+        const students = Object.keys(data).map(username => ({
           username: username,
           name: data[username].name || username,
           gempoint: data[username].gempoint || 0,
-          avatar: data[username].avatar || DEFAULT_AVATAR
+          avatar: data[username].avatar || fallbackAvt
         }));
         students.sort((a, b) => b.gempoint - a.gempoint);
 
@@ -270,14 +277,27 @@
             crownIcon = "(Wingman)";
           }
 
+          // Tạo Avatar (có hiệu ứng lấp lánh nếu thuộc nhóm VIP/Mốc điểm)
+          const avatarHTML = (typeof buildAvatarHTML === "function")
+            ? buildAvatarHTML(st.avatar, 42, isMe ? 'onclick="openAvatarPicker()" title="Bấm để đổi Avatar" style="cursor:pointer;"' : '')
+            : `<img src="${st.avatar}" style="width:42px; height:42px; border-radius:50%; object-fit:cover; border:1.5px solid #cbd5e1;">`;
+
+          // Lấy huy hiệu [Logo Clan + Tên Clan hiệu ứng Rank]
+          const clanBadgeHTML = (typeof window.getClanBadgeHTML === "function")
+            ? window.getClanBadgeHTML(st.username)
+            : "";
+
           listEl.innerHTML += `
             <div class="lb-item ${topClass} ${isMe ? 'me' : ''}">
               <div class="lb-left">
                 <div class="rank-badge">${rankIcon}</div>
-                <img src="${st.avatar}" alt="Avatar" ${isMe ? 'onclick="openAvatarPicker()" title="Bấm để đổi Avatar"' : ''} style="width: 38px; height: 38px; border-radius: 50%; object-fit: cover; border: 2px solid ${rank === 1 ? '#f59e0b' : '#cbd5e1'}; background: #fff; flex-shrink: 0; ${isMe ? 'cursor: pointer;' : ''}">
-                <div class="student-name">
-                  ${st.name} ${crownIcon}
-                  ${isMe ? '<span class="me-tag">You</span>' : ''}
+                ${avatarHTML}
+                <div style="display: flex; flex-direction: column; gap: 4px;">
+                  <div class="student-name">
+                    ${st.name} ${crownIcon}
+                    ${isMe ? '<span class="me-tag">You</span>' : ''}
+                  </div>
+                  ${clanBadgeHTML ? `<div>${clanBadgeHTML}</div>` : ''}
                 </div>
               </div>
               <div class="lb-score">
@@ -287,7 +307,6 @@
             </div>
           `;
         });
-
       } catch (err) {
         console.error("Lỗi tải bảng xếp hạng:", err);
         listEl.innerHTML = '<div class="loading">Không thể tải dữ liệu bảng xếp hạng!</div>';
@@ -295,8 +314,12 @@
     }
 
     window.onload = loadLeaderboard;
+
   </script>
   
    <script src="avatar_system.js"></script>
+   <script src="invite_listener.js"></script>
+<script src="clan_system.js"></script>
+
 </body>
 </html>
