@@ -1,0 +1,785 @@
+ <!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Gemsphere - Đấu Trường Gem</title>
+  <style>
+
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
+    
+    /* Nền tổng thể tím than sâu lắng */
+    body { 
+      background: radial-gradient(circle at top center, #3b0764 0%, #1e1b4b 55%, #0f172a 100%); 
+      min-height: 100vh; 
+      display: flex; 
+      justify-content: center; 
+      align-items: center; 
+      padding: 16px; 
+      color: #0f172a; 
+    }
+    
+    /* Khung đấu trường chính viền tím sáng */
+    .arena-box { 
+      background: #ffffff; 
+      width: 100%; 
+      max-width: 650px; 
+      border-radius: 24px; 
+      box-shadow: 0 25px 60px rgba(76, 29, 149, 0.55), 0 0 20px rgba(167, 139, 250, 0.3); 
+      overflow: hidden; 
+      border: 2px solid #c4b5fd; 
+    }
+    
+    /* Header đồng bộ màu tím gradient đậm giống thẻ GemSphere */
+    .arena-header { 
+      background: linear-gradient(135deg, #2e1065 0%, #5b21b6 55%, #7c3aed 100%); 
+      padding: 16px 20px; 
+      display: flex; 
+      justify-content: space-between; 
+      align-items: center; 
+      border-bottom: 2px solid #ddd6fe; 
+    }
+    .brand-title { display: flex; align-items: center; gap: 10px; }
+    .brand-title img { 
+      width: 40px; 
+      height: 40px; 
+      border-radius: 12px; 
+      background: #ffffff; 
+      padding: 3px; 
+      object-fit: contain; 
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.25);
+    }
+    .brand-title h1 { 
+      font-size: 1.25rem; 
+      font-weight: 900; 
+      color: #ffffff; 
+      letter-spacing: 0.6px; 
+      text-transform: uppercase; 
+      text-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+    }
+    
+    .header-actions { display: flex; align-items: center; gap: 8px; }
+    .rule-btn { 
+      background: rgba(255, 255, 255, 0.18); 
+      color: #ffffff; 
+      border: 1px solid rgba(255, 255, 255, 0.35); 
+      padding: 6px 13px; 
+      border-radius: 20px; 
+      font-size: 0.8rem; 
+      font-weight: 800; 
+      cursor: pointer; 
+      backdrop-filter: blur(6px);
+      transition: 0.2s;
+    }
+    .rule-btn:hover { background: rgba(255, 255, 255, 0.3); }
+
+    .my-gem-pill { 
+      background: #ffffff; 
+      border: 1.5px solid #fde047; 
+      padding: 5px 12px; 
+      border-radius: 20px; 
+      font-weight: 800; 
+      font-size: 0.85rem; 
+      color: #2e1065;
+      display: flex; 
+      align-items: center; 
+      gap: 5px; 
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    }
+    .my-gem-pill img { width: 18px; height: 18px; border-radius: 50%; }
+
+    .screen { display: none; padding: 22px 20px; }
+    .screen.active { display: block; animation: fadeIn 0.25s ease; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+
+    /* Màn hình sảnh chờ & Mời bạn bè tông tím pastel dịu mắt */
+    .lobby-card { 
+      background: linear-gradient(180deg, #faf5ff 0%, #f3e8ff 100%); 
+      border: 1.5px solid #d8b4fe; 
+      border-radius: 18px; 
+      padding: 16px; 
+      margin-bottom: 16px; 
+    }
+    .lobby-card h3 { font-size: 0.96rem; font-weight: 800; margin-bottom: 8px; color: #3b0764; }
+    .input-row { display: flex; gap: 8px; }
+    .input-row input { 
+      flex: 1; 
+      padding: 10px 14px; 
+      border: 1.5px solid #c084fc; 
+      border-radius: 12px; 
+      font-size: 0.92rem; 
+      font-weight: 600; 
+      outline: none; 
+      background: #ffffff;
+    }
+    .input-row input:focus { border-color: #6d28d9; box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.15); }
+    
+    /* Nút mời & vào phòng tím đậm */
+    .btn-primary { 
+      background: linear-gradient(135deg, #5b21b6 0%, #7c3aed 100%); 
+      color: #ffffff; 
+      border: none; 
+      padding: 10px 18px; 
+      border-radius: 12px; 
+      font-weight: 800; 
+      cursor: pointer; 
+      font-size: 0.9rem; 
+      box-shadow: 0 4px 12px rgba(109, 40, 217, 0.25);
+      transition: 0.2s;
+    }
+    .btn-primary:hover { background: linear-gradient(135deg, #4c1d95 0%, #6d28d9 100%); transform: translateY(-1px); }
+
+    /* Nút Bắt đầu đấu nổi bật */
+    .btn-gold { 
+      width: 100%; 
+      background: linear-gradient(135deg, #fde047 0%, #facc15 100%); 
+      color: #2e1065; 
+      border: 2px solid #5b21b6; 
+      padding: 13px; 
+      border-radius: 14px; 
+      font-size: 1rem; 
+      font-weight: 900; 
+      cursor: pointer; 
+      text-transform: uppercase; 
+      margin-top: 12px; 
+      box-shadow: 0 6px 16px rgba(250, 204, 21, 0.35);
+      transition: 0.2s;
+    }
+    .btn-gold:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(250, 204, 21, 0.5); }
+    .btn-gold:disabled { opacity: 0.55; cursor: not-allowed; background: #e9d5ff; border-color: #c084fc; color: #581c87; box-shadow: none; }
+
+    /* Danh sách người chơi trong phòng */
+    .players-list { display: grid; grid-template-columns: repeat(auto-fit, minmax(110px, 1fr)); gap: 10px; margin-top: 14px; }
+    .player-slot { 
+      background: #ffffff; 
+      border: 1.5px solid #d8b4fe; 
+      border-radius: 14px; 
+      padding: 12px 8px; 
+      text-align: center; 
+      position: relative; 
+      box-shadow: 0 4px 10px rgba(88, 28, 135, 0.06);
+    }
+    .player-slot.host { 
+      border: 2px solid #7c3aed; 
+      background: linear-gradient(180deg, #ffffff 0%, #f5f3ff 100%); 
+    }
+    .player-slot img.p-avt { 
+      width: 48px; 
+      height: 48px; 
+      border-radius: 50%; 
+      object-fit: cover; 
+      border: 2.5px solid #7c3aed; 
+      margin-bottom: 5px; 
+      background: #fff; 
+    }
+    .player-slot .p-name { font-size: 0.82rem; font-weight: 800; color: #2e1065; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .player-slot .p-gem { font-size: 0.76rem; font-weight: 700; color: #7c3aed; margin-top: 2px; }
+    .kick-btn { position: absolute; top: 5px; right: 6px; background: #ef4444; color: #fff; border: none; border-radius: 50%; width: 18px; height: 18px; font-size: 0.65rem; cursor: pointer; }
+
+    /* Thanh đối thủ trong màn hình đấu (Tím hoàng gia đậm) */
+    .battle-players-bar { 
+      display: flex; 
+      justify-content: center; 
+      gap: 10px; 
+      flex-wrap: wrap; 
+      background: linear-gradient(135deg, #2e1065 0%, #4c1d95 100%); 
+      padding: 14px; 
+      border-radius: 16px; 
+      margin-bottom: 16px; 
+      border: 1.5px solid #a78bfa;
+    }
+    .b-player { 
+      background: rgba(255, 255, 255, 0.12); 
+      backdrop-filter: blur(6px);
+      border: 1.5px solid rgba(216, 180, 254, 0.4); 
+      border-radius: 12px; 
+      padding: 8px 10px; 
+      min-width: 105px; 
+      text-align: center; 
+      color: #ffffff; 
+      position: relative; 
+      transition: 0.25s; 
+    }
+    .b-player.answered { border-color: #fde047; box-shadow: 0 0 12px rgba(253, 224, 71, 0.35); }
+    .b-player.win-round { border-color: #4ade80; background: rgba(22, 101, 52, 0.85); transform: scale(1.04); }
+    .b-player.lose-round { border-color: #f87171; background: rgba(153, 27, 27, 0.85); }
+    .b-player img { width: 38px; height: 38px; border-radius: 50%; object-fit: cover; border: 2px solid #fde047; background: #fff; }
+    .b-player .bp-name { font-size: 0.78rem; font-weight: 700; margin-top: 3px; }
+    .b-player .bp-stat { font-size: 0.72rem; color: #fde047; font-weight: 800; }
+    .b-status-tag { font-size: 0.65rem; padding: 2px 7px; border-radius: 8px; background: rgba(15, 23, 42, 0.5); display: inline-block; margin-top: 3px; }
+
+    /* Đồng hồ 10s & Câu hỏi */
+    .timer-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+    .round-badge { background: #f3e8ff; color: #5b21b6; border: 1px solid #d8b4fe; padding: 4px 12px; border-radius: 12px; font-weight: 800; font-size: 0.85rem; }
+    .timer-circle { background: linear-gradient(135deg, #dc2626 0%, #991b1b 100%); color: #fff; font-weight: 900; padding: 5px 14px; border-radius: 20px; font-size: 0.95rem; box-shadow: 0 3px 10px rgba(220, 38, 38, 0.3); }
+    .q-box { font-size: 1.08rem; font-weight: 700; color: #1e1b4b; margin-bottom: 14px; line-height: 1.45; }
+    
+    .opt-grid { display: flex; flex-direction: column; gap: 9px; }
+    .opt-item { 
+      text-align: left; 
+      padding: 12px 15px; 
+      border: 2px solid #e9d5ff; 
+      border-radius: 12px; 
+      background: #faf5ff; 
+      color: #1e1b4b;
+      font-size: 0.95rem; 
+      font-weight: 600; 
+      cursor: pointer; 
+      transition: 0.15s; 
+    }
+    .opt-item:hover:not(:disabled) { border-color: #7c3aed; background: #f3e8ff; transform: translateX(3px); }
+    .opt-item.selected { border-color: #7c3aed; background: linear-gradient(135deg, #6d28d9 0%, #7c3aed 100%); color: #ffffff; }
+    .opt-item.reveal-correct { border-color: #16a34a !important; background: #dcfce7 !important; color: #14532d !important; }
+    .opt-item.reveal-wrong { border-color: #dc2626 !important; background: #fee2e2 !important; color: #7f1d1d !important; }
+    .opt-item:disabled { cursor: default; }
+
+    .round-banner { margin-top: 14px; padding: 11px; border-radius: 12px; text-align: center; font-weight: 800; font-size: 0.9rem; display: none; }
+    .round-banner.show { display: block; background: #f3e8ff; border: 1.5px solid #c084fc; color: #4c1d95; }
+
+    /* Modal Luật chơi */
+    .modal-bg { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.72); backdrop-filter: blur(6px); display: none; justify-content: center; align-items: center; padding: 16px; z-index: 9999; }
+    .modal-bg.open { display: flex; }
+    .modal-card { background: #ffffff; max-width: 440px; width: 100%; border-radius: 22px; padding: 24px; border: 2px solid #8b5cf6; box-shadow: 0 20px 45px rgba(46, 16, 101, 0.4); }
+    .modal-card h2 { font-size: 1.25rem; font-weight: 900; margin-bottom: 12px; color: #3b0764; text-align: center; }
+    .rule-list { font-size: 0.9rem; line-height: 1.6; color: #334155; display: flex; flex-direction: column; gap: 8px; margin-bottom: 18px; }
+    
+    .footer-nav { padding: 0 20px 20px 20px; display: flex; justify-content: space-between; }
+    .btn-exit { 
+      background: #f3e8ff; 
+      color: #4c1d95; 
+      text-decoration: none; 
+      padding: 9px 16px; 
+      border-radius: 12px; 
+      font-weight: 700; 
+      font-size: 0.9rem; 
+      border: 1.5px solid #d8b4fe; 
+      transition: 0.2s;
+    }
+    .btn-exit:hover { background: #e9d5ff; }
+  </style>
+
+</head>
+<body>
+
+  <div class="arena-box">
+    <!-- HEADER -->
+    <div class="arena-header">
+      <div class="brand-title">
+        <img src="logogemsphere.jpg" alt="GemSphere">
+        <h1>GemSphere</h1>
+      </div>
+      <div class="header-actions">
+        <button class="rule-btn" onclick="toggleRules(true)">📜 Luật Chơi</button>
+        <div class="my-gem-pill">
+          <img src="logogempoint.png" alt="Gem">
+          <span id="myGemHeader">0</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- MÀN HÌNH 1: SẢNH CHỜ & MỜI ĐỐI THỦ (2 - 5 NGƯỜI) -->
+    <div class="screen active" id="lobbyScreen">
+      <div class="lobby-card">
+        <h3>Tạo phòng hoặc Mời 2 - 5 Học viên</h3>
+        <p style="font-size:0.83rem; color:#475569; margin-bottom:10px;">Nhập <b>username</b> của Học viên để mời vào phòng đấu. Cần tối thiểu <b>2 Học viên</b> để bắt đầu</p>
+        <div class="input-row">
+          <input type="text" id="inviteUsernameInput" placeholder="Username (Tên Đăng Nhập) Đối Thủ ...">
+          <button class="btn-primary" onclick="invitePlayer()">+ Mời vào</button>
+        </div>
+        <div id="lobbyMsg" style="font-size:0.82rem; font-weight:700; margin-top:8px; color:#dc2626;"></div>
+
+        <div class="players-list" id="lobbyPlayersGrid"></div>
+
+        <button class="btn-gold" id="startMatchBtn" onclick="startMatch()" disabled>
+          Vào Đấu Trường GemSphere (ít nhất 2 Học viên)
+        </button>
+      </div>
+
+      <div class="lobby-card" style="margin-bottom:0;">
+        <h3>🔑 Hoặc nhập Mã Phòng của bạn bè để tham gia</h3>
+        <div class="input-row">
+          <input type="text" id="joinRoomCodeInput" placeholder="Dán mã phòng vào đây...">
+          <button class="btn-primary" onclick="joinRoomByCode()">Vào phòng</button>
+        </div>
+        <div style="margin-top:10px; font-size:0.82rem; color:#334155;">
+          Mã phòng hiện tại của Học viên: <b id="currentRoomCodeDisplay" style="color:#1d4ed8; user-select:all;">...</b>
+        </div>
+      </div>
+    </div>
+
+    <!-- MÀN HÌNH 2: ĐẤU TRƯỜNG TRỰC TIẾP (10 CÂU - 10 GIÂY/CÂU) -->
+    <div class="screen" id="battleScreen">
+      <div class="battle-players-bar" id="battlePlayersBar"></div>
+
+      <div class="timer-row">
+	        <div class="battle-players-bar" id="battlePlayersBar"></div>
+
+      <div class="timer-row">
+        <span class="round-badge" id="roundCounter">CÂU 1 / 10</span>
+        <span class="timer-circle" id="timerDisplay">⏱ 10s</span>
+      </div>
+
+      <div class="q-box" id="battleQuestionText">Question is loading...</div>
+      <div class="opt-grid" id="battleOptionsGrid"></div>
+      <div class="round-banner" id="roundResultBanner"></div>
+    </div>
+
+    <div class="screen" id="summaryScreen">
+      <h2 style="text-align:center; font-size:1.4rem; font-weight:900; margin-bottom:6px;">KẾT QUẢ TRẬN ĐẤU GEMSPHERE</h2>
+      <p style="text-align:center; font-size:0.88rem; color:#475569; margin-bottom:16px;">10 câu đã qua, thắng thua đã rõ!</p>
+      <div id="finalRankingList" style="display:flex; flex-direction:column; gap:10px; margin-bottom:18px;"></div>
+      <button class="btn-gold" onclick="location.reload()">🔄 Chơi ván mới</button>
+    </div>
+
+    <div class="footer-nav">
+      <a href="tichluyhome.html" class="btn-exit">← Trở về sảnh GemPoint</a>
+    </div>
+  </div>
+
+  <div class="modal-bg open" id="rulesModal">
+    <div class="modal-card">
+      <h2>📜 Luật Chơi GemSphere</h2>
+      <div class="rule-list">
+        <div><b>Player:</b> Từ <b>2 đến 5 Học viên</b>. Không thể bắt đầu nếu chỉ có 1 Học viên.</div>
+        <div><b>In-Game:</b> Mỗi trận gồm <b>10 câu hỏi</b>. Mỗi câu có <b>10 giây</b> để chọn đáp án (Học viên không thấy lựa chọn của nhau trong 10 giây này).</div>
+        <div><b>Bonus GemPoint:</b> Hết 10 giây hệ thống sẽ khui đáp án. Người trả lời <b>ĐÚNG</b> sẽ nhận được <b>+50 GemPoint</b> trực tiếp từ mỗi người chơi trả lời <b>SAI</b>.</div>
+        <div><b>Victory:</b> Sau 10 câu, người trả lời đúng nhiều câu nhất sẽ giành ngôi GemSphere Master!</div>
+      </div>
+      <button class="btn-gold" onclick="toggleRules(false)">Đã hiểu</button>
+    </div>
+  </div>
+
+  <script src="questions.js"></script>
+  <script>
+    const DB_ROOT = "https://" + "tich-luy-gempoint-default-rtdb" + ".asia-southeast1." + "firebasedatabase.app";
+    const STAKE_PER_PLAYER = 50; // Mức GemPoint chuyển từ người thua sang người thắng mỗi câu
+    const TOTAL_ROUNDS = 10;
+
+    const myUser = localStorage.getItem("currentUsername") || "player_" + Math.floor(Math.random()*1000);
+    const myName = localStorage.getItem("currentStudentName") || myUser;
+    const myAvatar = localStorage.getItem("currentUserAvatar") || "avatargaubasic.jpg";
+
+    let roomId = "GEM_" + Math.floor(100000 + Math.random() * 900000);
+    let isHost = true;
+    let roomData = null;
+    let syncInterval = null;
+    let myChoice = -1;
+    let revealedRound = -1;
+
+    function toggleRules(show) {
+      document.getElementById("rulesModal").classList.toggle("open", show);
+    }
+
+    async function initMyRoom() {
+      document.getElementById("currentRoomCodeDisplay").innerText = roomId;
+      const myInfo = await fetchStudentProfile(myUser);
+      document.getElementById("myGemHeader").innerText = myInfo.gempoint;
+
+      const initialRoom = {
+        host: myUser,
+        status: "waiting",
+        currentRound: 0,
+        roundStartTime: 0,
+        questionIndices: pickRandom10Indices(),
+        players: {
+          [myUser]: {
+            username: myUser,
+            name: myInfo.name,
+            avatar: myInfo.avatar,
+            gempoint: myInfo.gempoint,
+            correctCount: 0,
+            answers: {}
+          }
+        }
+      };
+
+      await fetch(`${DB_ROOT}/gemsphere_rooms/${roomId}.json`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(initialRoom)
+      });
+
+      startRoomSync();
+    }
+
+    function pickRandom10Indices() {
+      let arr = Array.from({ length: questions.length }, (_, i) => i);
+      for (let i = arr.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [arr[i], arr[j]] = [arr[j], arr[i]];
+      }
+      return arr.slice(0, TOTAL_ROUNDS);
+    }
+
+    async function fetchStudentProfile(username) {
+      try {
+        const res = await fetch(`${DB_ROOT}/students/${username}.json?t=${Date.now()}`);
+        const data = await res.json();
+        if (data) {
+          return {
+            exists: true,
+            username: username,
+            name: data.name || username,
+            avatar: data.avatar || "avatargaubasic.jpg",
+            gempoint: Number(data.gempoint || 0)
+          };
+        }
+      } catch (e) {}
+      return { exists: false, username: username, name: myName, avatar: myAvatar, gempoint: 0 };
+    }
+
+    async function invitePlayer() {
+      const input = document.getElementById("inviteUsernameInput");
+      const targetUser = input.value.trim();
+      const msg = document.getElementById("lobbyMsg");
+      msg.innerText = "";
+
+      if (!targetUser) return;
+      if (!roomData || !roomData.players) return;
+
+      const currentCount = Object.keys(roomData.players).length;
+      if (currentCount >= 5) {
+        msg.innerText = "⚠️ Đã đtạ tối đa Học viên tham gia!";
+        return;
+      }
+      if (roomData.players[targetUser]) {
+        msg.innerText = "⚠️ Học viên này đã có mặt trong phòng!";
+        return;
+      }
+
+      const profile = await fetchStudentProfile(targetUser);
+      if (!profile.exists) {
+        msg.innerText = `❌ Không tìm thấy Học viên "${targetUser}" trên hệ thống!`;
+        return;
+      }
+
+            // Gửi tín hiệu mời đấu trực tiếp lên màn hình của người được mời
+      await fetch(`${DB_ROOT}/gemsphere_invites/${targetUser}.json`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          roomId: roomId,
+          fromUser: myUser,
+          fromName: myName,
+          timestamp: Date.now()
+        })
+      });
+
+      input.value = "";
+      msg.style.color = "#16a34a";
+      msg.innerText = `✅ Đã thêm Học viên ${profile.name} vào phòng!`;
+    }
+
+    async function joinRoomByCode() {
+      const code = document.getElementById("joinRoomCodeInput").value.trim().toUpperCase();
+      if (!code) return;
+
+      const res = await fetch(`${DB_ROOT}/gemsphere_rooms/${code}.json`);
+      const data = await res.json();
+      if (!data) {
+        alert("❌ Mã phòng không tồn tại!");
+        return;
+      }
+      if (data.status !== "waiting") {
+        alert("⚠️ Phòng này đã vào GemSphere rồi!");
+        return;
+      }
+
+      roomId = code;
+      isHost = (data.host === myUser);
+      document.getElementById("currentRoomCodeDisplay").innerText = roomId;
+
+      const myInfo = await fetchStudentProfile(myUser);
+      await fetch(`${DB_ROOT}/gemsphere_rooms/${roomId}/players/${myUser}.json`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          username: myUser,
+          name: myInfo.name,
+          avatar: myInfo.avatar,
+          gempoint: myInfo.gempoint,
+          correctCount: 0,
+          answers: {}
+        })
+      });
+    }
+
+    async function kickPlayer(targetUser) {
+      await fetch(`${DB_ROOT}/gemsphere_rooms/${roomId}/players/${targetUser}.json`, { method: "DELETE" });
+    }
+
+    async function startMatch() {
+      if (!roomData || !roomData.players) return;
+      const count = Object.keys(roomData.players).length;
+      if (count < 2) {
+        alert("⚠️ Cần ít nhất 2 Học viên trong phòng để bắt đầu!");
+        return;
+      }
+
+      await fetch(`${DB_ROOT}/gemsphere_rooms/${roomId}.json`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          status: "playing",
+          currentRound: 0,
+          roundStartTime: Date.now()
+        })
+      });
+    }
+
+    function startRoomSync() {
+      if (syncInterval) clearInterval(syncInterval);
+      syncInterval = setInterval(async () => {
+        try {
+          const res = await fetch(`${DB_ROOT}/gemsphere_rooms/${roomId}.json?t=${Date.now()}`);
+          const data = await res.json();
+          if (!data) return;
+          roomData = data;
+
+          if (data.status === "waiting") {
+            renderLobby(data);
+          } else if (data.status === "playing") {
+            switchScreen("battleScreen");
+            renderBattle(data);
+          } else if (data.status === "finished") {
+            switchScreen("summaryScreen");
+            renderSummary(data);
+            clearInterval(syncInterval);
+          }
+        } catch (e) {}
+      }, 1000);
+    }
+
+    function switchScreen(screenId) {
+      document.querySelectorAll(".screen").forEach(s => s.classList.remove("active"));
+      document.getElementById(screenId).classList.add("active");
+    }
+
+    function renderLobby(data) {
+      const grid = document.getElementById("lobbyPlayersGrid");
+      const players = Object.values(data.players || {});
+      grid.innerHTML = "";
+
+      players.forEach(p => {
+        const isRoomHost = (p.username === data.host);
+        grid.innerHTML += `
+          <div class="player-slot ${isRoomHost ? 'host' : ''}">
+            ${(isHost && !isRoomHost) ? `<button class="kick-btn" onclick="kickPlayer('${p.username}')">✕</button>` : ''}
+            <img src="${p.avatar}" class="p-avt" alt="Avatar">
+            <div class="p-name">${p.name} ${isRoomHost ? '(Host)' : ''}</div>
+            <div class="p-gem">${p.gempoint} Gem</div>
+          </div>
+        `;
+      });
+
+      const startBtn = document.getElementById("startMatchBtn");
+      if (isHost) {
+        startBtn.style.display = "block";
+        startBtn.disabled = (players.length < 2);
+        startBtn.innerText = players.length < 2 
+          ? `Vào Đấu Trường GemSphere (Đang có ${players.length}/2 Học viên tham gia)` 
+          : `Vào Đấu Trường GemSphere (${players.length} Học viên)`;
+      } else {
+        startBtn.style.display = "block";
+        startBtn.disabled = true;
+        startBtn.innerText = "⏳ Đang chờ chủ phòng bấm Vào Đấu Trường ...";
+      }
+    }
+
+    let lastRenderedRound = -1;
+
+    function renderBattle(data) {
+      const rIdx = data.currentRound;
+      const qIdx = data.questionIndices[rIdx];
+      const qObj = questions[qIdx];
+      const players = Object.values(data.players || {});
+
+      const bar = document.getElementById("battlePlayersBar");
+      bar.innerHTML = "";
+      players.forEach(p => {
+        const ansObj = (p.answers && p.answers[rIdx] !== undefined) ? p.answers[rIdx] : null;
+        const hasAnswered = (ansObj !== null && ansObj !== -1);
+        let statusHTML = hasAnswered ? `<span class="b-status-tag" style="background:#0284c7;">✓ Đã chọn đáp án</span>` : `<span class="b-status-tag">🤔 Đang chọn...</span>`;
+        let extraClass = hasAnswered ? "answered" : "";
+
+        if (revealedRound === rIdx) {
+          const isRight = (ansObj === qObj.c);
+          extraClass = isRight ? "win-round" : "lose-round";
+          statusHTML = isRight ? `<span class="b-status-tag" style="background:#16a34a;">✔ Chính xác, tiếp tục chinh phục!</span>` : `<span class="b-status-tag" style="background:#dc2626;">✘ Sai rồi, cữu vãn thế trận nào!</span>`;
+        }
+
+        bar.innerHTML += `
+          <div class="b-player ${extraClass}">
+            <img src="${p.avatar}" alt="Avatar">
+            <div class="bp-name">${p.name}</div>
+            <div class="bp-stat">${p.gempoint} • ✔ ${p.correctCount || 0}</div>
+            ${statusHTML}
+          </div>
+        `;
+      });
+
+      if (lastRenderedRound !== rIdx) {
+        lastRenderedRound = rIdx;
+        myChoice = -1;
+        revealedRound = -1;
+        document.getElementById("roundResultBanner").className = "round-banner";
+        document.getElementById("roundCounter").innerText = `CÂU ${rIdx + 1} / ${TOTAL_ROUNDS}`;
+        document.getElementById("battleQuestionText").innerText = qObj.q;
+
+        const optGrid = document.getElementById("battleOptionsGrid");
+        optGrid.innerHTML = "";
+        qObj.a.forEach((optText, i) => {
+          const btn = document.createElement("button");
+          btn.className = "opt-item";
+          btn.innerText = optText;
+          btn.onclick = () => selectSecretOption(rIdx, i, btn);
+          optGrid.appendChild(btn);
+        });
+      }
+
+      const elapsedSec = Math.floor((Date.now() - data.roundStartTime) / 1000);
+      const timeLeft = Math.max(0, 10 - elapsedSec);
+      document.getElementById("timerDisplay").innerText = `⏱ ${timeLeft}s`;
+
+      if (timeLeft === 0 && revealedRound !== rIdx) {
+        revealedRound = rIdx;
+        revealAndSettleRound(data, rIdx, qObj);
+      }
+    }
+
+    async function selectSecretOption(rIdx, choiceIdx, btnEl) {
+      if (revealedRound === rIdx) return;
+      myChoice = choiceIdx;
+      document.querySelectorAll(".opt-item").forEach(b => b.classList.remove("selected"));
+      btnEl.classList.add("selected");
+
+      await fetch(`${DB_ROOT}/gemsphere_rooms/${roomId}/players/${myUser}/answers/${rIdx}.json`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(choiceIdx)
+      });
+    }
+
+    async function revealAndSettleRound(data, rIdx, qObj) {
+      const optBtns = document.querySelectorAll(".opt-item");
+      optBtns.forEach((b, i) => {
+        b.disabled = true;
+        if (i === qObj.c) b.classList.add("reveal-correct");
+        else if (i === myChoice) b.classList.add("reveal-wrong");
+      });
+
+      const players = Object.values(data.players || {});
+      const winners = players.filter(p => p.answers && p.answers[rIdx] === qObj.c);
+      const losers = players.filter(p => !p.answers || p.answers[rIdx] !== qObj.c);
+
+      const banner = document.getElementById("roundResultBanner");
+      banner.className = "round-banner show";
+
+      if (winners.length > 0 && losers.length > 0) {
+        const totalPool = losers.length * STAKE_PER_PLAYER;
+        const winGainEach = Math.round((totalPool / winners.length) * 100) / 100;
+        banner.innerHTML = `🔔 Đáp án đã hiện! Học viên thắng lấy <b>+${winGainEach} GemPoint</b> từ quỹ <b>-${STAKE_PER_PLAYER} GemPoint</b> của Học viên trả lời sai!`;
+
+        if (isHost) {
+          for (const p of players) {
+            const isWin = winners.some(w => w.username === p.username);
+            const delta = isWin ? winGainEach : -STAKE_PER_PLAYER;
+            const newGem = Math.round((Number(p.gempoint || 0) + delta) * 100) / 100;
+            const newCorrect = (p.correctCount || 0) + (isWin ? 1 : 0);
+
+            await fetch(`${DB_ROOT}/gemsphere_rooms/${roomId}/players/${p.username}.json`, {
+              method: "PATCH",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ gempoint: newGem, correctCount: newCorrect })
+            });
+
+            await fetch(`${DB_ROOT}/students/${p.username}.json`, {
+              method: "PATCH",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ gempoint: newGem })
+            });
+          }
+        }
+      } else {
+        banner.innerHTML = `⚖️ Cả hai Học viên chung trạng thái — Bảo toàn GemPoint vòng này!`;
+        if (isHost && winners.length === players.length) {
+          for (const p of players) {
+            await fetch(`${DB_ROOT}/gemsphere_rooms/${roomId}/players/${p.username}.json`, {
+              method: "PATCH",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ correctCount: (p.correctCount || 0) + 1 })
+            });
+          }
+        }
+      }
+
+      setTimeout(async () => {
+        const updatedMe = await fetchStudentProfile(myUser);
+        document.getElementById("myGemHeader").innerText = updatedMe.gempoint;
+      }, 1000);
+
+      if (isHost) {
+        setTimeout(async () => {
+          if (rIdx + 1 < TOTAL_ROUNDS) {
+            await fetch(`${DB_ROOT}/gemsphere_rooms/${roomId}.json`, {
+              method: "PATCH",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                currentRound: rIdx + 1,
+                roundStartTime: Date.now()
+              })
+            });
+          } else {
+            await fetch(`${DB_ROOT}/gemsphere_rooms/${roomId}.json`, {
+              method: "PATCH",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ status: "finished" })
+            });
+          }
+        }, 3500);
+      }
+    }
+
+    function renderSummary(data) {
+      const list = document.getElementById("finalRankingList");
+      const players = Object.values(data.players || {});
+      players.sort((a, b) => (b.correctCount || 0) - (a.correctCount || 0));
+
+      list.innerHTML = "";
+      players.forEach((p, i) => {
+        const medal = i === 0 ? "🥇" : (i === 1 ? "🥈" : (i === 2 ? "🥉" : `#${i + 1}`));
+        list.innerHTML += `
+          <div style="display:flex; justify-content:space-between; align-items:center; padding:12px 16px; background:${i === 0 ? '#fef9c3' : '#f8fafc'}; border:1.5px solid ${i === 0 ? '#eab308' : '#cbd5e1'}; border-radius:14px;">
+            <div style="display:flex; align-items:center; gap:10px;">
+              <span style="font-size:1.2rem; font-weight:900;">${medal}</span>
+              <img src="${p.avatar}" style="width:40px; height:40px; border-radius:50%; object-fit:cover; border:1.5px solid #0f172a;">
+              <div>
+                <div style="font-weight:800; color:#0f172a;">${p.name}</div>
+                <div style="font-size:0.8rem; color:#16a34a; font-weight:700;">Học viên trả lời đúng: ${p.correctCount || 0} / ${TOTAL_ROUNDS} câu</div>
+              </div>
+            </div>
+            <div style="font-weight:900; color:#b45309;">${p.gempoint} GemPoint</div>
+          </div>
+        `;
+      });
+    }
+
+    window.onload = async function() {
+      const urlParams = new URLSearchParams(window.location.search);
+      const joinCode = urlParams.get("join");
+
+      if (joinCode) {
+        // Nếu người chơi bấm từ thông báo mời -> tự động gia nhập phòng đó
+        document.getElementById("joinRoomCodeInput").value = joinCode;
+        await joinRoomByCode();
+        startRoomSync();
+      } else {
+        // Nếu tự vào từ sảnh -> tạo phòng mới
+        await initMyRoom();
+      }
+    };
+
+  </script>
+</body>
+</html>
+
