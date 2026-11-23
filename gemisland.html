@@ -351,19 +351,43 @@
 
     function stopLobbyHorrorBGM() { clearInterval(lobbyMusicTimer); lobbyMusicTimer = null; }
 
-    function startWindAmbience() {
+        function startWindAmbience() {
       if (!audioCtx || windAmbienceStarted) return;
       windAmbienceStarted = true;
+
+      // 1. Tiếng mưa rào nhẹ cực êm (giảm tối đa độ rè, chỉ làm nền sâu)
       const bufSize = audioCtx.sampleRate * 3;
       const buf = audioCtx.createBuffer(1, bufSize, audioCtx.sampleRate);
       const data = buf.getChannelData(0);
       for (let i = 0; i < bufSize; i++) data[i] = Math.random() * 2 - 1;
       const noise = audioCtx.createBufferSource(); noise.buffer = buf; noise.loop = true;
-      const filter = audioCtx.createBiquadFilter(); filter.type = "bandpass"; filter.frequency.value = 310; filter.Q.value = 2.8;
-      const windGain = audioCtx.createGain(); windGain.gain.value = 0.18;
-      noise.connect(filter); filter.connect(windGain); windGain.connect(audioCtx.destination);
+      const filter = audioCtx.createBiquadFilter(); filter.type = "lowpass"; filter.frequency.value = 420;
+      const rainBaseGain = audioCtx.createGain(); rainBaseGain.gain.value = 0.025;
+      noise.connect(filter); filter.connect(rainBaseGain); rainBaseGain.connect(audioCtx.destination);
       noise.start();
+
+      // 2. Tạo tiếng từng giọt nước mưa rơi tí tách ngẫu nhiên
+      setInterval(() => {
+        if (!audioCtx || !matchRunning) return;
+        const drops = 1 + Math.floor(Math.random() * 3);
+        for (let i = 0; i < drops; i++) {
+          const delay = Math.random() * 0.22;
+          const now = audioCtx.currentTime + delay;
+          const osc = audioCtx.createOscillator();
+          const dropGain = audioCtx.createGain();
+          const startFreq = 900 + Math.random() * 1100;
+          osc.type = "sine";
+          osc.frequency.setValueAtTime(startFreq, now);
+          osc.frequency.exponentialRampToValueAtTime(startFreq * 1.45, now + 0.045);
+          dropGain.gain.setValueAtTime(0.001, now);
+          dropGain.gain.linearRampToValueAtTime(0.035 + Math.random() * 0.025, now + 0.008);
+          dropGain.gain.exponentialRampToValueAtTime(0.0001, now + 0.055);
+          osc.connect(dropGain); dropGain.connect(audioCtx.destination);
+          osc.start(now); osc.stop(now + 0.06);
+        }
+      }, 240);
     }
+
 
     function playThunderSFX() {
       initAudio(); if (!audioCtx) return;
@@ -374,7 +398,7 @@
       const src = audioCtx.createBufferSource(); src.buffer = buf;
       const lowpass = audioCtx.createBiquadFilter(); lowpass.type = "lowpass"; lowpass.frequency.value = 230;
       const g = audioCtx.createGain();
-      g.gain.setValueAtTime(1.2, now); g.gain.exponentialRampToValueAtTime(0.001, now + 2.6);
+      g.gain.setValueAtTime(1.40, now); g.gain.exponentialRampToValueAtTime(0.001, now + 2.6);
 
       src.connect(lowpass); lowpass.connect(g); g.connect(audioCtx.destination);
       src.start(now);
@@ -1088,7 +1112,7 @@
 
       updateDynamicBottomHint();
 
-      if (Math.random() < 0.08) { lightningAlpha = 0.78; playThunderSFX(); }
+      if (Math.random() < 0.12) { lightningAlpha = 0.85; playThunderSFX(); }
       if (flashlight.cooldown > 0) { flashlight.cooldown--; updateFlashlightBtnUI(); }
       if (flashlight.stunTimer > 0) {
         flashlight.stunTimer--;
