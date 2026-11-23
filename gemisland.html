@@ -617,6 +617,7 @@
         const data = await (await fetch(`${DB_URL}/mansion_rooms/${roomId}.json?t=${Date.now()}`)).json();
         if (!data) return;
         squad = data.players || {};
+		if (playerTrapped && squad[myUser] && squad[myUser].trapped === false) { playerTrapped = false; showSubtleNotify("Bạn đã được đồng đội giải cứu!"); }
 
         if (data.status === "waiting") {
           renderSquad();
@@ -849,6 +850,8 @@
     let flashlight = { owned: false, on: false, stunTimer: 0, cooldown: 0 };
     let crossItem = { owned: false, on: false, timeLeft: 45 };
     let bosses = [], playersSlowed = false;
+	    let stillSeconds = 0, playerTrapped = false, trappedTimeLeft = 0;
+
 
     let elapsedSeconds = 0, nextBossSpawn = 20, clockInterval = null, lastPosSync = 0;
     let dustMotes = [], windLines = [], ghostShadows = [], lightningAlpha = 0, screenShake = 0;
@@ -1058,6 +1061,31 @@
       const mm = String(Math.floor(elapsedSeconds / 60)).padStart(2, "0");
       const ss = String(elapsedSeconds % 60).padStart(2, "0");
       document.getElementById("hudTimer").innerText = `⏱️ ${mm}:${ss}`;
+	        // Tính năng 4: Đếm ngược 25s khi bị Hobokuryo trói chờ đồng đội cứu
+      if (playerTrapped) {
+        trappedTimeLeft--;
+        showSubtleNotify(`⛓️ Linh hồn bạn đang bị trói! Chờ đồng đội tới cứu còn ${trappedTimeLeft}s...`, 1100);
+        if (trappedTimeLeft <= 0) {
+          playerTrapped = false;
+          endMatch(false, "Đồng đội không kịp giải cứu linh hồn bạn khỏi lời nguyền của Hobokuryo!");
+          return;
+        }
+      }
+
+      // Tính năng 3: Nín thở khi đứng yên & tắt đèn pin (tối đa 8 giây)
+      if (!playerTrapped && !player.isMoving && !flashlight.on && bosses.length > 0) {
+        stillSeconds++;
+        if (stillSeconds <= 8) {
+          showSubtleNotify(`Đang nín thở ẩn nấp (${stillSeconds}/8s) — Hobokuryo khó phát hiện!`, 1100);
+        } else {
+          stillSeconds = 0;
+          playHeartbeatSFX();
+          showSubtleNotify("Hết hơi! Bạn thở dốc làm lộ vị trí cho Hobokuryo!", 2500);
+        }
+      } else {
+        stillSeconds = 0;
+      }
+
       updateDynamicBottomHint();
 
       if (Math.random() < 0.08) { lightningAlpha = 0.78; playThunderSFX(); }
@@ -1208,6 +1236,22 @@
 
     function tryInteract() {
       if (!matchRunning || puzzleOpen) return;
+	        if (playerTrapped) { showSubtleNotify("Bạn đang bị trói, hãy gọi đồng đội lại gần bấm NHẶT để cứu!"); return; }
+
+      // Tính năng 4: Giải cứu đồng đội đang bị trói trong bán kính 65px
+      for (const mate of Object.values(squad)) {
+        if (mate.username !== myUser && mate.trapped && Math.hypot(player.x - mate.x, player.y - mate.y) < 65) {
+          mate.trapped = false;
+          const msg = `${myName} đã giải cứu ${mate.name} khỏi xiềng xích (Phát ra tiếng động lớn khiến quỷ chú ý)!`;
+          showSubtleNotify(msg, 3800);
+          syncRoomState({ eventBanner: msg });
+          fetch(`${DB_URL}/mansion_rooms/${roomId}/players/${mate.username}.json`, {
+            method: "PATCH", body: JSON.stringify({ trapped: false })
+          }).catch(() => {});
+          return;
+        }
+      }
+
  if (questState.talismansTaken.filter(Boolean).length === 3 && !questState.wordSolved) {
         resetAllMovementInputs();
         playRealisticChestSFX(true);
@@ -1438,7 +1482,7 @@
       const curSpeed = playersSlowed ? player.slowSpeed : player.baseSpeed;
       player.isMoving = false;
 
-      if (!puzzleOpen) {
+      if (!puzzleOpen && !playerTrapped) {
         let dx = joyDir.x, dy = joyDir.y;
         if (keys.w || keys.arrowup) dy -= 1; if (keys.s || keys.arrowdown) dy += 1;
         if (keys.a || keys.arrowleft) dx -= 1; if (keys.d || keys.arrowright) dx += 1;
@@ -1554,9 +1598,23 @@
             b.x += vx; b.y += vy;
 
             const iAmProtected = crossItem.owned && crossItem.on && crossItem.timeLeft > 0;
-            if (!iAmProtected && distToMe < player.r + b.r) {
-              endMatch(false, "Ác quỷ xuyên tường đã tóm được bạn trong bóng tối!");
-            }
+const isHidingBreath = (stillSeconds > 0 && stillSeconds <= 8 && distToMe > 65);
+if (!iAmProtected && !isHidingBreath && !playerTrapped && distToMe < player.r + b.r) {
+  const freeMates = Object.values(squad).filter(p => p.username !== myUser && p.alive !== false && !p.trapped);
+  if (freeMates.length === 0) {
+    endMatch(false, "Ác quỷ Hobokuryo đã tóm gọn cả đội trong bóng tối!");
+  } else {
+    playerTrapped = true; trappedTimeLeft = 25;
+    playPlayerKilledSFX();
+    const msg = `⛓️ ${myName} đã bị Hobokuryo trói! Hãy tới cứu trong 25 giây!`;
+    showSubtleNotify(msg, 4000);
+    syncRoomState({ eventBanner: msg });
+    fetch(`${DB_URL}/mansion_rooms/${roomId}/players/${myUser}.json`, {
+      method: "PATCH", body: JSON.stringify({ trapped: true })
+    }).catch(() => {});
+  }
+}
+
           }
         });
 
@@ -1762,7 +1820,10 @@
         ctx.fillStyle = holy; ctx.beginPath(); ctx.arc(player.x, player.y, 65, 0, Math.PI * 2); ctx.fill();
       }
 
-      if (flashlight.owned && flashlight.on) {
+            const bossNear = bosses.some(b => Math.hypot(b.x - player.x, b.y - player.y) < 185);
+      const flickerOk = !bossNear || Math.random() > 0.28;
+      if (flashlight.owned && flashlight.on && flickerOk) {
+
         ctx.save(); ctx.translate(player.x, player.y); ctx.rotate(player.facingAngle);
         const beam = ctx.createRadialGradient(0, 0, 10, 0, 0, 190);
         beam.addColorStop(0, "rgba(254, 240, 138, 0.68)"); beam.addColorStop(1, "rgba(254, 240, 138, 0)");
@@ -1781,6 +1842,19 @@
       ctx.fillStyle = fog; ctx.fillRect(0, 0, canvas.width, canvas.height);
 
       drawFloatingJoystickUI();
+	        // Tính năng 1: Nhiễu sóng tĩnh CRT khi Hobokuryo ở gần (< 185px)
+      if (bossNear) {
+        ctx.fillStyle = "rgba(255, 255, 255, 0.08)";
+        for (let i = 0; i < 6; i++) {
+          ctx.fillRect(0, Math.random() * canvas.height, canvas.width, 2 + Math.random() * 3);
+        }
+      }
+      // Hiển thị cảnh báo nếu bản thân đang bị trói
+      if (playerTrapped) {
+        ctx.strokeStyle = "#ef4444"; ctx.lineWidth = 4;
+        ctx.beginPath(); ctx.arc(cx, cy, 26 + Math.sin(Date.now() * 0.015) * 4, 0, Math.PI * 2); ctx.stroke();
+      }
+
       drawRadarMap();
       document.getElementById("lightningFlash").style.opacity = lightningAlpha.toFixed(2);
       requestAnimationFrame(loop);
