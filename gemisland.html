@@ -167,7 +167,7 @@
       </div>
       <div class="story-box" style="font-size:0.82rem; line-height:1.55;">
         <b>Vai trò:</b> Người chơi phân chia vai trò hợp lí để <b>Săn Đồ Vật</b>, <b>Giải Mã</b>, <b>Gác Cửa</b>, <b>Ngăn Hobokuryo</b>.<br>
-        <b>Hộ vật:</b> Người chơi di chuyển xung quanh để truy tìm <b>Đèn pin đông cứng Hobokuryo trong 10 giây</b>, <b>Thánh giá bảo hộ khỏi tầm nhìn của Hobokuryo trong 2 phút</b>.<br>
+        <b>Hộ vật:</b> Người chơi di chuyển xung quanh để truy tìm <b>Đèn pin đông cứng Hobokuryo trong 10 giây</b>, <b>Thánh giá bảo hộ khỏi tầm nhìn của Hobokuryo trong 45 giây</b>.<br>
         <b>Tiến Trình Đội:</b> Thắp 3 nến mở Cuộn Giấy (<b>số thứ 1</b>), cả đội cùng trả lời tăng dần 5 câu Tiếng Anh để mở <b>số thứ 2</b> (sai bị Hobokuryo ám), nhặt 3 mảnh bùa ghép từ lấy <b>số thứ 3 &amp; 4</b>.<br>
         <b>Ác linh Hobokuryo:</b> Rượt <b>30s</b> rồi biến mất <b>20s</b> (cả đội sẽ bị dính Ác Xích). Từ <b>phút thứ 3</b> sẽ có thêm <b>tay sai của Hobokuryo</b> săn đuổi.
       </div>
@@ -202,7 +202,7 @@
   <div class="danger-alert" id="dangerAlert">HOBOKURYO ĐANG SĂN ĐUỔI NGƯỜI CHƠI!</div>
   <div class="stun-banner" id="stunBanner">CHIẾU TRÚNG HOBOKURYO! ĐÓNG BĂNG: 10s</div>
   <div class="slow-banner" id="slowBanner">LỜI NGUYỀN ÁC XÍCH: HIỆU ỨNG GIẢM TỐC ĐỘ NGƯỜI CHƠI</div>
-  <div class="cross-banner" id="crossBanner">BẠN ĐƯỢC THÁNH GIÁ BẢO HỘ: 02:00</div>
+  <div class="cross-banner" id="crossBanner">BẠN ĐƯỢC THÁNH GIÁ BẢO HỘ: 00:45</div>
   <div id="bottomHintBar">💡 Gợi ý: Vuốt nửa trái màn hình để di chuyển 360°, tìm 3 Que Diêm để thắp sáng 3 Ngọn Nến.</div>
   <canvas id="gameCanvas"></canvas>
 
@@ -465,7 +465,7 @@
         const box = document.getElementById("leaderboardList");
         if (!box) return;
         if (arr.length === 0) { box.innerHTML = "<div style='color:#94a3b8; font-size:0.83rem;'>Chưa có người chơi nào thoát hiểm!</div>"; return; }
-        box.innerHTML = arr.map((u, i) => `<div class="lb-item"><span><b>#${i + 1}</b> ${u.name}</span><span style="color:#fbbf24; font-weight:800;">🏆 ${u.wins} trận</span></div>`).join("");
+        box.innerHTML = arr.map((u, i) => `<div class="lb-item"><span><b>#${i + 1}</b> ${u.name}</span><span style="color:#fbbf24; font-weight:800;"> ${u.wins} trận</span></div>`).join("");
       } catch (e) {}
     }
 
@@ -639,7 +639,7 @@
       matchRunning = false; clearInterval(clockInterval); bosses = []; playersSlowed = false; chestProgress = 0; woodChips = [];
       resetAllMovementInputs();
       flashlight = { owned: false, on: false, stunTimer: 0, cooldown: 0 };
-      crossItem = { owned: false, on: false, timeLeft: 120 };
+      crossItem = { owned: false, on: false, timeLeft: 45 };
       doorRitual = { active: false, timeLeft: 15 };
       document.getElementById("dangerAlert").style.display = "none";
       document.getElementById("stunBanner").style.display = "none";
@@ -694,34 +694,102 @@
       return true;
     }
 
-    const QUIZ_BANK = [
-      { lvl: "Trung bình", q: "Choose the correct word: 'You must _____ quiet so the demon cannot hear you.'", opts: ["A. keep", "B. keeps", "C. keeping"], ans: 0 },
-      { lvl: "Trung bình", q: "If we _____ all the candles, the secret scroll will appear.", opts: ["A. light", "B. lit", "C. lighting"], ans: 0 },
-      { lvl: "Trung bình", q: "Which preposition fits: 'The matches are hidden _____ the corner of the kitchen.'", opts: ["A. in", "B. between", "C. above"], ans: 0 },
-      { lvl: "Trung bình", q: "By the time we reached the exit, the ghost _____ disappeared.", opts: ["A. had", "B. has", "C. was"], ans: 0 },
-      { lvl: "Trung bình", q: "We had better _____ a flashlight before entering the dark corridor.", opts: ["A. find", "B. to find", "C. finding"], ans: 0 },
-      { lvl: "Khó", q: "Which word means 'a ghostly apparition or haunting spirit'?", opts: ["A. Phantom", "B. Lantern", "C. Fortress"], ans: 0 },
-      { lvl: "Khó", q: "Complete: 'Hardly _____ the door opened when the demon rushed in.'", opts: ["A. had", "B. has", "C. was"], ans: 0 },
-      { lvl: "Khó", q: "Find the synonym of 'CURSED' (bị nguyền rủa):", opts: ["A. Bewitched", "B. Blessed", "C. Protected"], ans: 0 },
-      { lvl: "Khó", q: "What does 'OMINOUS' mean in: 'An ominous shadow moved behind the curtain'?", opts: ["A. Threatening & evil", "B. Bright & cheerful", "C. Weak & harmless"], ans: 0 },
-      { lvl: "Khó", q: "Complete the inversion: 'Never before _____ such a terrifying scream.'", opts: ["A. have I heard", "B. I have heard", "C. I heard"], ans: 0 },
-      { lvl: "Khó", q: "Choose the closest meaning to 'EERIE':", opts: ["A. Strange and frightening", "B. Loud and crowded", "C. Warm and welcoming"], ans: 0 },
-      { lvl: "Khó", q: "If he _____ the flashlight earlier, the monster wouldn't have caught him.", opts: ["A. had turned on", "B. turned on", "C. turns on"], ans: 0 },
-      { lvl: "Khó", q: "Which phrasal verb means 'to extinguish a candle or fire'?", opts: ["A. Put out", "B. Put off", "C. Put up with"], ans: 0 },
-      { lvl: "Khó", q: "What is a 'LABYRINTH'?", opts: ["A. A complicated maze", "B. A silver key", "C. An ancient spell"], ans: 0 },
-      { lvl: "Khó", q: "Complete: 'No sooner _____ the ritual begun than the lights went out.'", opts: ["A. had", "B. did", "C. was"], ans: 0 },
-      { lvl: "Khó", q: "Which adjective describes a house 'abandoned and falling into ruin'?", opts: ["A. Derelict", "B. Immaculate", "C. Vibrant"], ans: 0 },
-      { lvl: "Khó", q: "Choose the correct idiom: 'The sudden thunder made my blood _____.'", opts: ["A. run cold", "B. boil fast", "C. turn blue"], ans: 0 },
-      { lvl: "Khó", q: "What does 'CLANDESTINE' mean?", opts: ["A. Kept secret or hidden", "B. Open to everyone", "C. Extremely noisy"], ans: 0 },
-      { lvl: "Khó", q: "Complete: 'She walked on tiptoe lest she _____ the sleeping spirit.'", opts: ["A. awaken", "B. awakened", "C. awakens"], ans: 0 },
-      { lvl: "Khó", q: "Find the antonym of 'TRANSPARENT' (trong suốt / rõ ràng):", opts: ["A. Opaque", "B. Crystal", "C. Fragile"], ans: 0 }
+        const QUIZ_BANK = [
+      // --- LEVEL: DỄ (20 CÂU) ---
+      { lvl: "Dễ", q: "Complete the rule: 'You must _____ quiet so Hobokuryo cannot hear your footsteps.'", opts: ["A. keeps", "B. keep", "C. keeping"], ans: 1 },
+      { lvl: "Dễ", q: "Which item do you need to light the three unlit candles in the mansion?", opts: ["A. A cross", "B. A coin", "C. A match"], ans: 2 },
+      { lvl: "Dễ", q: "Choose the correct word: 'Turn _____ the flashlight to freeze the monster for 10 seconds.'", opts: ["A. on", "B. at", "C. under"], ans: 0 },
+      { lvl: "Dễ", q: "How many digits are required to unlock the final exit door?", opts: ["A. Three digits", "B. Four digits", "C. Five digits"], ans: 1 },
+      { lvl: "Dễ", q: "Complete: 'My teammates _____ searching for the talismans in the kitchen right now.'", opts: ["A. is", "B. was", "C. are"], ans: 2 },
+      { lvl: "Dễ", q: "What happens when you hold the glowing Cross?", opts: ["A. Hobokuryo cannot see you", "B. The exit opens instantly", "C. You run twice as fast"], ans: 0 },
+      { lvl: "Dễ", q: "Choose the correct preposition: 'The golden coin is lying _____ the wooden floor.'", opts: ["A. into", "B. on", "C. between"], ans: 1 },
+      { lvl: "Dễ", q: "Complete: 'Run faster! The demon is right _____ you!'", opts: ["A. above", "B. inside", "C. behind"], ans: 2 },
+      { lvl: "Dễ", q: "Which room is best for cooking and finding hidden matches?", opts: ["A. The Kitchen", "B. The Bedroom", "C. The Study"], ans: 0 },
+      { lvl: "Dễ", q: "Complete: 'We _____ collected two talismans, so we only need one more.'", opts: ["A. has", "B. have", "C. having"], ans: 1 },
+      { lvl: "Dễ", q: "What is the opposite of 'DARK' inside the haunted mansion?", opts: ["A. Cold", "B. Heavy", "C. Bright"], ans: 2 },
+      { lvl: "Dễ", q: "Choose the right verb: 'Do not _____ a wrong answer, or the spirit will wake up!'", opts: ["A. choose", "B. chose", "C. chosen"], ans: 0 },
+      { lvl: "Dễ", q: "Complete: 'There _____ three flashlights hidden in different corners of the house.'", opts: ["A. is", "B. are", "C. be"], ans: 1 },
+      { lvl: "Dễ", q: "Which word describes a team working together to survive?", opts: ["A. Solo", "B. Enemy", "C. Co-op"], ans: 2 },
+      { lvl: "Dễ", q: "Complete: 'She _____ a secret scroll after lighting the third candle.'", opts: ["A. found", "B. find", "C. finding"], ans: 0 },
+      { lvl: "Dễ", q: "What should you check in the top-right corner to see where your friends are?", opts: ["A. The timer", "B. The radar map", "C. The keypad"], ans: 1 },
+      { lvl: "Dễ", q: "Complete: 'Listen carefully! Can you hear the loud _____ outside the window?'", opts: ["A. candle", "B. puzzle", "C. thunder"], ans: 2 },
+      { lvl: "Dễ", q: "Choose the correct pronoun: 'This flashlight belongs to me. It is _____.'", opts: ["A. mine", "B. my", "C. me"], ans: 0 },
+      { lvl: "Dễ", q: "Complete: 'Every player can carry _____ one flashlight at a time.'", opts: ["A. at least", "B. at most", "C. at last"], ans: 1 },
+      { lvl: "Dễ", q: "Which word means 'to get away safely from a dangerous place'?", opts: ["A. Trap", "B. Haunt", "C. Escape"], ans: 2 },
+
+      // --- LEVEL: TRUNG BÌNH (20 CÂU) ---
+      { lvl: "Trung bình", q: "Complete: 'If we _____ all three candles, the ancient scroll will unlock.'", opts: ["A. light", "B. lit", "C. will light"], ans: 0 },
+      { lvl: "Trung bình", q: "What does the word 'CURSED' mean when describing this mansion?", opts: ["A. Newly built and modern", "B. Under an evil magical spell", "C. Completely empty and safe"], ans: 1 },
+      { lvl: "Trung bình", q: "Complete: 'When Hobokuryo disappears, the whole team _____ slowed down by dark chains.'", opts: ["A. are", "B. were", "C. is"], ans: 2 },
+      { lvl: "Trung bình", q: "Which phrase means 'to stop a monster from moving'?", opts: ["A. Freeze it in place", "B. Let it pass by", "C. Follow its trail"], ans: 0 },
+      { lvl: "Trung bình", q: "Complete: 'You had better _____ your flashlight battery for the final 15 seconds.'", opts: ["A. saving", "B. save", "C. to save"], ans: 1 },
+      { lvl: "Trung bình", q: "What happens after the third minute of the match begins?", opts: ["A. All doors open automatically", "B. The storm stops completely", "C. A second demon joins the hunt"], ans: 2 },
+      { lvl: "Trung bình", q: "Choose the best word: 'Your heartbeat grows _____ as the monster gets closer to you.'", opts: ["A. faster", "B. fastest", "C. fastly"], ans: 0 },
+      { lvl: "Trung bình", q: "What is a 'TALISMAN' in this horror survival game?", opts: ["A. A heavy wooden table", "B. A mystical charm used to unlock a code", "C. A broken window"], ans: 1 },
+      { lvl: "Trung bình", q: "Complete: 'While one player solves the chest, another _____ guard the hallway.'", opts: ["A. ought", "B. have to", "C. should"], ans: 2 },
+      { lvl: "Trung bình", q: "Which word means 'strange, mysterious, and slightly frightening'?", opts: ["A. Eerie", "B. Cheerful", "C. Ordinary"], ans: 0 },
+      { lvl: "Trung bình", q: "Complete: 'Neither the lock _____ the darkness could stop our team from escaping.'", opts: ["A. or", "B. nor", "C. and"], ans: 1 },
+      { lvl: "Trung bình", q: "What does 'GUARD THE EXIT' mean?", opts: ["A. Run away from the door", "B. Lock your teammates outside", "C. Protect the door area until it opens"], ans: 2 },
+      { lvl: "Trung bình", q: "Complete: 'By the time the door opened, we _____ already solved all the riddles.'", opts: ["A. had", "B. have", "C. has"], ans: 0 },
+      { lvl: "Trung bình", q: "Which adjective describes a room with no light at all?", opts: ["A. Crystal-clear", "B. Pitch-black", "C. Sunlit"], ans: 1 },
+      { lvl: "Trung bình", q: "Complete: 'The ancient chest requires _____ correct answers from the squad.'", opts: ["A. fifth", "B. fives", "C. five"], ans: 2 },
+      { lvl: "Trung bình", q: "What does 'DIVIDE AND CONQUER' suggest for your squad?", opts: ["A. Split up to search different rooms", "B. Stand together in one corner", "C. Drop all your items"], ans: 0 },
+      { lvl: "Trung bình", q: "Complete: 'If you _____ attention to the radar map, you will never get lost.'", opts: ["A. paid", "B. pay", "C. paying"], ans: 1 },
+      { lvl: "Trung bình", q: "Which word refers to 'a secret word or number needed to enter'?", opts: ["A. A lantern", "B. A shadow", "C. A passcode"], ans: 2 },
+      { lvl: "Trung bình", q: "Complete: 'The wooden floorboards creak loudly _____ someone walks across them.'", opts: ["A. whenever", "B. wherever", "C. whoever"], ans: 0 },
+      { lvl: "Trung bình", q: "Choose the closest meaning to 'VANISH' (when the demon disappears for 20s):", opts: ["A. Attack suddenly", "B. Disappear from sight", "C. Scream loudly"], ans: 1 }
     ];
-    const WORD_SCRAMBLE_BANK = [
+
+        const WORD_SCRAMBLE_BANK = [
+      // --- NHÓM 1: VẬT PHẨM & PHONG ẤN TRONG DINH THỰ (10 từ) ---
+      { hint: "Ghép các chữ thành từ nghĩa là 'LÁ BÙA HỘ MỆNH' (8 chữ cái):", word: "TALISMAN" },
       { hint: "Ghép các chữ thành từ nghĩa là 'ĐÈN PIN' (10 chữ cái):", word: "FLASHLIGHT" },
+      { hint: "Ghép các chữ thành từ nghĩa là 'CUỘN GIẤY CỔ' (6 chữ cái):", word: "SCROLL" },
+      { hint: "Ghép các chữ thành từ nghĩa là 'NGHI LỄ TÂM LINH' (6 chữ cái):", word: "RITUAL" },
+      { hint: "Ghép các chữ thành từ nghĩa là 'THÁNH GIÁ / CÂY THẬP TỰ' (8 chữ cái):", word: "CRUCIFIX" },
+      { hint: "Ghép các chữ thành từ nghĩa là 'ĐÈN LỒNG' (7 chữ cái):", word: "LANTERN" },
+      { hint: "Ghép các chữ thành từ nghĩa là 'MẬT MÃ KHÓA CỬA' (8 chữ cái):", word: "PASSCODE" },
+      { hint: "Ghép các chữ thành từ nghĩa là 'CỔ VẬT THIÊNG' (5 chữ cái):", word: "RELIC" },
+      { hint: "Ghép các chữ thành từ nghĩa là 'BÙA CHÚ PHÉP THUẬT' (11 chữ cái):", word: "INCANTATION" },
+      { hint: "Ghép các chữ thành từ nghĩa là 'LỜI NGUYỀN RỦA' (5 chữ cái):", word: "CURSE" },
+
+      // --- NHÓM 2: KHÔNG GIAN & KIẾN TRÚC MA ÁM (10 từ) ---
+      { hint: "Ghép các chữ thành từ nghĩa là 'DINH THỰ LỚN' (7 chữ cái):", word: "MANSION" },
+      { hint: "Ghép các chữ thành từ nghĩa là 'HÀNH LANG DÀI' (8 chữ cái):", word: "CORRIDOR" },
+      { hint: "Ghép các chữ thành từ nghĩa là 'MÊ CUNG RẮC RỐI' (9 chữ cái):", word: "LABYRINTH" },
+      { hint: "Ghép các chữ thành từ nghĩa là 'CĂN HẦM NGẦM' (8 chữ cái):", word: "BASEMENT" },
+      { hint: "Ghép các chữ thành từ nghĩa là 'NGƯỠNG CỬA' (9 chữ cái):", word: "THRESHOLD" },
+      { hint: "Ghép các chữ thành từ nghĩa là 'TẦNG ÁP MÁI' (5 chữ cái):", word: "ATTIC" },
+      { hint: "Ghép các chữ thành từ nghĩa là 'KHU RỪNG U ÁM' (6 chữ cái):", word: "FOREST" },
+      { hint: "Ghép các chữ thành từ nghĩa là 'NGÔI ĐỀN / MIẾU THỜ' (6 chữ cái):", word: "SHRINE" },
+      { hint: "Ghép các chữ thành từ nghĩa là 'BÓNG TỐI ĐẶC QUÁNH' (8 chữ cái):", word: "DARKNESS" },
+      { hint: "Ghép các chữ thành từ nghĩa là 'HOANG TÀN / ĐỔ NÁT' (8 chữ cái):", word: "DERELICT" },
+
+      // --- NHÓM 3: THỰC THỂ SIÊU NHIÊN & TRUYỀN THUYẾT (10 từ) ---
+      { hint: "Ghép các chữ thành từ nghĩa là 'BÓNG MA / ẢO ẢNH' (7 chữ cái):", word: "PHANTOM" },
+      { hint: "Ghép các chữ thành từ nghĩa là 'HỒN MA / BÓNG QUỶ' (7 chữ cái):", word: "SPECTER" },
+      { hint: "Ghép các chữ thành từ nghĩa là 'OAN HỒN / LINH HỒN' (6 chữ cái):", word: "WRAITH" },
+      { hint: "Ghép các chữ thành từ nghĩa là 'ÁM ẢNH / MA ÁM' (8 chữ cái):", word: "HAUNTING" },
+      { hint: "Ghép các chữ thành từ nghĩa là 'TRUYỀN THUYẾT DÂN GIAN' (8 chữ cái):", word: "FOLKLORE" },
+      { hint: "Ghép các chữ thành từ nghĩa là 'BÓNG ĐEN CHẬP CHỜN' (6 chữ cái):", word: "SHADOW" },
+      { hint: "Ghép các chữ thành từ nghĩa là 'ĐIỀM GỞ / ĐÁNG NGẠI' (7 chữ cái):", word: "OMINOUS" },
+      { hint: "Ghép các chữ thành từ nghĩa là 'QUÁI DỊ / RÙNG RỢN' (5 chữ cái):", word: "EERIE" },
+      { hint: "Ghép các chữ thành từ nghĩa là 'RÙNG MÌNH / KINH HÃI' (7 chữ cái):", word: "MACABRE" },
+      { hint: "Ghép các chữ thành từ nghĩa là 'SIÊU NHIÊN / MA QUÁI' (12 chữ cái):", word: "SUPERNATURAL" },
+
+      // --- NHÓM 4: HÀNH ĐỘNG SINH TỒN & ĐỒNG ĐỘI (10 từ) ---
       { hint: "Ghép các chữ thành từ nghĩa là 'TRỐN THOÁT' (6 chữ cái):", word: "ESCAPE" },
-      { hint: "Ghép các chữ thành từ nghĩa là 'BÓNG MA' (7 chữ cái):", word: "PHANTOM" },
-      { hint: "Ghép các chữ thành từ nghĩa là 'LỜI NGUYỀN' (5 chữ cái):", word: "CURSE" }
+      { hint: "Ghép các chữ thành từ nghĩa là 'SỰ SINH TỒN' (8 chữ cái):", word: "SURVIVAL" },
+      { hint: "Ghép các chữ thành từ nghĩa là 'ĐỒNG ĐỘI' (8 chữ cái):", word: "TEAMMATE" },
+      { hint: "Ghép các chữ thành từ nghĩa là 'TIẾNG THÌ THẦM' (7 chữ cái):", word: "WHISPER" },
+      { hint: "Ghép các chữ thành từ nghĩa là 'TIẾNG BƯỚC CHÂN' (9 chữ cái):", word: "FOOTSTEP" },
+      { hint: "Ghép các chữ thành từ nghĩa là 'NHỊP TIM ĐẬP' (9 chữ cái):", word: "HEARTBEAT" },
+      { hint: "Ghép các chữ thành từ nghĩa là 'SỰ BẢO VỆ' (10 chữ cái):", word: "PROTECTION" },
+      { hint: "Ghép các chữ thành từ nghĩa là 'TAN BIẾN / BIẾN MẤT' (6 chữ cái):", word: "VANISH" },
+      { hint: "Ghép các chữ thành từ nghĩa là 'ĐÔNG CỨNG / ĐÓNG BĂNG' (6 chữ cái):", word: "FREEZE" },
+      { hint: "Ghép các chữ thành từ nghĩa là 'SỰ CẢNH GIÁC' (9 chữ cái):", word: "VIGILANCE" }
     ];
+
     const canvas = document.getElementById("gameCanvas"), ctx = canvas.getContext("2d");
     const radarCanvas = document.getElementById("radarCanvas"), rctx = radarCanvas.getContext("2d");
     const EXIT_DOOR = { x: 525, y: 635 };
@@ -754,7 +822,7 @@
 
     let player = { x: 465, y: 565, r: 10, baseSpeed: 2.15, slowSpeed: 1.45, facingAngle: -Math.PI / 2, flipX: false, isMoving: false, walkFrame: 0 };
     let flashlight = { owned: false, on: false, stunTimer: 0, cooldown: 0 };
-    let crossItem = { owned: false, on: false, timeLeft: 120 };
+    let crossItem = { owned: false, on: false, timeLeft: 45 };
     let bosses = [], playersSlowed = false;
 
     let elapsedSeconds = 0, nextBossSpawn = 20, clockInterval = null, lastPosSync = 0;
@@ -903,7 +971,7 @@
     function toggleCross() {
       if (!matchRunning || puzzleOpen) return;
       if (!crossItem.owned) { showSubtleNotify("Bạn chưa nhặt Thánh Giá! Hãy tìm cây Thánh Giá giấu trong dinh thự."); return; }
-      if (crossItem.timeLeft <= 0) { showSubtleNotify("Thánh Giá đã cạn kiệt linh lực sau 2 phút bảo hộ!"); return; }
+      if (crossItem.timeLeft <= 0) { showSubtleNotify("Thánh Giá đã cạn kiệt linh lực sau 45 giây bảo hộ!"); return; }
       crossItem.on = !crossItem.on;
       updateCrossBtnUI();
       syncCrossState();
@@ -992,7 +1060,7 @@
         if (crossItem.timeLeft <= 0) {
           crossItem.on = false; updateCrossBtnUI(); syncCrossState();
           if (crossBanner) crossBanner.style.display = "none";
-          showSubtleNotify("⚠️ Thánh Giá đã hết tác dụng sau 2 phút bảo hộ! Hobokuryo có thể nhìn thấy bạn!", 4200);
+          showSubtleNotify("⚠️ Thánh Giá đã hết tác dụng sau 45 giây bảo hộ! Hobokuryo có thể nhìn thấy bạn!", 4200);
         }
       } else if (crossBanner) {
         crossBanner.style.display = "none";
@@ -1085,7 +1153,7 @@
       puzzleOpen = false; elapsedSeconds = 0; nextBossSpawn = 20; playersSlowed = false;
       player = { x: 465, y: 565, r: 10, baseSpeed: 2.15, slowSpeed: 1.45, facingAngle: -Math.PI / 2, flipX: false, isMoving: false, walkFrame: 0 };
       flashlight = { owned: false, on: false, stunTimer: 0, cooldown: 0 };
-      crossItem = { owned: false, on: false, timeLeft: 120 };
+      crossItem = { owned: false, on: false, timeLeft: 45 };
       updateFlashlightBtnUI();
       updateCrossBtnUI();
 
@@ -1115,7 +1183,12 @@
 
     function tryInteract() {
       if (!matchRunning || puzzleOpen) return;
-
+ if (questState.talismansTaken.filter(Boolean).length === 3 && !questState.wordSolved) {
+        resetAllMovementInputs();
+        playRealisticChestSFX(true);
+        openWordScrambleModal();
+        return;
+		}
       for (const fl of FLASHLIGHT_SPOTS) {
         if (!fl.taken && Math.hypot(player.x - fl.x, player.y - fl.y) < 55) {
           if (flashlight.owned) { showSubtleNotify("Mỗi người chỉ được mang tối đa 1 cây Đèn Pin!"); return; }
@@ -1128,9 +1201,9 @@
       }
 
       if (!CROSS_SPOT.taken && Math.hypot(player.x - CROSS_SPOT.x, player.y - CROSS_SPOT.y) < 55) {
-        CROSS_SPOT.taken = true; crossItem.owned = true; crossItem.on = true; crossItem.timeLeft = 120;
+        CROSS_SPOT.taken = true; crossItem.owned = true; crossItem.on = true; crossItem.timeLeft = 45;
         updateCrossBtnUI(); syncCrossState();
-        const msg = `${myName} đã nhặt Thánh Giá! Ác quỷ sẽ không rượt ${myName} trong 2 phút!`;
+        const msg = `${myName} đã nhặt Thánh Giá! Ác quỷ sẽ không rượt ${myName} trong 45 giây!`;
         showSubtleNotify(msg, 4200);
         syncRoomState({ crossTaken: true, eventBanner: msg });
         return;
@@ -1188,7 +1261,14 @@
       }
     }
 
-    function closePuzzleModal() { playRealisticChestSFX(false); puzzleOpen = false; document.getElementById("puzzleModal").classList.remove("open"); }
+   function closePuzzleModal() {
+      playRealisticChestSFX(false);
+      puzzleOpen = false;
+      document.getElementById("puzzleModal").classList.remove("open");
+      if (questState.talismansTaken.filter(Boolean).length === 3 && !questState.wordSolved) {
+        showSubtleNotify("Đã cất 3 Mảnh Bùa vào túi! Bấm nút NHẶT bất cứ lúc nào để mở lại bảng ghép chữ.", 4000);
+      }
+    }
 
     function openQuizModal(targetMode) {
       puzzleOpen = true;
@@ -1230,22 +1310,27 @@
       });
       document.getElementById("puzzleModal").classList.add("open");
     }
+        let currentScrambleItem = null;
+
     function openWordScrambleModal() {
       puzzleOpen = true;
-      let wIdx = Math.floor(Math.random() * WORD_SCRAMBLE_BANK.length);
-      if (usedWordIdx.length < WORD_SCRAMBLE_BANK.length) {
-        while (usedWordIdx.includes(wIdx)) wIdx = Math.floor(Math.random() * WORD_SCRAMBLE_BANK.length);
+      if (!currentScrambleItem) {
+        let wIdx = Math.floor(Math.random() * WORD_SCRAMBLE_BANK.length);
+        if (usedWordIdx.length < WORD_SCRAMBLE_BANK.length) {
+          while (usedWordIdx.includes(wIdx)) wIdx = Math.floor(Math.random() * WORD_SCRAMBLE_BANK.length);
+        }
+        usedWordIdx.push(wIdx);
+        currentScrambleItem = WORD_SCRAMBLE_BANK.at(wIdx);
       }
-      usedWordIdx.push(wIdx);
-      const item = WORD_SCRAMBLE_BANK.at(wIdx);
 
       document.getElementById("puzzleTitle").innerText = "Ghép 3 Mảnh Bùa Chú";
-      document.getElementById("puzzleQ").innerText = item.hint;
-      const shuffled = item.word.split("").sort(() => Math.random() - 0.5);
-      scrambleState = { target: item.word, letters: shuffled, pickedIdx: [] };
+      document.getElementById("puzzleQ").innerText = currentScrambleItem.hint;
+      const shuffled = currentScrambleItem.word.split("").sort(() => Math.random() - 0.5);
+      scrambleState = { target: currentScrambleItem.word, letters: shuffled, pickedIdx: [] };
       renderScrambleUI();
       document.getElementById("puzzleModal").classList.add("open");
     }
+
 
     function renderScrambleUI() {
       const body = document.getElementById("puzzleBody");
