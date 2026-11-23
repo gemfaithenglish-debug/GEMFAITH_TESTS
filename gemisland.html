@@ -878,7 +878,7 @@
 	    let stillSeconds = 0, playerTrapped = false, trappedTimeLeft = 0;
 
 
-    let elapsedSeconds = 0, nextBossSpawn = 20, clockInterval = null, lastPosSync = 0;
+    let elapsedSeconds = 0, nextBossSpawn = 30, clockInterval = null, lastPosSync = 0;
     let dustMotes = [], windLines = [], ghostShadows = [], lightningAlpha = 0, screenShake = 0;
 
     const keys = {};
@@ -1228,7 +1228,7 @@
         return { id, x: pt.x, y: pt.y, val: 3 + Math.floor(Math.random() * 8), taken: false };
       });
 
-      puzzleOpen = false; elapsedSeconds = 0; nextBossSpawn = 20; playersSlowed = false;
+      puzzleOpen = false; elapsedSeconds = 0; nextBossSpawn = 30; playersSlowed = false;
       player = { x: 465, y: 565, r: 10, baseSpeed: 2.15, slowSpeed: 1.45, facingAngle: -Math.PI / 2, flipX: false, isMoving: false, walkFrame: 0 };
       flashlight = { owned: false, on: false, stunTimer: 0, cooldown: 0 };
       crossItem = { owned: false, on: false, timeLeft: 45 };
@@ -1240,7 +1240,7 @@
       windLines = Array.from({ length: 9 }, () => ({ x: Math.random() * MAP_W, y: Math.random() * MAP_H, len: 35 + Math.random() * 40, speed: 1.5 + Math.random() * 1.2 }));
       ghostShadows = Array.from({ length: 4 }, () => ({ x: Math.random() * MAP_W, y: Math.random() * MAP_H, vx: (Math.random() - 0.5) * 0.8, vy: (Math.random() - 0.5) * 0.8 }));
 
-      showSubtleNotify("Vuốt nửa trái màn hình để di chuyển 360°! Hãy tỏa ra tìm vật phẩm!", 4500);
+      showSubtleNotify("Bạn có 30 giây trước khi Hobokuryo xuất hiện. Hãy tỏa ra tìm vật phẩm!", 4500);
       clearInterval(clockInterval);
       clockInterval = setInterval(tickClock, 1000);
       requestAnimationFrame(loop);
