@@ -12,11 +12,13 @@ const AVATAR_LIST = [
  
 
   // Nhóm dùng GemPoint để mua (Có hiệu ứng lấp lánh sáng bóng)
-  { id: "avt6", name: "Gấu Geminton", desc: "Cao thủ Cầu lông", url: "avatargeminton.png", type: "buy", cost: 2000, shiny: true },
+  { id: "avt6", name: "Gấu Geminton", desc: "Cao Thủ Cầu Lông", url: "avatargeminton.png", type: "buy", cost: 2000, shiny: true },
   { id: "avt4", name: "Gấu Gemball", desc: "Fan Argentina", url: "gemball.jpg", type: "buy", cost: 2000, shiny: true },
   { id: "avt5", name: "Gấu Gemball", desc: "Fan Portugal", url: "gemball2.jpg", type: "buy", cost: 2000, shiny: true },
   { id: "avt8", name: "Gấu Gemball", desc: "Fan Spain", url: "gemball3.png", type: "buy", cost: 2000, shiny: true },
-  { id: "avt9", name: "Cặp Gấu Hạnh Phúc", desc: "Chan chứa tình yêu", url: "gemlove.png", type: "buy", cost: 3000, shiny: true },
+  { id: "avt15", name: "Gấu GemHue", desc: "Cố Đô Huế", url: "avatargemhue.jpg", type: "buy", cost: 2500, shiny: true },
+  { id: "avt14", name: "Gấu GemWest", desc: "Miền Tây Hào Sảng", url: "avatargaugemwest.jpg", type: "buy", cost: 2500, shiny: true },
+  { id: "avt9", name: "Cặp Gấu Hạnh Phúc", desc: "Chan Chứa Tình Yêu", url: "gemlove.png", type: "buy", cost: 3000, shiny: true },
    { id: "avt9", name: "Gấu Gemdino", desc: "Khủng Long Xanh", url: "gemdino.jpg", type: "buy", cost: 3000, shiny: true },
 
   // Nhóm mở khóa theo mốc điểm (Có hiệu ứng lấp lánh sáng bóng)
