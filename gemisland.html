@@ -380,7 +380,8 @@
           osc.frequency.setValueAtTime(startFreq, now);
           osc.frequency.exponentialRampToValueAtTime(startFreq * 1.45, now + 0.045);
           dropGain.gain.setValueAtTime(0.001, now);
-          dropGain.gain.linearRampToValueAtTime(0.035 + Math.random() * 0.025, now + 0.008);
+          dropGain.gain.linearRampToValueAtTime(0, now + 0.008);
+
           dropGain.gain.exponentialRampToValueAtTime(0.0001, now + 0.055);
           osc.connect(dropGain); dropGain.connect(audioCtx.destination);
           osc.start(now); osc.stop(now + 0.06);
