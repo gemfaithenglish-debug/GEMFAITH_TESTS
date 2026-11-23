@@ -113,6 +113,29 @@
     .dial-btn { width: 100%; background: #262938; color: #fff; border: none; border-radius: 6px; padding: 6px; font-weight: 800; cursor: pointer; }
     .dial-num { font-size: 1.7rem; font-weight: 900; color: #fef08a; }
   </style>
+    <style>
+    #rulesReadyScreen {
+      overflow-y: auto !important;
+      align-items: flex-start !important;
+      padding: 8px !important;
+    }
+    #rulesReadyScreen .lobby-card {
+      margin: auto !important;
+      max-height: 95vh !important;
+      overflow-y: auto !important;
+      padding: 10px 14px !important;
+    }
+    @media (max-height: 500px) {
+      #rulesReadyScreen .lobby-head { padding-bottom: 4px !important; margin-bottom: 4px !important; }
+      #rulesReadyScreen .lobby-head h1 { font-size: 0.92rem !important; }
+      #rulesReadyScreen .story-box { font-size: 0.72rem !important; line-height: 1.32 !important; padding: 6px 8px !important; margin-bottom: 6px !important; }
+      #rulesReadyScreen .squad-grid { margin: 4px 0 !important; gap: 6px !important; }
+      #rulesReadyScreen .slot-box { padding: 4px 2px !important; font-size: 0.7rem !important; }
+      #rulesReadyScreen .slot-box img { width: 24px !important; height: 24px !important; }
+      #rulesReadyScreen .btn-blood { padding: 8px !important; margin-top: 6px !important; font-size: 0.85rem !important; }
+    }
+  </style>
+
 </head>
 <body>
   <div id="redScreenEdge"></div>
@@ -319,7 +342,7 @@
         osc.type = "triangle";
         osc.frequency.setValueAtTime(notes[Math.floor(Math.random() * notes.length)], now);
         g.gain.setValueAtTime(0.001, now);
-        g.gain.linearRampToValueAtTime(0.08, now + 0.4);
+        g.gain.linearRampToValueAtTime(0.32, now + 0.4);
         g.gain.exponentialRampToValueAtTime(0.001, now + 2.4);
         osc.connect(g); g.connect(audioCtx.destination);
         osc.start(now); osc.stop(now + 2.5);
@@ -337,7 +360,7 @@
       for (let i = 0; i < bufSize; i++) data[i] = Math.random() * 2 - 1;
       const noise = audioCtx.createBufferSource(); noise.buffer = buf; noise.loop = true;
       const filter = audioCtx.createBiquadFilter(); filter.type = "bandpass"; filter.frequency.value = 310; filter.Q.value = 2.8;
-      const windGain = audioCtx.createGain(); windGain.gain.value = 0.045;
+      const windGain = audioCtx.createGain(); windGain.gain.value = 0.18;
       noise.connect(filter); filter.connect(windGain); windGain.connect(audioCtx.destination);
       noise.start();
     }
@@ -351,7 +374,8 @@
       const src = audioCtx.createBufferSource(); src.buffer = buf;
       const lowpass = audioCtx.createBiquadFilter(); lowpass.type = "lowpass"; lowpass.frequency.value = 230;
       const g = audioCtx.createGain();
-      g.gain.setValueAtTime(0.68, now); g.gain.exponentialRampToValueAtTime(0.001, now + 2.6);
+      g.gain.setValueAtTime(1.2, now); g.gain.exponentialRampToValueAtTime(0.001, now + 2.6);
+
       src.connect(lowpass); lowpass.connect(g); g.connect(audioCtx.destination);
       src.start(now);
     }
@@ -364,7 +388,7 @@
         osc.type = "sine";
         osc.frequency.setValueAtTime(idx === 0 ? 68 : 54, now + offset);
         osc.frequency.exponentialRampToValueAtTime(28, now + offset + 0.12);
-        g.gain.setValueAtTime(0.3, now + offset); g.gain.exponentialRampToValueAtTime(0.001, now + offset + 0.13);
+        g.gain.setValueAtTime(0.75, now + offset); g.gain.exponentialRampToValueAtTime(0.001, now + offset + 0.13);
         osc.connect(g); g.connect(audioCtx.destination);
         osc.start(now + offset); osc.stop(now + offset + 0.14);
       });
@@ -388,7 +412,8 @@
       osc.type = "triangle";
       osc.frequency.setValueAtTime(125 + Math.random() * 20, now);
       osc.frequency.exponentialRampToValueAtTime(42, now + 0.08);
-      g.gain.setValueAtTime(0.28, now); g.gain.exponentialRampToValueAtTime(0.001, now + 0.085);
+      g.gain.setValueAtTime(0.75, now); g.gain.exponentialRampToValueAtTime(0.001, now + 0.085);
+
       osc.connect(g); g.connect(audioCtx.destination);
       osc.start(now); osc.stop(now + 0.09);
     }
