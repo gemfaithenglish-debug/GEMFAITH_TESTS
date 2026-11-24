@@ -63,38 +63,24 @@
     #radarCanvas { display: block; border-radius: 6px; background: #090b10; }
     .radar-legend { display: flex; justify-content: space-between; font-size: 0.6rem; color: #94a3b8; margin-top: 2px; padding: 0 2px; font-weight: 700; }
     #bottomHintBar { position: fixed; bottom: 8px; left: 50%; transform: translateX(-50%); font-size: 0.72rem; font-weight: 600; color: rgba(226, 232, 240, 0.8); text-shadow: 0 1px 4px #000; z-index: 20; pointer-events: none; text-align: center; width: 92vw; }
-    #redScreenEdge { position: fixed; inset: 0; pointer-events: none; z-index: 15; box-shadow: inset 0 0 80px rgba(220, 38, 38, 0.75); opacity: 0; transition: opacity 0.4s; }
+    #redScreenEdge { position: fixed; inset: 0; pointer-events: none; z-index: 15; box-shadow: inset 0 0 85px rgba(220, 38, 38, 0.82); opacity: 0; transition: opacity 0.35s; }
     #lightningFlash { position: fixed; inset: 0; background: #ffffff; opacity: 0; pointer-events: none; z-index: 16; }
 
-    .right-btns { position: fixed; bottom: 24px; right: 18px; display: flex; gap: 10px; align-items: flex-end; z-index: 40; }
-         .btn-horror {
+    .right-btns { position: fixed; bottom: 22px; right: 18px; display: flex; gap: 12px; align-items: flex-end; z-index: 40; }
+    .btn-horror {
       width: 64px; height: 64px; border-radius: 50%;
-      background: rgba(10, 12, 18, 0.52);
-      backdrop-filter: blur(8px);
-      -webkit-backdrop-filter: blur(8px);
+      background: rgba(10, 12, 18, 0.54);
+      backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
       border: 1px solid rgba(255, 255, 255, 0.16);
       box-shadow: 0 4px 16px rgba(0, 0, 0, 0.45);
       cursor: pointer; display: flex; justify-content: center; align-items: center;
       padding: 0; touch-action: none; transition: transform 0.12s ease, border-color 0.2s ease, background 0.2s ease;
     }
-    .btn-horror:active {
-      transform: scale(0.92);
-      background: rgba(255, 255, 255, 0.14);
-    }
-    .btn-horror img {
-      width: 50px; height: 50px; object-fit: contain; pointer-events: none;
-      opacity: 0.35; transition: opacity 0.2s ease, filter 0.2s ease;
-    }
-    #btnInteract img, .btn-horror.has-item img, .btn-horror.active-glow img {
-      opacity: 0.95;
-    }
-    .btn-horror.active-glow {
-      background: rgba(20, 22, 32, 0.72);
-      border-color: rgba(253, 224, 71, 0.7);
-      box-shadow: 0 0 14px rgba(250, 204, 21, 0.28);
-    }
+    .btn-horror:active { transform: scale(0.92); background: rgba(255, 255, 255, 0.14); }
+    .btn-horror img { width: 34px; height: 34px; object-fit: contain; pointer-events: none; opacity: 0.35; transition: opacity 0.2s ease; }
+    #btnInteract img, .btn-horror.has-item img, .btn-horror.active-glow img { opacity: 0.96; }
+    .btn-horror.active-glow { background: rgba(20, 22, 32, 0.74); border-color: rgba(253, 224, 71, 0.72); box-shadow: 0 0 14px rgba(250, 204, 21, 0.3); }
     .btn-horror span { display: none; }
-
 
     .modal-overlay { position: fixed; inset: 0; background: rgba(0, 0, 0, 0.85); display: none; justify-content: center; align-items: center; z-index: 100; padding: 14px; }
     .modal-overlay.open { display: flex; }
@@ -166,7 +152,7 @@
   <div class="hud-left">
     <div class="pill-box" id="hudCode">Mã: ? - ? - ? - ?</div>
     <div class="pill-box" id="hudItems">Diêm 0 • Nến 0/3 • Bùa 0/3</div>
-    <div class="pill-box" style="color:#fbbf24;"><span id="hudGemPoint">0</span> GemPoint</div>
+    <div class="pill-box" style="color:#fbbf24;"><span id="hudGemPoint">0</span> GP</div>
   </div>
 
   <div class="center-hud-anchor">
@@ -187,13 +173,12 @@
   <canvas id="gameCanvas"></canvas>
 
   <div class="right-btns" id="aliveActionBtns">
-  <button class="btn-horror" id="btnCross"><img src="cross.png" alt="Thánh giá"><span id="crossLabel">Chưa có</span></button>
-  <button class="btn-horror" id="btnFlashlight"><img src="flashlight.png" alt="Đèn pin"><span id="flashLabel">Chưa có</span></button>
-  <button class="btn-horror" id="btnInteract"><img src="interact.png" alt="Nhặt"><span>Nhặt</span></button>
-</div>
-
+    <button class="btn-horror" id="btnCross"><img src="cross.png" alt="Thánh giá"><span id="crossLabel">Chưa có</span></button>
+    <button class="btn-horror" id="btnFlashlight"><img src="flashlight.png" alt="Đèn pin"><span id="flashLabel">Chưa có</span></button>
+    <button class="btn-horror" id="btnInteract"><img src="interact.png" alt="Nhặt"><span>Nhặt</span></button>
+  </div>
   <div class="right-btns" id="spectateActionBtns" style="display:none;">
-    <button class="btn-horror" style="width:92px; border-color:#38bdf8; color:#7dd3fc;" onclick="cycleSpectateTarget()"><span>Đổi góc nhìn</span></button>
+    <button class="btn-horror" style="width:88px; border-color:#38bdf8; color:#7dd3fc; font-size:0.68rem; font-weight:800;" onclick="cycleSpectateTarget()">Đổi góc nhìn</button>
   </div>
 
   <div class="modal-overlay" id="puzzleModal">
@@ -226,7 +211,23 @@
       <button class="btn-blood" onclick="exitAndResetToLobby()">Về sảnh chờ</button>
     </div>
   </div>
+
   <script>
+      (function loadFirebaseSDK() {
+      const base = "https://www.gstatic." + "com/firebasejs/9.23.0/";
+      const s1 = document.createElement("script");
+      s1.src = base + "firebase-app-compat.js";
+      s1.onload = function() {
+        const s2 = document.createElement("script");
+        s2.src = base + "firebase-database-compat.js";
+        s2.onload = function() {
+          if (typeof initLobby === "function") initLobby();
+        };
+        document.head.appendChild(s2);
+      };
+      document.head.appendChild(s1);
+    })();
+
     const SPRITE_CONFIG = {
       logo:          { src: "logotoshidensetsu.png", w: 32,   h: 32  },
       map:           { src: "map.png",               w: 1024, h: 768 },
@@ -234,11 +235,6 @@
       playerLeft:    { src: "player_left.png",       w: 120,  h: 55  },
       playerMid:     { src: "player_mid.png",        w: 120,  h: 55  },
       playerRight:   { src: "player_right.png",      w: 120,  h: 55  },
-      teammateIdle:  { src: "player_idle.png",     w: 120,  h: 55  },
-      teammateLeft:  { src: "player_left.png",     w: 120,  h: 55  },
-      teammateMid:   { src: "player_mid.png",      w: 120,  h: 55  },
-      teammateRight: { src: "player_right.png",    w: 120,  h: 55  },
-      teammate:      { src: "player_idle.png",          w: 120,  h: 55  },
       boss:          { src: "boss.png",              w: 100,  h: 60  },
       boss2:         { src: "boss2.png",             w: 100,  h: 60  },
       coin:          { src: "coin.png",              w: 33,   h: 33  },
@@ -390,13 +386,73 @@
       osc1.connect(g); osc2.connect(g); g.connect(audioCtx.destination);
       osc1.start(now); osc2.start(now); osc1.stop(now + 1.25); osc2.stop(now + 1.25);
     }
-    const DB_URL = "https://" + "tich-luy-gempoint-default-rtdb" + ".asia-southeast1." + "firebasedatabase.app";
+        const DB_URL = "https://" + "tich-luy-gempoint-default-rtdb" + ".asia-southeast1." + "firebasedatabase.app";
+
+    // Bộ điều khiển Realtime siêu tốc dùng EventSource (không cần thư viện ngoài)
+    const rtdb = {
+      ref(path) {
+        const cleanPath = path.replace(/^\/+|\/+$/g, "");
+        const url = `${DB_URL}/${cleanPath}.json`;
+        return {
+          async once() {
+            const res = await fetch(`${url}?t=${Date.now()}`);
+            const data = await res.json();
+            return { val: () => data };
+          },
+          async set(val) {
+            await fetch(url, { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify(val) });
+          },
+          async update(val) {
+            await fetch(url, { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify(val) });
+          },
+          _es: null,
+          on(event, callback) {
+            this.off();
+            let cache = null;
+            const applyPatch = (target, pathStr, val) => {
+              if (!pathStr || pathStr === "/") return val;
+              const parts = pathStr.replace(/^\/+/, "").split("/");
+              if (!target || typeof target !== "object") target = {};
+              let cur = target;
+              for (let i = 0; i < parts.length - 1; i++) {
+                if (!cur[parts[i]] || typeof cur[parts[i]] !== "object") cur[parts[i]] = {};
+                cur = cur[parts[i]];
+              }
+              const last = parts[parts.length - 1];
+              if (val === null) delete cur[last];
+              else cur[last] = val;
+              return target;
+            };
+            const es = new EventSource(url);
+            this._es = es;
+            es.addEventListener("put", e => {
+              const msg = JSON.parse(e.data);
+              cache = applyPatch(cache, msg.path, msg.data);
+              callback({ val: () => cache });
+            });
+            es.addEventListener("patch", e => {
+              const msg = JSON.parse(e.data);
+              if (msg.data && typeof msg.data === "object") {
+                Object.entries(msg.data).forEach(([k, v]) => {
+                  const subPath = (msg.path === "/" ? "" : msg.path) + "/" + k;
+                  cache = applyPatch(cache, subPath, v);
+                });
+                callback({ val: () => cache });
+              }
+            });
+          },
+          off() {
+            if (this._es) { this._es.close(); this._es = null; }
+          }
+        };
+      }
+    };
     const myUser = localStorage.getItem("currentUsername") || "guest_" + Math.floor(Math.random() * 999);
     const myName = localStorage.getItem("currentStudentName") || myUser;
     const myAvatar = localStorage.getItem("currentUserAvatar") || "avatargaubasic.jpg";
     let myGem = 0, myWins = 0, roomId = "MANSION_" + Math.floor(1000 + Math.random() * 9000);
     let isHost = true, squad = {}, matchRunning = false, lastSharedEventId = "";
-    let isSpectating = false, spectateUser = null;
+    let isSpectating = false, spectateUser = null, roomListenerRef = null;
     let teammateRenderPos = {};
 
     async function syncStudentProfile(addGem = 0, addWin = 0) {
@@ -406,24 +462,21 @@
         return;
       }
       try {
-        const ref = `${DB_URL}/students/${myUser}.json?t=${Date.now()}`;
-        const data = (await (await fetch(ref)).json()) || {};
+        const snap = await rtdb.ref(`students/${myUser}`).once("value");
+        const data = snap.val() || {};
         myGem = (typeof data.gempoint === "number" ? data.gempoint : 0) + addGem;
         myWins = (typeof data.mansionWins === "number" ? data.mansionWins : 0) + addWin;
         document.getElementById("hudGemPoint").innerText = myGem;
         if (addGem > 0 || addWin > 0) {
-          await fetch(`${DB_URL}/students/${myUser}.json`, {
-            method: "PATCH", headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ gempoint: myGem, mansionWins: myWins, name: myName })
-          });
+          await rtdb.ref(`students/${myUser}`).update({ gempoint: myGem, mansionWins: myWins, name: myName });
         }
       } catch (e) {}
     }
 
     async function loadLeaderboard() {
       try {
-        const res = await fetch(`${DB_URL}/students.json?t=${Date.now()}`);
-        const data = (await res.json()) || {};
+        const snap = await rtdb.ref("students").once("value");
+        const data = snap.val() || {};
         const arr = Object.entries(data)
           .map(([u, info]) => ({ username: u, name: info.name || u, wins: info.mansionWins || 0 }))
           .filter(x => x.wins > 0).sort((a, b) => b.wins - a.wins);
@@ -440,49 +493,46 @@
       roomId = "MANSION_" + Math.floor(1000 + Math.random() * 9000);
       isHost = true;
       document.getElementById("roomCodeText").innerText = roomId;
-      squad = { [myUser]: { username: myUser, name: myName, avatar: myAvatar, x: 465, y: 565, alive: true, ready: false, flipX: false, moving: false } };
-      try {
-        await fetch(`${DB_URL}/mansion_rooms/${roomId}.json`, {
-          method: "PUT", headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            host: myUser, status: "waiting", players: squad,
-            secretCode: new Array(1, 2, 3, 4), foundDigits: ["?", "?", "?", "?"],
-            matchesCount: 0, matchesTaken: [false, false, false],
-            litTorches: [false, false, false], scrollSolved: false,
-            chestSolved: false, chestProgress: 0, talismansTaken: [false, false, false],
-            wordSolved: false, coinsTaken: [false, false, false],
-            flashlightsTaken: [false, false, false], crossTaken: false,
-            layoutSeed: null, doorRitualStarted: false, bosses: [], eventBanner: ""
-          })
-        });
-      } catch (e) {}
+      squad = { [myUser]: { username: myUser, name: myName, avatar: myAvatar, x: 465, y: 565, vx: 0, vy: 0, alive: true, ready: false, flipX: false, moving: false } };
+      await rtdb.ref(`mansion_rooms/${roomId}`).set({
+        host: myUser, status: "waiting", players: squad,
+        secretCode: new Array(1, 2, 3, 4), foundDigits: ["?", "?", "?", "?"],
+        matchesCount: 0, matchesTaken: [false, false, false],
+        litTorches: [false, false, false], scrollSolved: false,
+        chestSolved: false, chestProgress: 0, talismansTaken: [false, false, false],
+        wordSolved: false, coinsTaken: [false, false, false],
+        flashlightsTaken: [false, false, false], crossTaken: false,
+        layoutSeed: null, doorRitualStarted: false, bosses: [], bossStunTimer: 0, eventBanner: ""
+      });
+      attachRealtimeRoomListener(roomId);
       renderSquad();
     }
 
     async function invitePlayer() {
       const target = document.getElementById("inviteUserTxt").value.trim();
       if (!target || Object.keys(squad).length >= 4) return;
-      const st = await (await fetch(`${DB_URL}/students/${target}.json`)).json();
+      const snap = await rtdb.ref(`students/${target}`).once("value");
+      const st = snap.val();
       if (!st) { showSubtleNotify("Không tìm thấy username này."); return; }
-      squad[target] = { username: target, name: st.name || target, avatar: st.avatar || "avatargaubasic.jpg", x: 485, y: 565, alive: true, ready: false, flipX: false, moving: false };
-      await fetch(`${DB_URL}/mansion_rooms/${roomId}/players/${target}.json`, { method: "PUT", body: JSON.stringify(squad[target]) });
+      const newMember = { username: target, name: st.name || target, avatar: st.avatar || "avatargaubasic.jpg", x: 485, y: 565, vx: 0, vy: 0, alive: true, ready: false, flipX: false, moving: false };
+      await rtdb.ref(`mansion_rooms/${roomId}/players/${target}`).set(newMember);
       document.getElementById("inviteUserTxt").value = "";
-      renderSquad();
     }
 
     async function joinRoomByCode() {
       const code = document.getElementById("joinCodeTxt").value.trim().toUpperCase();
       if (!code) return;
-      const data = await (await fetch(`${DB_URL}/mansion_rooms/${code}.json`)).json();
+      const snap = await rtdb.ref(`mansion_rooms/${code}`).once("value");
+      const data = snap.val();
       if (!data) { showSubtleNotify("Mã phòng không tồn tại."); return; }
       roomId = code; isHost = (data.host === myUser);
       document.getElementById("roomCodeText").innerText = roomId;
-      await fetch(`${DB_URL}/mansion_rooms/${roomId}/players/${myUser}.json`, {
-        method: "PATCH", body: JSON.stringify({ username: myUser, name: myName, avatar: myAvatar, x: 465, y: 565, alive: true, ready: false, flipX: false, moving: false })
+      await rtdb.ref(`mansion_rooms/${roomId}/players/${myUser}`).update({
+        username: myUser, name: myName, avatar: myAvatar, x: 465, y: 565, vx: 0, vy: 0, alive: true, ready: false, flipX: false, moving: false
       });
-      if (data.status === "rules") openRulesReadyScreen();
-      if (data.status === "playing") startMatchLocal(data);
+      attachRealtimeRoomListener(roomId);
     }
+
     function renderSquad() {
       const g = document.getElementById("squadGrid");
       if (!g) return;
@@ -503,21 +553,15 @@
       );
       const randomOrder = Array.from({ length: 18 }, (_, idx) => idx).sort(() => Math.random() - 0.5);
       Object.keys(squad).forEach(u => { squad[u].ready = false; squad[u].alive = true; });
-      try {
-        await fetch(`${DB_URL}/mansion_rooms/${roomId}.json`, {
-          method: "PATCH",
-          body: JSON.stringify({
-            status: "rules", players: squad, secretCode: randomCode, layoutSeed: randomOrder,
-            foundDigits: ["?", "?", "?", "?"], matchesCount: 0,
-            matchesTaken: [false, false, false], litTorches: [false, false, false],
-            scrollSolved: false, chestSolved: false, chestProgress: 0,
-            talismansTaken: [false, false, false], wordSolved: false,
-            coinsTaken: [false, false, false], flashlightsTaken: [false, false, false],
-            crossTaken: false, doorRitualStarted: false, bosses: [], eventBanner: ""
-          })
-        });
-      } catch (e) {}
-      openRulesReadyScreen();
+      await rtdb.ref(`mansion_rooms/${roomId}`).update({
+        status: "rules", players: squad, secretCode: randomCode, layoutSeed: randomOrder,
+        foundDigits: ["?", "?", "?", "?"], matchesCount: 0,
+        matchesTaken: [false, false, false], litTorches: [false, false, false],
+        scrollSolved: false, chestSolved: false, chestProgress: 0,
+        talismansTaken: [false, false, false], wordSolved: false,
+        coinsTaken: [false, false, false], flashlightsTaken: [false, false, false],
+        crossTaken: false, doorRitualStarted: false, bosses: [], bossStunTimer: 0, eventBanner: ""
+      });
     }
 
     function openRulesReadyScreen() {
@@ -547,14 +591,14 @@
       initAudio();
       const btn = document.getElementById("btnConfirmReady");
       btn.disabled = true; btn.innerText = "Đang chờ đồng đội...";
-      if (squad[myUser]) squad[myUser].ready = true;
-      renderReadySquad();
-      try { await fetch(`${DB_URL}/mansion_rooms/${roomId}/players/${myUser}/ready.json`, { method: "PUT", body: "true" }); } catch (e) {}
+      await rtdb.ref(`mansion_rooms/${roomId}/players/${myUser}/ready`).set(true);
     }
 
-    setInterval(async () => {
-      try {
-        const data = await (await fetch(`${DB_URL}/mansion_rooms/${roomId}.json?t=${Date.now()}`)).json();
+    function attachRealtimeRoomListener(targetRoomId) {
+      if (roomListenerRef) roomListenerRef.off();
+      roomListenerRef = rtdb.ref(`mansion_rooms/${targetRoomId}`);
+      roomListenerRef.on("value", snapshot => {
+        const data = snapshot.val();
         if (!data) return;
         squad = data.players || {};
 
@@ -566,7 +610,7 @@
           renderReadySquad();
           const list = Object.values(squad);
           if (list.length > 0 && list.every(p => p.ready)) {
-            if (isHost) await fetch(`${DB_URL}/mansion_rooms/${roomId}/status.json`, { method: "PUT", body: '"playing"' });
+            if (isHost) rtdb.ref(`mansion_rooms/${targetRoomId}/status`).set("playing");
             startMatchLocal(data);
           }
         } else if (data.status === "playing") {
@@ -576,9 +620,7 @@
 
             if (Array.isArray(data.foundDigits) && data.foundDigits.length === 4) {
               for (let i = 0; i < 4; i++) {
-                if (data.foundDigits[i] !== "?" && data.foundDigits[i] !== undefined) {
-                  foundDigits[i] = data.foundDigits[i];
-                }
+                if (data.foundDigits[i] !== "?" && data.foundDigits[i] !== undefined) foundDigits[i] = data.foundDigits[i];
               }
               document.getElementById("hudCode").innerText = `Mã: ${foundDigits.join(" - ")}`;
             }
@@ -586,32 +628,29 @@
             if (typeof data.matchesCount === "number") questState.matchesCount = data.matchesCount;
             if (Array.isArray(data.matchesTaken)) questState.matchesTaken = data.matchesTaken;
             if (Array.isArray(data.litTorches)) questState.litTorches = data.litTorches;
-            if (typeof data.scrollSolved === "boolean" && data.scrollSolved) questState.scrollSolved = true;
-            if (typeof data.chestSolved === "boolean" && data.chestSolved) questState.chestSolved = true;
+            if (data.scrollSolved) questState.scrollSolved = true;
+            if (data.chestSolved) questState.chestSolved = true;
             if (typeof data.chestProgress === "number") chestProgress = Math.max(chestProgress, data.chestProgress);
             if (Array.isArray(data.talismansTaken)) questState.talismansTaken = data.talismansTaken;
-            if (typeof data.wordSolved === "boolean" && data.wordSolved) questState.wordSolved = true;
+            if (data.wordSolved) questState.wordSolved = true;
             if (Array.isArray(data.coinsTaken)) data.coinsTaken.forEach((t, i) => { if (coinsList[i] && t) coinsList[i].taken = true; });
-            if (Array.isArray(data.flashlightsTaken)) data.flashlightsTaken.forEach((t, i) => { if (FLASHLIGHT_SPOTS[i] && t) FLASHLIGHT_SPOTS[i].taken = true; });
+			            if (Array.isArray(data.flashlightsTaken)) data.flashlightsTaken.forEach((t, i) => { if (FLASHLIGHT_SPOTS[i] && t) FLASHLIGHT_SPOTS[i].taken = true; });
             if (data.crossTaken) CROSS_SPOT.taken = true;
             if (data.doorRitualStarted && !doorRitual.active) triggerDoorRitualLocally();
             updateItemsHUD();
 
+            const hasBoss = Array.isArray(data.bosses) && data.bosses.length > 0;
+            document.getElementById("redScreenEdge").style.opacity = hasBoss ? "1" : "0";
+            flashlight.stunTimer = data.bossStunTimer || 0;
+
             if (!isHost) {
-              if (Array.isArray(data.bosses) && data.bosses.length > 0) {
-                if (bosses.length === 0) document.getElementById("redScreenEdge").style.opacity = "1";
+              if (hasBoss) {
                 bosses = data.bosses.map((sb, idx) => {
                   const prev = bosses[idx] || sb;
-                  return {
-                    ...sb,
-                    renderX: prev.renderX !== undefined ? prev.renderX : sb.x,
-                    renderY: prev.renderY !== undefined ? prev.renderY : sb.y
-                  };
+                  return { ...sb, renderX: prev.renderX !== undefined ? prev.renderX : sb.x, renderY: prev.renderY !== undefined ? prev.renderY : sb.y };
                 });
-                flashlight.stunTimer = data.bossStunTimer || 0;
-              } else if (bosses.length > 0) {
-                bosses = []; flashlight.stunTimer = 0;
-                document.getElementById("redScreenEdge").style.opacity = "0";
+              } else {
+                bosses = [];
               }
             }
 
@@ -627,8 +666,170 @@
             }
           }
         }
-      } catch (e) {}
-    }, 600);
+      });
+    }
+
+
+
+    async function invitePlayer() {
+      const target = document.getElementById("inviteUserTxt").value.trim();
+      if (!target || Object.keys(squad).length >= 4) return;
+      const snap = await rtdb.ref(`students/${target}`).once("value");
+      const st = snap.val();
+      if (!st) { showSubtleNotify("Không tìm thấy username này."); return; }
+      const newMember = { username: target, name: st.name || target, avatar: st.avatar || "avatargaubasic.jpg", x: 485, y: 565, vx: 0, vy: 0, alive: true, ready: false, flipX: false, moving: false };
+      await rtdb.ref(`mansion_rooms/${roomId}/players/${target}`).set(newMember);
+      document.getElementById("inviteUserTxt").value = "";
+    }
+
+    async function joinRoomByCode() {
+      const code = document.getElementById("joinCodeTxt").value.trim().toUpperCase();
+      if (!code) return;
+      const snap = await rtdb.ref(`mansion_rooms/${code}`).once("value");
+      const data = snap.val();
+      if (!data) { showSubtleNotify("Mã phòng không tồn tại."); return; }
+      roomId = code; isHost = (data.host === myUser);
+      document.getElementById("roomCodeText").innerText = roomId;
+      await rtdb.ref(`mansion_rooms/${roomId}/players/${myUser}`).update({
+        username: myUser, name: myName, avatar: myAvatar, x: 465, y: 565, vx: 0, vy: 0, alive: true, ready: false, flipX: false, moving: false
+      });
+      attachRealtimeRoomListener(roomId);
+    }
+    function renderSquad() {
+      const g = document.getElementById("squadGrid");
+      if (!g) return;
+      g.innerHTML = "";
+      const list = Object.values(squad);
+      for (let i = 0; i < 4; i++) {
+        g.innerHTML += list[i]
+          ? `<div class="slot-box"><img src="${list[i].avatar}"><div><b>${list[i].name}</b></div></div>`
+          : `<div class="slot-box" style="opacity:0.4; display:flex; align-items:center; justify-content:center;">Trống</div>`;
+      }
+    }
+
+    async function hostOpenRulesScreen() {
+      initAudio();
+      const randomCode = new Array(
+        Math.floor(Math.random() * 10), Math.floor(Math.random() * 10),
+        Math.floor(Math.random() * 10), Math.floor(Math.random() * 10)
+      );
+      const randomOrder = Array.from({ length: 18 }, (_, idx) => idx).sort(() => Math.random() - 0.5);
+      Object.keys(squad).forEach(u => { squad[u].ready = false; squad[u].alive = true; });
+      await rtdb.ref(`mansion_rooms/${roomId}`).update({
+        status: "rules", players: squad, secretCode: randomCode, layoutSeed: randomOrder,
+        foundDigits: ["?", "?", "?", "?"], matchesCount: 0,
+        matchesTaken: [false, false, false], litTorches: [false, false, false],
+        scrollSolved: false, chestSolved: false, chestProgress: 0,
+        talismansTaken: [false, false, false], wordSolved: false,
+        coinsTaken: [false, false, false], flashlightsTaken: [false, false, false],
+        crossTaken: false, doorRitualStarted: false, bosses: [], bossStunTimer: 0, eventBanner: ""
+      });
+    }
+
+    function openRulesReadyScreen() {
+      document.getElementById("lobbyScreen").style.display = "none";
+      document.getElementById("rulesReadyScreen").style.display = "flex";
+      const btn = document.getElementById("btnConfirmReady");
+      btn.disabled = false; btn.innerText = "Đã hiểu và sẵn sàng";
+      renderReadySquad();
+    }
+
+    function renderReadySquad() {
+      const list = Object.values(squad);
+      const readyCount = list.filter(p => p.ready).length;
+      document.getElementById("readyCounterText").innerText = `${readyCount}/${list.length} Sẵn sàng`;
+      const g = document.getElementById("readySquadGrid");
+      if (!g) return;
+      g.innerHTML = "";
+      list.forEach(p => {
+        g.innerHTML += `<div class="slot-box" style="border-color:${p.ready ? '#10b981' : '#475569'}">
+          <img src="${p.avatar}"><div><b>${p.name}</b></div>
+          <div style="font-size:0.7rem; color:${p.ready ? '#34d399' : '#94a3b8'};">${p.ready ? 'Sẵn sàng' : 'Đang đọc...'}</div>
+        </div>`;
+      });
+    }
+
+    async function confirmPlayerReady() {
+      initAudio();
+      const btn = document.getElementById("btnConfirmReady");
+      btn.disabled = true; btn.innerText = "Đang chờ đồng đội...";
+      await rtdb.ref(`mansion_rooms/${roomId}/players/${myUser}/ready`).set(true);
+    }
+
+    function attachRealtimeRoomListener(targetRoomId) {
+      if (roomListenerRef) roomListenerRef.off();
+      roomListenerRef = rtdb.ref(`mansion_rooms/${targetRoomId}`);
+      roomListenerRef.on("value", snapshot => {
+        const data = snapshot.val();
+        if (!data) return;
+        squad = data.players || {};
+
+        if (data.status === "waiting") {
+          renderSquad();
+          if (matchRunning) cleanupMatchState();
+        } else if (data.status === "rules") {
+          if (document.getElementById("rulesReadyScreen").style.display !== "flex" && !matchRunning) openRulesReadyScreen();
+          renderReadySquad();
+          const list = Object.values(squad);
+          if (list.length > 0 && list.every(p => p.ready)) {
+            if (isHost) rtdb.ref(`mansion_rooms/${targetRoomId}/status`).set("playing");
+            startMatchLocal(data);
+          }
+        } else if (data.status === "playing") {
+          if (!matchRunning) startMatchLocal(data);
+          else {
+            if (Array.isArray(data.secretCode) && data.secretCode.length === 4) secretCode = data.secretCode;
+
+            if (Array.isArray(data.foundDigits) && data.foundDigits.length === 4) {
+              for (let i = 0; i < 4; i++) {
+                if (data.foundDigits[i] !== "?" && data.foundDigits[i] !== undefined) foundDigits[i] = data.foundDigits[i];
+              }
+              document.getElementById("hudCode").innerText = `Mã: ${foundDigits.join(" - ")}`;
+            }
+
+            if (typeof data.matchesCount === "number") questState.matchesCount = data.matchesCount;
+            if (Array.isArray(data.matchesTaken)) questState.matchesTaken = data.matchesTaken;
+            if (Array.isArray(data.litTorches)) questState.litTorches = data.litTorches;
+            if (data.scrollSolved) questState.scrollSolved = true;
+            if (data.chestSolved) questState.chestSolved = true;
+            if (typeof data.chestProgress === "number") chestProgress = Math.max(chestProgress, data.chestProgress);
+            if (Array.isArray(data.talismansTaken)) questState.talismansTaken = data.talismansTaken;
+            if (data.wordSolved) questState.wordSolved = true;
+            if (Array.isArray(data.coinsTaken)) data.coinsTaken.forEach((t, i) => { if (coinsList[i] && t) coinsList[i].taken = true; });
+            if (Array.isArray(data.flashlightsTaken)) data.flashlightsTaken.forEach((t, i) => { if (FLASHLIGHT_SPOTS[i] && t) FLASHLIGHT_SPOTS[i].taken = true; });
+            if (data.crossTaken) CROSS_SPOT.taken = true;
+            if (data.doorRitualStarted && !doorRitual.active) triggerDoorRitualLocally();
+            updateItemsHUD();
+
+            const hasBoss = Array.isArray(data.bosses) && data.bosses.length > 0;
+            document.getElementById("redScreenEdge").style.opacity = hasBoss ? "1" : "0";
+            flashlight.stunTimer = data.bossStunTimer || 0;
+
+            if (!isHost) {
+              if (hasBoss) {
+                bosses = data.bosses.map((sb, idx) => {
+                  const prev = bosses[idx] || sb;
+                  return { ...sb, renderX: prev.renderX !== undefined ? prev.renderX : sb.x, renderY: prev.renderY !== undefined ? prev.renderY : sb.y };
+                });
+              } else {
+                bosses = [];
+              }
+            }
+
+            const allPlayers = Object.values(squad);
+            if (allPlayers.length > 0 && allPlayers.every(p => p.alive === false)) {
+              endMatch(false, "Toàn bộ thành viên trong đội đều đã bị Hobokuryo hạ gục.");
+              return;
+            }
+
+            if (data.eventBanner && data.eventBanner !== lastSharedEventId) {
+              lastSharedEventId = data.eventBanner;
+              showSubtleNotify(data.eventBanner, 3600);
+            }
+          }
+        }
+      });
+    }
     function cleanupMatchState() {
       matchRunning = false; clearInterval(clockInterval); bosses = []; playersSlowed = false; chestProgress = 0; woodChips = [];
       isSpectating = false; spectateUser = null; teammateRenderPos = {};
@@ -650,12 +851,9 @@
 
     async function exitAndResetToLobby() {
       cleanupMatchState();
-      try {
-        await fetch(`${DB_URL}/mansion_rooms/${roomId}.json`, {
-          method: "PATCH",
-          body: JSON.stringify({ status: "waiting", foundDigits: ["?", "?", "?", "?"], chestProgress: 0, bosses: [], eventBanner: "" })
-        });
-      } catch (e) {}
+      await rtdb.ref(`mansion_rooms/${roomId}`).update({
+        status: "waiting", foundDigits: ["?", "?", "?", "?"], chestProgress: 0, bosses: [], bossStunTimer: 0, eventBanner: ""
+      }).catch(() => {});
       await loadLeaderboard();
     }
 
@@ -843,8 +1041,8 @@
 
     function updateFlashlightBtnUI() {
       const btn = document.getElementById("btnFlashlight"), lbl = document.getElementById("flashLabel");
+      btn.classList.toggle("has-item", flashlight.owned);
       btn.classList.toggle("active-glow", flashlight.owned && flashlight.on);
-	  btn.classList.toggle("has-item", flashlight.owned);
       if (!flashlight.owned) lbl.innerText = "Chưa có";
       else if (flashlight.cooldown > 0) lbl.innerText = `Hồi ${flashlight.cooldown}s`;
       else lbl.innerText = flashlight.on ? "Đèn bật" : "Đèn tắt";
@@ -852,8 +1050,8 @@
 
     function updateCrossBtnUI() {
       const btn = document.getElementById("btnCross"), lbl = document.getElementById("crossLabel");
+      btn.classList.toggle("has-item", crossItem.owned && crossItem.timeLeft > 0);
       btn.classList.toggle("active-glow", crossItem.owned && crossItem.on && crossItem.timeLeft > 0);
-	  btn.classList.toggle("has-item", crossItem.owned);
       if (!crossItem.owned) lbl.innerText = "Chưa có";
       else if (crossItem.timeLeft <= 0) lbl.innerText = "Hết lực";
       else lbl.innerText = crossItem.on ? `Bật ${crossItem.timeLeft}s` : "Thánh giá";
@@ -880,9 +1078,7 @@
     function syncCrossState() {
       const active = crossItem.owned && crossItem.on && crossItem.timeLeft > 0;
       if (squad[myUser]) squad[myUser].crossProtected = active;
-      fetch(`${DB_URL}/mansion_rooms/${roomId}/players/${myUser}.json`, {
-        method: "PATCH", body: JSON.stringify({ crossProtected: active })
-      }).catch(() => {});
+      rtdb.ref(`mansion_rooms/${roomId}/players/${myUser}`).update({ crossProtected: active }).catch(() => {});
     }
 
     function pickRandomTargetUser(excludeUser = null) {
@@ -993,12 +1189,7 @@
       if (isHost) {
         if (bosses.length === 0 && elapsedSeconds >= nextBossSpawn) spawnBossCycle(30);
         else if (bosses.length > 0) {
-          bosses.forEach(b => {
-            b.lifeLeft--;
-            if (elapsedSeconds % 8 === 0 || !squad[b.targetUser] || squad[b.targetUser].alive === false || squad[b.targetUser].crossProtected) {
-              b.targetUser = pickRandomTargetUser();
-            }
-          });
+          bosses.forEach(b => { b.lifeLeft--; });
           if (bosses.at(0).lifeLeft <= 0 && !doorRitual.active) despawnBossCycle();
         }
       }
@@ -1038,10 +1229,9 @@
       FLASHLIGHT_SPOTS = new Array(0, 1, 2).map(id => { const s = pickSpot(); return { id, x: s.x, y: s.y, taken: false }; });
       const cr = pickSpot(); CROSS_SPOT = { x: cr.x, y: cr.y, taken: false };
       matchSpots = new Array(0, 1, 2).map(id => { const s = pickSpot(); return { id, x: s.x, y: s.y, room: s.area }; });
-      BRAZIER_SPOTS = new Array(0, 1, 2).
       BRAZIER_SPOTS = new Array(0, 1, 2).map(id => { const s = pickSpot(); return { id, x: s.x, y: s.y, room: s.area }; });
       const sc = pickSpot(); SCROLL_SPOT = { x: sc.x, y: sc.y };
-      const ch = pickSpot(); LOCKED_CHEST_SPOT = { x: ch.x, y: ch.y };
+	        const ch = pickSpot(); LOCKED_CHEST_SPOT = { x: ch.x, y: ch.y };
       TALISMAN_SPOTS = new Array(0, 1, 2).map(id => { const s = pickSpot(); return { id, x: s.x, y: s.y, loc: s.area }; });
       coinsList = new Array(0, 1, 2).map(id => { const pt = pickSpot(); return { id, x: pt.x, y: pt.y, val: 3 + Math.floor(Math.random() * 8), taken: false }; });
 
@@ -1060,8 +1250,9 @@
       clockInterval = setInterval(tickClock, 1000);
       requestAnimationFrame(loop);
     }
-    async function syncRoomState(patchObj) {
-      try { await fetch(`${DB_URL}/mansion_rooms/${roomId}.json`, { method: "PATCH", body: JSON.stringify(patchObj) }); } catch (e) {}
+
+    function syncRoomState(patchObj) {
+      rtdb.ref(`mansion_rooms/${roomId}`).update(patchObj).catch(() => {});
     }
 
     function getUniqueQuiz() {
@@ -1072,7 +1263,6 @@
       usedQuizIdx.push(idx);
       return QUIZ_BANK[idx];
     }
-
     function tryInteract() {
       if (!matchRunning || puzzleOpen || isSpectating) return;
 
@@ -1289,9 +1479,7 @@
       document.getElementById("aliveActionBtns").style.display = "none";
       document.getElementById("spectateActionBtns").style.display = "flex";
 
-      fetch(`${DB_URL}/mansion_rooms/${roomId}/players/${myUser}.json`, {
-        method: "PATCH", body: JSON.stringify({ alive: false, crossProtected: false })
-      }).catch(() => {});
+      rtdb.ref(`mansion_rooms/${roomId}/players/${myUser}`).update({ alive: false, crossProtected: false }).catch(() => {});
 
       const aliveMates = Object.values(squad).filter(p => p.username !== myUser && p.alive !== false);
       if (aliveMates.length === 0) {
@@ -1317,12 +1505,7 @@
       matchRunning = false; clearInterval(clockInterval); resetAllMovementInputs();
       if (!win) playPlayerKilledSFX();
       if (win) await syncStudentProfile(25, 1);
-      try {
-        await fetch(`${DB_URL}/mansion_rooms/${roomId}.json`, {
-          method: "PATCH",
-          body: JSON.stringify({ status: "waiting", foundDigits: ["?", "?", "?", "?"], chestProgress: 0, bosses: [], doorRitualStarted: false, eventBanner: "" })
-        });
-      } catch (e) {}
+      syncRoomState({ status: "waiting", foundDigits: ["?", "?", "?", "?"], chestProgress: 0, bosses: [], bossStunTimer: 0, doorRitualStarted: false, eventBanner: "" });
       document.getElementById("redScreenEdge").style.opacity = "0";
       document.getElementById("endTitle").innerText = win ? "Thoát hiểm thành công" : "Nhiệm vụ thất bại";
       document.getElementById("endTitle").style.color = win ? "#34d399" : "#ef4444";
@@ -1333,6 +1516,7 @@
       if (!matchRunning) return;
       const curSpeed = playersSlowed ? player.slowSpeed : player.baseSpeed;
       player.isMoving = false;
+      let vx = 0, vy = 0;
 
       if (!puzzleOpen && !isSpectating) {
         let dx = joyDir.x, dy = joyDir.y;
@@ -1341,7 +1525,7 @@
         const mag = Math.hypot(dx, dy);
         if (mag > 0.05) {
           const norm = mag > 1 ? 1 / mag : 1;
-          const vx = dx * norm, vy = dy * norm;
+          vx = dx * norm; vy = dy * norm;
           player.isMoving = true;
           player.facingAngle = Math.atan2(vy, vx);
           const walkCycle = new Array(1, 2, 3, 2);
@@ -1368,10 +1552,12 @@
           squad[myUser].x = player.x; squad[myUser].y = player.y;
           squad[myUser].flipX = player.flipX; squad[myUser].moving = player.isMoving;
         }
-        if (Date.now() - lastPosSync > 140) {
+        if (Date.now() - lastPosSync > 75) {
           lastPosSync = Date.now();
-          fetch(`${DB_URL}/mansion_rooms/${roomId}/players/${myUser}.json`, {
-            method: "PATCH", body: JSON.stringify({ x: Math.round(player.x), y: Math.round(player.y), flipX: player.flipX, moving: player.isMoving })
+          rtdb.ref(`mansion_rooms/${roomId}/players/${myUser}`).update({
+            x: Math.round(player.x), y: Math.round(player.y),
+            vx: Number((vx * curSpeed).toFixed(2)), vy: Number((vy * curSpeed).toFixed(2)),
+            flipX: player.flipX, moving: player.isMoving
           }).catch(() => {});
         }
       }
@@ -1411,34 +1597,43 @@
 
           if (isHost) {
             if (flashlight.stunTimer <= 0) {
-              const targetP = (b.targetUser && squad[b.targetUser] && squad[b.targetUser].alive !== false && !squad[b.targetUser].crossProtected)
-                ? squad[b.targetUser]
-                : Object.values(squad).find(p => p.alive !== false && !p.crossProtected);
+              const candidates = Object.values(squad).filter(p => p.alive !== false && !p.crossProtected).map(p => {
+                const px = p.username === myUser ? player.x : p.x;
+                const py = p.username === myUser ? player.y : p.y;
+                return { username: p.username, x: px, y: py, dist: Math.hypot(px - b.x, py - b.y) };
+              });
 
-              let vx = 0, vy = 0;
-              if (targetP) {
-                const tx = targetP.username === myUser ? player.x : targetP.x;
-                const ty = targetP.username === myUser ? player.y : targetP.y;
-                const ang = Math.atan2(ty - b.y, tx - b.x);
-                vx = Math.cos(ang) * b.speed;
-                vy = Math.sin(ang) * b.speed;
+              let bvx = 0, bvy = 0;
+              if (candidates.length > 0) {
+                candidates.sort((a, c) => a.dist - c.dist);
+                const nearest = candidates.at(0);
+                const currentTarget = candidates.find(c => c.username === b.targetUser);
+
+                if (!currentTarget || nearest.dist < currentTarget.dist - 35 || nearest.dist < 145) {
+                  b.targetUser = nearest.username;
+                }
+                const chosen = candidates.find(c => c.username === b.targetUser) || nearest;
+                const ang = Math.atan2(chosen.y - b.y, chosen.x - b.x);
+                bvx = Math.cos(ang) * b.speed;
+                bvy = Math.sin(ang) * b.speed;
               }
+
               bosses.forEach((other, j) => {
                 if (i !== j) {
                   const sep = Math.hypot(b.x - other.x, b.y - other.y);
                   if (sep < 85 && sep > 0.1) {
                     const pushAng = Math.atan2(b.y - other.y, b.x - other.x);
-                    vx += Math.cos(pushAng) * 1.4; vy += Math.sin(pushAng) * 1.4;
+                    bvx += Math.cos(pushAng) * 1.4; bvy += Math.sin(pushAng) * 1.4;
                   }
                 }
               });
-              if (vx < -0.05) b.flipX = true; else if (vx > 0.05) b.flipX = false;
-              b.x += vx; b.y += vy;
+              if (bvx < -0.05) b.flipX = true; else if (bvx > 0.05) b.flipX = false;
+              b.x += bvx; b.y += bvy;
             }
             b.renderX = b.x; b.renderY = b.y;
           } else {
-            b.renderX += (b.x - b.renderX) * 0.25;
-            b.renderY += (b.y - b.renderY) * 0.25;
+            b.renderX += (b.x - b.renderX) * 0.35;
+            b.renderY += (b.y - b.renderY) * 0.35;
           }
 
           const iAmProtected = crossItem.owned && crossItem.on && crossItem.timeLeft > 0;
@@ -1447,7 +1642,7 @@
           }
         });
 
-        if (isHost && Date.now() - lastPosSync > 140) {
+        if (isHost && Date.now() - lastPosSync > 75) {
           syncRoomState({
             bosses: bosses.map(b => ({ id: b.id, x: Math.round(b.x), y: Math.round(b.y), r: b.r, speed: b.speed, lifeLeft: b.lifeLeft, flipX: b.flipX, spriteKey: b.spriteKey, targetUser: b.targetUser })),
             bossStunTimer: flashlight.stunTimer
@@ -1611,24 +1806,22 @@
         if (mate.username !== myUser && mate.alive !== false) {
           if (!teammateRenderPos[mate.username]) teammateRenderPos[mate.username] = { x: mate.x, y: mate.y };
           const rp = teammateRenderPos[mate.username];
-          const moveDist = Math.hypot(mate.x - rp.x, mate.y - rp.y);
-          rp.x += (mate.x - rp.x) * 0.25;
-          rp.y += (mate.y - rp.y) * 0.25;
+          const predX = mate.x + (mate.vx || 0);
+          const predY = mate.y + (mate.vy || 0);
+          rp.x += (predX - rp.x) * 0.35;
+          rp.y += (predY - rp.y) * 0.35;
 
-          const isMateMoving = mate.moving || moveDist > 1.2;
-          let tKey = "teammateIdle";
-          let fallbackKey = "playerIdle";
-          if (isMateMoving) {
-            if (stepFrame === 1) { tKey = "teammateLeft"; fallbackKey = "playerLeft"; }
-            else if (stepFrame === 2) { tKey = "teammateMid"; fallbackKey = "playerMid"; }
-            else { tKey = "teammateRight"; fallbackKey = "playerRight"; }
+          let pKey = "playerIdle";
+          if (mate.moving) {
+            if (stepFrame === 1) pKey = "playerLeft";
+            else if (stepFrame === 2) pKey = "playerMid";
+            else pKey = "playerRight";
           }
 
-          const drawn = drawConfiguredSprite(tKey, rp.x, rp.y, mate.flipX)
-                     || drawConfiguredSprite("teammate", rp.x, rp.y, mate.flipX)
-                     || drawConfiguredSprite(fallbackKey, rp.x, rp.y, mate.flipX);
-          if (!drawn) { ctx.fillStyle = "#34d399"; ctx.fillRect(rp.x - 10, rp.y - 13, 20, 26); }
-          drawPixelHint(mate.name, rp.x, rp.y - 28, "#ffffff");
+          if (!drawConfiguredSprite(pKey, rp.x, rp.y, mate.flipX)) {
+            ctx.fillStyle = "#34d399"; ctx.fillRect(rp.x - 10, rp.y - 13, 20, 26);
+          }
+          drawPixelHint(mate.name, rp.x, rp.y - 28, "#6ee7b7");
         }
       });
 
@@ -1688,3 +1881,4 @@
   </script>
 </body>
 </html>
+
