@@ -3,295 +3,253 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Toshi Densetsu</title>
+  <title>Toshi Densetsu 1.0</title>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Roboto, sans-serif; user-select: none; -webkit-user-select: none; }
-    html, body { width: 100vw; height: 100vh; overflow: hidden; background: #040406; color: #f8fafc; overscroll-behavior: none; touch-action: none; }
+    html, body {
+      position: fixed !important; inset: 0 !important; width: 100vw !important; height: 100vh !important;
+      overflow: hidden !important; overscroll-behavior: none !important; touch-action: none !important;
+      background: #040406; color: #f8fafc;
+    }
     canvas#gameCanvas { display: block; width: 100vw; height: 100vh; image-rendering: pixelated; }
 
+    #portraitLockOverlay {
+      position: fixed; inset: 0; background: #050508; z-index: 9999;
+      display: none; flex-direction: column; justify-content: center; align-items: center;
+      text-align: center; padding: 24px;
+    }
+    @media screen and (orientation: portrait) and (max-width: 900px) {
+      #portraitLockOverlay { display: flex; }
+    }
+
     #lobbyScreen, #rulesReadyScreen {
-      position: fixed; inset: 0; background: radial-gradient(circle at center, #18101c 0%, #040406 100%);
-      display: flex; justify-content: center; align-items: center; z-index: 500; padding: 14px;
+      position: fixed; inset: 0; background: radial-gradient(circle at center, #14080a 0%, #030305 100%);
+      display: flex; justify-content: center; align-items: center; z-index: 500; padding: 12px; overflow-y: auto;
     }
     #rulesReadyScreen { display: none; z-index: 520; }
-    .lobby-wrap { display: grid; grid-template-columns: 1.35fr 1fr; gap: 14px; width: 100%; max-width: 860px; max-height: 92vh; }
-    @media (max-width: 760px) { .lobby-wrap { grid-template-columns: 1fr; overflow-y: auto; } }
-    .lobby-card { background: rgba(11, 13, 20, 0.96); border: 1.5px solid rgba(185, 28, 28, 0.55); border-radius: 16px; padding: 18px 20px; box-shadow: 0 20px 50px rgba(0,0,0,0.92); }
-    .lobby-head { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 10px; margin-bottom: 10px; }
-    .lobby-head h1 { font-size: 1.08rem; font-weight: 800; color: #ef4444; letter-spacing: 0.5px; display: flex; align-items: center; gap: 8px; }
-    .game-logo-icon { width: 32px; height: 32px; object-fit: contain; border-radius: 6px; }
-    .story-box { background: rgba(22, 22, 30, 0.88); border-left: 3px solid #b91c1c; padding: 9px 12px; border-radius: 8px; font-size: 0.8rem; color: #cbd5e1; margin-bottom: 10px; line-height: 1.45; }
-    .room-row { display: flex; gap: 6px; margin-bottom: 10px; flex-wrap: wrap; }
-    .room-row input { flex: 1; min-width: 115px; background: #14161f; border: 1px solid rgba(255,255,255,0.15); border-radius: 9px; color: #fff; padding: 7px 10px; font-size: 0.84rem; outline: none; }
-    .btn-dark { background: #1e202b; color: #e2e8f0; border: 1px solid rgba(255,255,255,0.18); border-radius: 9px; padding: 7px 13px; font-size: 0.83rem; font-weight: 700; cursor: pointer; }
-    .btn-dark:hover { border-color: #ef4444; }
-    .btn-blood { width: 100%; background: linear-gradient(135deg, #991b1b, #7f1d1d); color: #fef2f2; border: 1px solid #ef4444; border-radius: 11px; padding: 11px; font-size: 0.94rem; font-weight: 800; cursor: pointer; margin-top: 10px; }
-    .squad-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin: 10px 0; }
-    .slot-box { background: rgba(24, 24, 32, 0.85); border: 1px solid rgba(255,255,255,0.12); border-radius: 10px; padding: 8px 4px; text-align: center; font-size: 0.78rem; }
-    .slot-box img { width: 36px; height: 36px; border-radius: 50%; border: 2px solid #991b1b; object-fit: cover; margin-bottom: 3px; }
-    .lb-list { max-height: 290px; overflow-y: auto; display: flex; flex-direction: column; gap: 6px; margin-top: 8px; }
-    .lb-item { display: flex; justify-content: space-between; align-items: center; background: rgba(24, 24, 32, 0.8); padding: 7px 12px; border-radius: 9px; font-size: 0.83rem; }
-
-    .hud-left { position: fixed; top: 12px; left: 14px; display: flex; gap: 6px; z-index: 20; flex-wrap: wrap; max-width: 38vw; }
-    .hud-right { position: fixed; top: 12px; right: 14px; display: flex; flex-direction: column; align-items: flex-end; gap: 8px; z-index: 20; }
-    .pill-box { background: rgba(10, 12, 18, 0.9); border: 1px solid rgba(255, 255, 255, 0.16); border-radius: 10px; padding: 6px 11px; font-weight: 700; font-size: 0.78rem; color: #e2e8f0; }
-
-    .radar-wrap {
-      background: rgba(8, 10, 16, 0.88); border: 1.5px solid rgba(148, 163, 184, 0.35);
-      border-radius: 12px; padding: 5px; box-shadow: 0 8px 24px rgba(0,0,0,0.9);
-      display: flex; flex-direction: column; align-items: center; gap: 3px;
+    .lobby-wrap {
+      display: grid; grid-template-columns: 1.25fr 0.85fr; gap: 14px;
+      max-width: 920px; width: 100%; max-height: 94vh;
     }
-    #radarCanvas { display: block; border-radius: 7px; background: #05070c; }
-    .radar-legend { font-size: 0.62rem; color: #94a3b8; display: flex; gap: 6px; font-weight: 700; }
-
-    .center-hud-anchor {
-      position: fixed; top: 12px; left: 50%; transform: translateX(-50%);
-      display: flex; flex-direction: column; align-items: center; gap: 5px;
-      z-index: 30; pointer-events: none; width: max-content; max-width: 90vw;
+    .lobby-card {
+      background: rgba(14, 15, 22, 0.96); border: 1.5px solid rgba(220, 38, 38, 0.45);
+      border-radius: 16px; padding: 14px 16px; box-shadow: 0 20px 50px rgba(0,0,0,0.9);
+      display: flex; flex-direction: column; max-height: 94vh; overflow-y: auto;
     }
-    .timer-box { background: rgba(10, 12, 18, 0.94); border: 1px solid rgba(248, 113, 113, 0.5); border-radius: 10px; padding: 5px 16px; font-weight: 800; font-size: 0.9rem; color: #f8fafc; box-shadow: 0 4px 15px rgba(0,0,0,0.8); }
-    #subtleSubNotify {
-      color: #ffffff; font-size: 0.83rem; font-weight: 600; text-align: center;
-      text-shadow: 0 2px 6px rgba(0,0,0,1); background: rgba(0, 0, 0, 0.68);
-      padding: 4px 14px; border-radius: 99px; opacity: 0; transition: opacity 0.25s;
-    }
+    .lobby-head { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 8px; margin-bottom: 10px; }
+    .lobby-head h1 { font-size: 1.05rem; font-weight: 900; color: #ef4444; letter-spacing: 0.4px; display: flex; align-items: center; gap: 8px; }
+    .game-logo-icon { width: 28px; height: 28px; object-fit: contain; border-radius: 6px; }
+    .story-box { background: rgba(127, 29, 29, 0.16); border-left: 3px solid #dc2626; padding: 8px 10px; border-radius: 8px; font-size: 0.78rem; color: #cbd5e1; line-height: 1.45; margin-bottom: 10px; }
+    .room-row { display: flex; gap: 6px; margin-bottom: 8px; }
+    .room-row input { flex: 1; background: #090a0f; border: 1px solid rgba(255,255,255,0.2); border-radius: 8px; padding: 7px 10px; color: #fff; font-size: 0.8rem; outline: none; }
+    .btn-dark { background: #1e202b; color: #f8fafc; border: 1px solid rgba(255,255,255,0.18); border-radius: 8px; padding: 7px 12px; font-weight: 700; cursor: pointer; font-size: 0.78rem; }
+    .btn-blood { width: 100%; background: linear-gradient(135deg, #991b1b, #7f1d1d); color: #fff; border: 1px solid #ef4444; border-radius: 10px; padding: 10px; font-size: 0.9rem; font-weight: 800; cursor: pointer; margin-top: 8px; }
+    .btn-blood:disabled { opacity: 0.55; cursor: default; }
+    .squad-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin: 8px 0; }
+    .slot-box { background: #090a0f; border: 1px solid rgba(255,255,255,0.14); border-radius: 10px; padding: 6px 4px; text-align: center; font-size: 0.72rem; }
+    .slot-box img { width: 32px; height: 32px; border-radius: 50%; border: 1.5px solid #ef4444; object-fit: cover; margin-bottom: 3px; }
+    .lb-list { display: flex; flex-direction: column; gap: 6px; overflow-y: auto; padding-right: 4px; }
+    .lb-item { display: flex; justify-content: space-between; align-items: center; background: #090a0f; border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 7px 10px; font-size: 0.78rem; }
+    .hud-left { position: fixed; top: 10px; left: 12px; display: flex; flex-direction: column; gap: 5px; z-index: 25; pointer-events: none; }
+    .pill-box { background: rgba(10, 11, 16, 0.86); border: 1px solid rgba(255,255,255,0.16); border-radius: 8px; padding: 5px 10px; font-size: 0.75rem; font-weight: 700; color: #f8fafc; pointer-events: auto; }
+    .center-hud-anchor { position: fixed; top: 10px; left: 50%; transform: translateX(-50%); display: flex; flex-direction: column; align-items: center; gap: 4px; z-index: 30; pointer-events: none; width: max-content; max-width: 90vw; }
+    .timer-box { background: rgba(10, 11, 16, 0.9); border: 1px solid rgba(239, 68, 68, 0.45); border-radius: 99px; padding: 4px 14px; font-size: 0.78rem; font-weight: 800; color: #fca5a5; }
+    #subtleSubNotify { background: rgba(10, 11, 16, 0.85); color: #e2e8f0; border: 1px solid rgba(255,255,255,0.12); font-size: 0.76rem; font-weight: 600; padding: 4px 12px; border-radius: 99px; opacity: 0; transition: opacity 0.25s ease; text-align: center; }
     #subtleSubNotify.show { opacity: 1; }
-    #bottomHintBar {
-      position: fixed; bottom: 14px; left: 50%; transform: translateX(-50%);
-      background: rgba(10, 12, 18, 0.78); border: 1px solid rgba(255, 255, 255, 0.14);
-      color: #cbd5e1; font-size: 0.76rem; font-weight: 600;
-      padding: 4px 16px; border-radius: 99px; z-index: 22;
-      pointer-events: none; text-align: center; max-width: 54vw; text-shadow: 0 1px 4px #000;
-    }
-    #portraitLockOverlay {
-      display: none; position: fixed; inset: 0; background: #040406;
-      z-index: 9999; flex-direction: column; justify-content: center; align-items: center;
-      text-align: center; padding: 24px; color: #f8fafc;
-    }
-    @media screen and (max-width: 900px) and (orientation: portrait) { #portraitLockOverlay { display: flex; } }
+    #statusLineText { font-size: 0.72rem; font-weight: 700; color: #fca5a5; text-shadow: 0 1px 4px #000; }
 
-    .danger-alert { position: fixed; top: 76px; left: 50%; transform: translateX(-50%); background: rgba(127, 29, 29, 0.92); color: #fecaca; border: 1px solid #ef4444; border-radius: 99px; padding: 4px 16px; font-size: 0.8rem; font-weight: 800; display: none; z-index: 25; }
-    .stun-banner { position: fixed; top: 106px; left: 50%; transform: translateX(-50%); background: rgba(15, 23, 42, 0.92); color: #7dd3fc; border: 1px solid #38bdf8; border-radius: 99px; padding: 4px 16px; font-size: 0.82rem; font-weight: 800; display: none; z-index: 26; }
-    .slow-banner { position: fixed; top: 136px; left: 50%; transform: translateX(-50%); background: rgba(30, 27, 75, 0.92); color: #c4b5fd; border: 1px solid #8b5cf6; border-radius: 99px; padding: 4px 14px; font-size: 0.78rem; font-weight: 800; display: none; z-index: 26; }
-    .cross-banner { position: fixed; top: 164px; left: 50%; transform: translateX(-50%); background: rgba(113, 63, 18, 0.92); color: #fef08a; border: 1px solid #facc15; border-radius: 99px; padding: 4px 14px; font-size: 0.78rem; font-weight: 800; display: none; z-index: 26; }
-    #redScreenEdge { position: fixed; inset: 0; pointer-events: none; z-index: 15; box-shadow: inset 0 0 95px rgba(185, 28, 28, 0.88); opacity: 0; transition: opacity 0.3s ease; }
-    #lightningFlash { position: fixed; inset: 0; pointer-events: none; z-index: 18; background: rgba(248, 250, 252, 0.72); opacity: 0; transition: opacity 0.08s ease-out; }
+    .hud-right { position: fixed; top: 10px; right: 12px; display: flex; flex-direction: column; align-items: flex-end; gap: 5px; z-index: 25; }
+    .radar-wrap { background: rgba(10, 11, 16, 0.88); border: 1.5px solid rgba(148, 163, 184, 0.35); border-radius: 10px; padding: 4px; }
+    #radarCanvas { display: block; border-radius: 6px; background: #090b10; }
+    .radar-legend { display: flex; justify-content: space-between; font-size: 0.6rem; color: #94a3b8; margin-top: 2px; padding: 0 2px; font-weight: 700; }
+    #bottomHintBar { position: fixed; bottom: 8px; left: 50%; transform: translateX(-50%); font-size: 0.72rem; font-weight: 600; color: rgba(226, 232, 240, 0.8); text-shadow: 0 1px 4px #000; z-index: 20; pointer-events: none; text-align: center; width: 92vw; }
+    #redScreenEdge { position: fixed; inset: 0; pointer-events: none; z-index: 15; box-shadow: inset 0 0 80px rgba(220, 38, 38, 0.75); opacity: 0; transition: opacity 0.4s; }
+    #lightningFlash { position: fixed; inset: 0; background: #ffffff; opacity: 0; pointer-events: none; z-index: 16; }
 
-    .dpad-box {
-      position: fixed;
-      bottom: calc(22px + env(safe-area-inset-bottom, 0px));
-      left: calc(18px + env(safe-area-inset-left, 0px));
-      display: none; grid-template-columns: repeat(3, 48px); grid-template-rows: repeat(3, 48px);
-      gap: 4px; z-index: 90; touch-action: none;
+    .right-btns { position: fixed; bottom: 24px; right: 18px; display: flex; gap: 10px; align-items: flex-end; z-index: 40; }
+         .btn-horror {
+      width: 64px; height: 64px; border-radius: 50%;
+      background: rgba(10, 12, 18, 0.52);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      border: 1px solid rgba(255, 255, 255, 0.16);
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.45);
+      cursor: pointer; display: flex; justify-content: center; align-items: center;
+      padding: 0; touch-action: none; transition: transform 0.12s ease, border-color 0.2s ease, background 0.2s ease;
     }
-    .dpad-btn {
-      width: 48px; height: 48px; border-radius: 12px; background: rgba(15, 18, 28, 0.88);
-      border: 2px solid rgba(248, 250, 252, 0.45); color: #ffffff; font-size: 1.2rem; font-weight: 900;
-      display: flex; justify-content: center; align-items: center;
-      box-shadow: 0 4px 14px rgba(0, 0, 0, 0.9); touch-action: none; -webkit-tap-highlight-color: transparent;
+    .btn-horror:active {
+      transform: scale(0.92);
+      background: rgba(255, 255, 255, 0.14);
     }
-    .dpad-btn.pressed { background: rgba(185, 28, 28, 0.92); border-color: #fca5a5; transform: scale(0.92); }
+    .btn-horror img {
+      width: 50px; height: 50px; object-fit: contain; pointer-events: none;
+      opacity: 0.35; transition: opacity 0.2s ease, filter 0.2s ease;
+    }
+    #btnInteract img, .btn-horror.has-item img, .btn-horror.active-glow img {
+      opacity: 0.95;
+    }
+    .btn-horror.active-glow {
+      background: rgba(20, 22, 32, 0.72);
+      border-color: rgba(253, 224, 71, 0.7);
+      box-shadow: 0 0 14px rgba(250, 204, 21, 0.28);
+    }
+    .btn-horror span { display: none; }
 
-    .right-btns { position: fixed; bottom: 22px; right: 20px; display: flex; gap: 10px; align-items: flex-end; z-index: 90; }
-    .btn-horror { width: 76px; height: 76px; border-radius: 50%; background: radial-gradient(circle at 30% 30%, #1e2029, #090a0f); border: 1.5px solid rgba(148, 163, 184, 0.35); color: #e2e8f0; font-weight: 800; font-size: 0.68rem; display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 2px; cursor: pointer; box-shadow: 0 6px 18px rgba(0, 0, 0, 0.85); touch-action: manipulation; -webkit-tap-highlight-color: transparent; }
-    .btn-horror:active { transform: scale(0.93); border-color: #ef4444; }
-    .btn-horror.active-glow { border-color: #fde047; color: #fef08a; box-shadow: 0 0 16px rgba(250, 204, 21, 0.35); }
-    .btn-horror img { width: 28px; height: 28px; object-fit: contain; }
 
-    .modal-overlay { position: fixed; inset: 0; background: rgba(0, 0, 0, 0.86); display: none; justify-content: center; align-items: center; z-index: 100; padding: 16px; }
+    .modal-overlay { position: fixed; inset: 0; background: rgba(0, 0, 0, 0.85); display: none; justify-content: center; align-items: center; z-index: 100; padding: 14px; }
     .modal-overlay.open { display: flex; }
-    .modal-card { background: #0c0e16; border: 1.5px solid #7f1d1d; border-radius: 16px; width: 100%; max-width: 450px; padding: 20px; text-align: center; box-shadow: 0 15px 45px rgba(0,0,0,0.95); }
-    .choice-btn { display: block; width: 100%; text-align: left; background: #161924; color: #f8fafc; border: 1px solid rgba(255,255,255,0.14); border-radius: 10px; padding: 10px 14px; margin-top: 8px; cursor: pointer; font-size: 0.86rem; font-weight: 600; }
-    .choice-btn:hover { border-color: #ef4444; background: #222636; }
-    .word-slots { display: flex; justify-content: center; gap: 6px; margin: 12px 0; flex-wrap: wrap; }
-    .w-slot { min-width: 32px; height: 36px; border-bottom: 2px solid #ef4444; background: #161924; border-radius: 6px; font-size: 1.1rem; font-weight: 900; color: #fef08a; display: flex; align-items: center; justify-content: center; }
-    .letter-pool { display: flex; justify-content: center; gap: 6px; flex-wrap: wrap; margin: 12px 0; }
-    .l-btn { min-width: 36px; height: 38px; background: #1e202b; border: 1px solid #64748b; border-radius: 8px; color: #fff; font-weight: 800; font-size: 0.95rem; cursor: pointer; }
+    .modal-card { background: #0c0e16; border: 1.5px solid #7f1d1d; border-radius: 14px; width: 100%; max-width: 440px; padding: 18px; text-align: center; }
+    .choice-btn { display: block; width: 100%; text-align: left; background: #161924; color: #f8fafc; border: 1px solid rgba(255,255,255,0.14); border-radius: 8px; padding: 9px 12px; margin-top: 7px; cursor: pointer; font-size: 0.84rem; font-weight: 600; }
+    .word-slots { display: flex; justify-content: center; gap: 6px; margin: 10px 0; flex-wrap: wrap; }
+    .w-slot { min-width: 30px; height: 34px; border-bottom: 2px solid #ef4444; background: #161924; border-radius: 6px; font-size: 1rem; font-weight: 900; color: #fef08a; display: flex; align-items: center; justify-content: center; }
+    .letter-pool { display: flex; justify-content: center; gap: 6px; flex-wrap: wrap; margin: 10px 0; }
+    .l-btn { min-width: 34px; height: 36px; background: #1e202b; border: 1px solid #64748b; border-radius: 8px; color: #fff; font-weight: 800; font-size: 0.9rem; cursor: pointer; }
     .l-btn:disabled { opacity: 0.25; cursor: default; }
-    .dial-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin: 16px 0; }
-    .dial-col { background: #161924; border: 1.5px solid #991b1b; border-radius: 12px; padding: 8px 4px; display: flex; flex-direction: column; align-items: center; gap: 6px; }
-    .dial-btn { width: 100%; background: #262938; color: #fff; border: none; border-radius: 6px; padding: 6px; font-weight: 800; cursor: pointer; }
-    .dial-num { font-size: 1.7rem; font-weight: 900; color: #fef08a; }
-  </style>
-    <style>
-    #rulesReadyScreen {
-      overflow-y: auto !important;
-      align-items: flex-start !important;
-      padding: 8px !important;
-    }
-    #rulesReadyScreen .lobby-card {
-      margin: auto !important;
-      max-height: 95vh !important;
-      overflow-y: auto !important;
-      padding: 10px 14px !important;
-    }
+    .dial-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin: 14px 0; }
+    .dial-col { background: #161924; border: 1.5px solid #991b1b; border-radius: 10px; padding: 6px 4px; display: flex; flex-direction: column; align-items: center; gap: 5px; }
+    .dial-btn { width: 100%; background: #262938; color: #fff; border: none; border-radius: 6px; padding: 5px; font-weight: 800; cursor: pointer; }
+    .dial-num { font-size: 1.5rem; font-weight: 900; color: #fef08a; }
     @media (max-height: 500px) {
-      #rulesReadyScreen .lobby-head { padding-bottom: 4px !important; margin-bottom: 4px !important; }
-      #rulesReadyScreen .lobby-head h1 { font-size: 0.92rem !important; }
+      #rulesReadyScreen .lobby-card { padding: 8px 12px !important; }
       #rulesReadyScreen .story-box { font-size: 0.72rem !important; line-height: 1.32 !important; padding: 6px 8px !important; margin-bottom: 6px !important; }
-      #rulesReadyScreen .squad-grid { margin: 4px 0 !important; gap: 6px !important; }
-      #rulesReadyScreen .slot-box { padding: 4px 2px !important; font-size: 0.7rem !important; }
       #rulesReadyScreen .slot-box img { width: 24px !important; height: 24px !important; }
-      #rulesReadyScreen .btn-blood { padding: 8px !important; margin-top: 6px !important; font-size: 0.85rem !important; }
+      #rulesReadyScreen .btn-blood { padding: 8px !important; margin-top: 6px !important; }
     }
   </style>
-
 </head>
 <body>
   <div id="redScreenEdge"></div>
   <div id="lightningFlash"></div>
   <div id="portraitLockOverlay">
-    <div style="font-size: 3rem; margin-bottom: 12px;">📱🔄</div>
-    <h3 style="color: #ef4444; margin-bottom: 8px;">VUI LÒNG XOAY NGANG ĐIỆN THOẠI</h3>
-    <p style="font-size: 0.86rem; color: #94a3b8;">Trò chơi tự động tối ưu góc nhìn ngang rộng để bạn quan sát bản đồ và tâm linh rõ nhất.</p>
+    <h3 style="color: #ef4444; margin-bottom: 8px;">Vui lòng xoay ngang điện thoại</h3>
+    <p style="font-size: 0.85rem; color: #94a3b8;">Trò chơi tự động tối ưu góc nhìn ngang rộng.</p>
   </div>
 
   <div id="lobbyScreen" onclick="startLobbyHorrorBGM()">
     <div class="lobby-wrap">
       <div class="lobby-card">
         <div class="lobby-head">
-          <h1>
-            <img src="logotoshidensetsu.png" class="game-logo-icon" alt="Logo" onerror="this.style.display='none'">
-            <span>TOSHI DENSETSU 1.0</span>
-          </h1>
-          <a href="tichluyhome.html" style="color:#ef4444; text-decoration:none; font-weight:700; font-size:0.85rem;">✕ Sảnh chính</a>
+          <h1><img src="logotoshidensetsu.png" class="game-logo-icon" alt="Logo" onerror="this.style.display='none'"><span>Toshi Densetsu 1.0</span></h1>
+          <a href="tichluyhome.html" style="color:#ef4444; text-decoration:none; font-weight:700; font-size:0.82rem;">Sảnh chính</a>
         </div>
-        <div class="story-box">
-          <b>Cốt Truyện:</b> Dinh thự bị khóa bởi mật mã 4 số. Mọi vật phẩm đều được giấu ngẫu nhiên mỗi trận! Đối mặt với <b>Hobokuryo</b> để trốn thoát!
-        </div>
+        <div class="story-box">Dinh thự bị khóa bởi mật mã 4 số. Mọi vật phẩm đều được giấu ngẫu nhiên mỗi trận. Cả đội cần phối hợp tìm mật mã và thoát khỏi Hobokuryo.</div>
         <div class="room-row">
           <input type="text" id="inviteUserTxt" placeholder="Username mời đội (tối đa 4)...">
-          <button class="btn-dark" onclick="invitePlayer()">+ Mời</button>
-          <input type="text" id="joinCodeTxt" placeholder="Mã phòng..." style="max-width:115px;">
+          <button class="btn-dark" onclick="invitePlayer()">Mời</button>
+          <input type="text" id="joinCodeTxt" placeholder="Mã phòng..." style="max-width:110px;">
           <button class="btn-dark" onclick="joinRoomByCode()">Vào</button>
         </div>
-        <div style="font-size:0.84rem; color:#94a3b8;">Mã phòng: <b id="roomCodeText" style="color:#f8fafc; user-select:all;">...</b></div>
+        <div style="font-size:0.8rem; color:#94a3b8;">Mã phòng: <b id="roomCodeText" style="color:#f8fafc; user-select:all;">...</b></div>
         <div class="squad-grid" id="squadGrid"></div>
-        <button class="btn-blood" onclick="hostOpenRulesScreen()">BẮT ĐẦU TRỐN THOÁT</button>
+        <button class="btn-blood" onclick="hostOpenRulesScreen()">Bắt đầu trốn thoát</button>
       </div>
-
       <div class="lobby-card">
-        <div class="lobby-head">
-          <h1 style="color:#e2e8f0;">BẢNG XẾP HẠNG THOÁT HIỂM</h1>
-          <span style="font-size:0.78rem; color:#94a3b8;">Trận thắng</span>
-        </div>
-        <div class="lb-list" id="leaderboardList">
-          <div style="color:#94a3b8; font-size:0.84rem;">Đang tải bảng xếp hạng...</div>
-        </div>
+        <div class="lobby-head"><h1 style="color:#e2e8f0;">Bảng xếp hạng thoát hiểm</h1><span style="font-size:0.76rem; color:#94a3b8;">Trận thắng</span></div>
+        <div class="lb-list" id="leaderboardList"><div style="color:#94a3b8; font-size:0.82rem;">Đang tải bảng xếp hạng...</div></div>
       </div>
     </div>
   </div>
 
   <div id="rulesReadyScreen" onclick="startLobbyHorrorBGM()">
-    <div class="lobby-card" style="max-width:530px; width:100%;">
-      <div class="lobby-head">
-        <h1>LUẬT LỆ SINH TỒN</h1>
-        <span id="readyCounterText" style="font-size:0.82rem; color:#fde047; font-weight:800;">0/1 Sẵn sàng</span>
-      </div>
-      <div class="story-box" style="font-size:0.82rem; line-height:1.55;">
-        <b>Vai trò:</b> Người chơi phân chia vai trò hợp lí để <b>Săn Đồ Vật</b>, <b>Giải Mã</b>, <b>Gác Cửa</b>, <b>Ngăn Hobokuryo</b>.<br>
-        <b>Hộ vật:</b> Người chơi di chuyển xung quanh để truy tìm <b>Đèn pin đông cứng Hobokuryo trong 10 giây</b>, <b>Thánh giá bảo hộ khỏi tầm nhìn của Hobokuryo trong 45 giây</b>.<br>
-        <b>Tiến Trình Đội:</b> Thắp 3 nến mở Cuộn Giấy (<b>số thứ 1</b>), cả đội cùng trả lời tăng dần 5 câu Tiếng Anh để mở <b>số thứ 2</b> (sai bị Hobokuryo ám), nhặt 3 mảnh bùa ghép từ lấy <b>số thứ 3 &amp; 4</b>.<br>
-        <b>Ác linh Hobokuryo:</b> Rượt <b>30s</b> rồi biến mất <b>20s</b> (cả đội sẽ bị dính Ác Xích). Từ <b>phút thứ 3</b> sẽ có thêm <b>tay sai của Hobokuryo</b> săn đuổi.
+    <div class="lobby-card" style="max-width:540px; width:100%;">
+      <div class="lobby-head"><h1>Luật lệ sinh tồn</h1><span id="readyCounterText" style="font-size:0.8rem; color:#fde047; font-weight:800;">0/1 Sẵn sàng</span></div>
+      <div class="story-box">
+        <b>Vai trò:</b> Phân chia hợp lý để tìm đồ vật, giải mã, gác cửa và ngăn chặn Hobokuryo.<br>
+        <b>Hộ vật:</b> Đèn pin đóng băng quỷ 10 giây; Thánh giá ẩn thân 45 giây.<br>
+        <b>Tiến trình đội:</b> Thắp 3 nến mở Cuộn giấy (số 1), cả đội giải 5 câu mở Rương khóa (số 2), nhặt 3 mảnh bùa ghép từ lấy số 3 và 4.<br>
+        <b>Ác linh:</b> Xuất hiện sau 30 giây đầu, săn 30 giây rồi biến mất 20 giây. Từ phút thứ 3 có 2 thực thể cùng săn đuổi.
       </div>
       <div class="squad-grid" id="readySquadGrid"></div>
-      <button id="btnConfirmReady" class="btn-blood" onclick="confirmPlayerReady()">ĐÃ HIỂU &amp; SẴN SÀNG</button>
+      <button id="btnConfirmReady" class="btn-blood" onclick="confirmPlayerReady()">Đã hiểu và sẵn sàng</button>
     </div>
   </div>
-
   <div class="hud-left">
-    <div class="pill-box" id="hudCode">🔐 Mã: ? - ? - ? - ?</div>
-    <div class="pill-box" id="hudItems">DIÊM 0 • NẾN 0/3 • BÙA 0/3</div>
-    <div class="pill-box" style="color:#fbbf24; border-color: rgba(251, 191, 36, 0.4);"><span id="hudGemPoint">0</span> GP</div>
+    <div class="pill-box" id="hudCode">Mã: ? - ? - ? - ?</div>
+    <div class="pill-box" id="hudItems">Diêm 0 • Nến 0/3 • Bùa 0/3</div>
+    <div class="pill-box" style="color:#fbbf24;"><span id="hudGemPoint">0</span> GemPoint</div>
   </div>
 
   <div class="center-hud-anchor">
-    <div class="timer-box" id="hudTimer">⏱️ 00:00</div>
-    <div id="subtleSubNotify">Thông báo</div>
+    <div class="timer-box" id="hudTimer">00:00</div>
+    <div id="statusLineText"></div>
+    <div id="subtleSubNotify"></div>
   </div>
 
   <div class="hud-right">
-    <button class="pill-box" style="cursor:pointer; color:#f87171;" onclick="exitAndResetToLobby()">🚪 Thoát</button>
+    <button class="pill-box" style="cursor:pointer; color:#f87171;" onclick="exitAndResetToLobby()">Thoát</button>
     <div class="radar-wrap">
-      <canvas id="radarCanvas" width="150" height="112"></canvas>
-      <div class="radar-legend">
-        <span style="color:#38bdf8;">● Bạn</span>
-        <span style="color:#34d399;">● Đội</span>
-        <span style="color:#facc15;">■ Cửa</span>
-      </div>
+      <canvas id="radarCanvas" width="146" height="108"></canvas>
+      <div class="radar-legend"><span style="color:#38bdf8;">Bạn</span><span style="color:#34d399;">Đội</span><span style="color:#facc15;">Cửa</span></div>
     </div>
   </div>
 
-  <div class="danger-alert" id="dangerAlert">HOBOKURYO ĐANG SĂN ĐUỔI NGƯỜI CHƠI!</div>
-  <div class="stun-banner" id="stunBanner">CHIẾU TRÚNG HOBOKURYO! ĐÓNG BĂNG: 10s</div>
-  <div class="slow-banner" id="slowBanner">LỜI NGUYỀN ÁC XÍCH: HIỆU ỨNG GIẢM TỐC ĐỘ NGƯỜI CHƠI</div>
-  <div class="cross-banner" id="crossBanner">BẠN ĐƯỢC THÁNH GIÁ BẢO HỘ: 00:45</div>
-  <div id="bottomHintBar">💡 Gợi ý: Vuốt nửa trái màn hình để di chuyển 360°, tìm 3 Que Diêm để thắp sáng 3 Ngọn Nến.</div>
+  <div id="bottomHintBar">Vuốt nửa trái màn hình để di chuyển, tìm 3 que diêm để thắp sáng 3 ngọn nến.</div>
   <canvas id="gameCanvas"></canvas>
 
-  <div class="right-btns">
-    <button class="btn-horror" id="btnCross" onclick="toggleCross()">
-      <img src="cross.png" alt="Thánh Giá" onerror="this.style.display='none'">
-      <span id="crossLabel">CHƯA CÓ</span>
-    </button>
-    <button class="btn-horror" id="btnFlashlight" onclick="toggleFlashlight()">
-      <img src="flashlight.png" alt="Đèn Pin" onerror="this.style.display='none'">
-      <span id="flashLabel">CHƯA CÓ</span>
-    </button>
-    <button class="btn-horror" onclick="tryInteract()"><span style="font-size:1.2rem;">✋</span><span>NHẶT</span></button>
+  <div class="right-btns" id="aliveActionBtns">
+  <button class="btn-horror" id="btnCross"><img src="cross.png" alt="Thánh giá"><span id="crossLabel">Chưa có</span></button>
+  <button class="btn-horror" id="btnFlashlight"><img src="flashlight.png" alt="Đèn pin"><span id="flashLabel">Chưa có</span></button>
+  <button class="btn-horror" id="btnInteract"><img src="interact.png" alt="Nhặt"><span>Nhặt</span></button>
+</div>
+
+  <div class="right-btns" id="spectateActionBtns" style="display:none;">
+    <button class="btn-horror" style="width:92px; border-color:#38bdf8; color:#7dd3fc;" onclick="cycleSpectateTarget()"><span>Đổi góc nhìn</span></button>
   </div>
 
   <div class="modal-overlay" id="puzzleModal">
     <div class="modal-card">
       <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
-        <h3 id="puzzleTitle" style="color:#ef4444;">Giải Mã Phong Ấn</h3>
-        <button class="btn-dark" style="padding:3px 9px;" onclick="closePuzzleModal()">✕</button>
+        <h3 id="puzzleTitle" style="color:#ef4444;">Giải mã phong ấn</h3>
+        <button class="btn-dark" style="padding:3px 9px;" onclick="closePuzzleModal()">Đóng</button>
       </div>
-      <p id="puzzleQ" style="font-size:0.9rem; line-height:1.45; margin-bottom:10px; color:#e2e8f0;"></p>
+      <p id="puzzleQ" style="font-size:0.88rem; line-height:1.45; margin-bottom:10px; color:#e2e8f0;"></p>
       <div id="puzzleBody"></div>
     </div>
   </div>
 
   <div class="modal-overlay" id="keypadModal">
     <div class="modal-card">
-      <h3 style="color:#34d399; margin-bottom:6px;">🔐 Giải Mật Mã Cửa Thoát</h3>
-      <p style="font-size:0.84rem; color:#cbd5e1;">Xoay đúng 4 chữ số mật mã Cửa thoát hiểm:</p>
+      <h3 style="color:#34d399; margin-bottom:6px;">Giải mật mã cửa thoát</h3>
+      <p style="font-size:0.82rem; color:#cbd5e1;">Xoay đúng 4 chữ số mật mã cửa thoát hiểm:</p>
       <div class="dial-grid" id="dialGrid"></div>
       <div style="display:flex; gap:8px;">
         <button class="btn-dark" style="flex:1;" onclick="closeKeypad()">Đóng</button>
-        <button class="btn-blood" style="flex:2; margin-top:0; background:linear-gradient(135deg,#065f46,#047857); border-color:#34d399;" onclick="verifyDoorCode()">🔓 CỬA SẼ MỞ SAU 15s</button>
+        <button class="btn-blood" style="flex:2; margin-top:0; background:linear-gradient(135deg,#065f46,#047857); border-color:#34d399;" onclick="verifyDoorCode()">Mở cửa (15s)</button>
       </div>
     </div>
   </div>
 
   <div class="modal-overlay" id="endModal">
     <div class="modal-card">
-      <div id="endIcon" style="font-size:2.8rem; margin-bottom:6px;">💀</div>
-      <h2 id="endTitle" style="color:#ef4444; margin-bottom:8px;">HOBOKURYO ĐÃ NUỐT CHỬNG LINH HỒN BẠN...</h2>
-      <p id="endDesc" style="font-size:0.88rem; color:#cbd5e1; margin-bottom:14px;"></p>
-      <button class="btn-blood" onclick="exitAndResetToLobby()">🔄 VỀ SẢNH CHỜ</button>
+      <h2 id="endTitle" style="color:#ef4444; margin-bottom:8px;">Trận đấu kết thúc</h2>
+      <p id="endDesc" style="font-size:0.86rem; color:#cbd5e1; margin-bottom:14px;"></p>
+      <button class="btn-blood" onclick="exitAndResetToLobby()">Về sảnh chờ</button>
     </div>
   </div>
   <script>
     const SPRITE_CONFIG = {
-      logo:        { src: "logotoshidensetsu.png", w: 32,   h: 32  },
-      map:         { src: "map.png",               w: 1024, h: 768 },
-      playerIdle:  { src: "player_idle.png",       w: 120,  h: 55  },
-      playerLeft:  { src: "player_left.png",       w: 120,  h: 55  },
-      playerMid:   { src: "player_mid.png",        w: 120,  h: 55  },
-      playerRight: { src: "player_right.png",      w: 120,  h: 55  },
-      teammate:    { src: "teammate.png",          w: 120,  h: 55  },
-      boss:        { src: "boss.png",              w: 100,  h: 60  },
-      boss2:       { src: "boss2.png",             w: 100,  h: 60  },
-      coin:        { src: "coin.png",              w: 33,   h: 33  },
-      flashlight:  { src: "flashlight.png",        w: 40,   h: 40  },
-      cross:       { src: "cross.png",             w: 36,   h: 42  },
-      match:       { src: "match.png",             w: 40,   h: 40  },
-      candleOff:   { src: "candle_off.png",        w: 40,   h: 40  },
-      candleOn:    { src: "candle_on.png",         w: 40,   h: 40  },
-      scroll:      { src: "scroll.png",            w: 40,   h: 40  },
-      chest:       { src: "chest.png",             w: 50,   h: 40  },
-      talisman:    { src: "talisman.png",          w: 40,   h: 31  }
+      logo:          { src: "logotoshidensetsu.png", w: 32,   h: 32  },
+      map:           { src: "map.png",               w: 1024, h: 768 },
+      playerIdle:    { src: "player_idle.png",       w: 120,  h: 55  },
+      playerLeft:    { src: "player_left.png",       w: 120,  h: 55  },
+      playerMid:     { src: "player_mid.png",        w: 120,  h: 55  },
+      playerRight:   { src: "player_right.png",      w: 120,  h: 55  },
+      teammateIdle:  { src: "player_idle.png",     w: 120,  h: 55  },
+      teammateLeft:  { src: "player_left.png",     w: 120,  h: 55  },
+      teammateMid:   { src: "player_mid.png",      w: 120,  h: 55  },
+      teammateRight: { src: "player_right.png",    w: 120,  h: 55  },
+      teammate:      { src: "player_idle.png",          w: 120,  h: 55  },
+      boss:          { src: "boss.png",              w: 100,  h: 60  },
+      boss2:         { src: "boss2.png",             w: 100,  h: 60  },
+      coin:          { src: "coin.png",              w: 33,   h: 33  },
+      flashlight:    { src: "flashlight.png",        w: 40,   h: 40  },
+      cross:         { src: "cross.png",             w: 36,   h: 42  },
+      match:         { src: "match.png",             w: 40,   h: 40  },
+      candleOff:     { src: "candle_off.png",        w: 40,   h: 40  },
+      candleOn:      { src: "candle_on.png",         w: 40,   h: 40  },
+      scroll:        { src: "scroll.png",            w: 40,   h: 40  },
+      chest:         { src: "chest.png",             w: 50,   h: 40  },
+      talisman:      { src: "talisman.png",          w: 40,   h: 31  }
     };
 
     const LOADED_IMGS = {};
@@ -313,16 +271,24 @@
       return true;
     }
 
+    function formatSentenceCase(rawText) {
+      if (!rawText) return "";
+      const cleaned = String(rawText).replace(/[^\p{L}\p{N}\s.,:;!?()\[\]\-\/•+]/gu, "").trim();
+      if (!cleaned) return "";
+      return cleaned.charAt(0).toUpperCase() + cleaned.slice(1).toLowerCase();
+    }
+
     let notifyTimer = null;
-    function showSubtleNotify(msg, duration = 3500) {
+    function showSubtleNotify(msg, duration = 3400) {
       const el = document.getElementById("subtleSubNotify");
-      el.innerText = msg;
+      const formatted = formatSentenceCase(msg);
+      if (!formatted) return;
+      el.innerText = formatted;
       el.classList.add("show");
       clearTimeout(notifyTimer);
       notifyTimer = setTimeout(() => el.classList.remove("show"), duration);
     }
-
-    let audioCtx = null, lastFootstep = 0, lastHeartbeat = 0, windAmbienceStarted = false, lobbyMusicTimer = null;
+    let audioCtx = null, lastFootstep = 0, lastHeartbeat = 0, lobbyMusicTimer = null;
     function initAudio() {
       if (!audioCtx) {
         const AC = window.AudioContext || window.webkitAudioContext;
@@ -342,53 +308,13 @@
         osc.type = "triangle";
         osc.frequency.setValueAtTime(notes[Math.floor(Math.random() * notes.length)], now);
         g.gain.setValueAtTime(0.001, now);
-        g.gain.linearRampToValueAtTime(0.32, now + 0.4);
+        g.gain.linearRampToValueAtTime(0.3, now + 0.4);
         g.gain.exponentialRampToValueAtTime(0.001, now + 2.4);
         osc.connect(g); g.connect(audioCtx.destination);
         osc.start(now); osc.stop(now + 2.5);
       }, 2200);
     }
-
     function stopLobbyHorrorBGM() { clearInterval(lobbyMusicTimer); lobbyMusicTimer = null; }
-
-        function startWindAmbience() {
-      if (!audioCtx || windAmbienceStarted) return;
-      windAmbienceStarted = true;
-
-      // 1. Tiếng mưa rào nhẹ cực êm (giảm tối đa độ rè, chỉ làm nền sâu)
-      const bufSize = audioCtx.sampleRate * 3;
-      const buf = audioCtx.createBuffer(1, bufSize, audioCtx.sampleRate);
-      const data = buf.getChannelData(0);
-      for (let i = 0; i < bufSize; i++) data[i] = Math.random() * 2 - 1;
-      const noise = audioCtx.createBufferSource(); noise.buffer = buf; noise.loop = true;
-      const filter = audioCtx.createBiquadFilter(); filter.type = "lowpass"; filter.frequency.value = 420;
-      const rainBaseGain = audioCtx.createGain(); rainBaseGain.gain.value = 0.025;
-      noise.connect(filter); filter.connect(rainBaseGain); rainBaseGain.connect(audioCtx.destination);
-      noise.start();
-
-      // 2. Tạo tiếng từng giọt nước mưa rơi tí tách ngẫu nhiên
-      setInterval(() => {
-        if (!audioCtx || !matchRunning) return;
-        const drops = 1 + Math.floor(Math.random() * 3);
-        for (let i = 0; i < drops; i++) {
-          const delay = Math.random() * 0.22;
-          const now = audioCtx.currentTime + delay;
-          const osc = audioCtx.createOscillator();
-          const dropGain = audioCtx.createGain();
-          const startFreq = 900 + Math.random() * 1100;
-          osc.type = "sine";
-          osc.frequency.setValueAtTime(startFreq, now);
-          osc.frequency.exponentialRampToValueAtTime(startFreq * 1.45, now + 0.045);
-          dropGain.gain.setValueAtTime(0.001, now);
-          dropGain.gain.linearRampToValueAtTime(0, now + 0.008);
-
-          dropGain.gain.exponentialRampToValueAtTime(0.0001, now + 0.055);
-          osc.connect(dropGain); dropGain.connect(audioCtx.destination);
-          osc.start(now); osc.stop(now + 0.06);
-        }
-      }, 240);
-    }
-
 
     function playThunderSFX() {
       initAudio(); if (!audioCtx) return;
@@ -399,8 +325,7 @@
       const src = audioCtx.createBufferSource(); src.buffer = buf;
       const lowpass = audioCtx.createBiquadFilter(); lowpass.type = "lowpass"; lowpass.frequency.value = 230;
       const g = audioCtx.createGain();
-      g.gain.setValueAtTime(1.40, now); g.gain.exponentialRampToValueAtTime(0.001, now + 2.6);
-
+      g.gain.setValueAtTime(1.2, now); g.gain.exponentialRampToValueAtTime(0.001, now + 2.6);
       src.connect(lowpass); lowpass.connect(g); g.connect(audioCtx.destination);
       src.start(now);
     }
@@ -413,7 +338,7 @@
         osc.type = "sine";
         osc.frequency.setValueAtTime(idx === 0 ? 68 : 54, now + offset);
         osc.frequency.exponentialRampToValueAtTime(28, now + offset + 0.12);
-        g.gain.setValueAtTime(0.75, now + offset); g.gain.exponentialRampToValueAtTime(0.001, now + offset + 0.13);
+        g.gain.setValueAtTime(0.65, now + offset); g.gain.exponentialRampToValueAtTime(0.001, now + offset + 0.13);
         osc.connect(g); g.connect(audioCtx.destination);
         osc.start(now + offset); osc.stop(now + offset + 0.14);
       });
@@ -437,8 +362,7 @@
       osc.type = "triangle";
       osc.frequency.setValueAtTime(125 + Math.random() * 20, now);
       osc.frequency.exponentialRampToValueAtTime(42, now + 0.08);
-      g.gain.setValueAtTime(0.75, now); g.gain.exponentialRampToValueAtTime(0.001, now + 0.085);
-
+      g.gain.setValueAtTime(0.7, now); g.gain.exponentialRampToValueAtTime(0.001, now + 0.085);
       osc.connect(g); g.connect(audioCtx.destination);
       osc.start(now); osc.stop(now + 0.09);
     }
@@ -453,15 +377,6 @@
       lGain.gain.setValueAtTime(0.22, now); lGain.gain.exponentialRampToValueAtTime(0.001, now + 0.065);
       latch.connect(lGain); lGain.connect(audioCtx.destination);
       latch.start(now); latch.stop(now + 0.07);
-
-      const creak = audioCtx.createOscillator(), cGain = audioCtx.createGain();
-      creak.type = "sawtooth";
-      if (isOpen) { creak.frequency.setValueAtTime(110, now + 0.05); creak.frequency.linearRampToValueAtTime(165, now + 0.22); creak.frequency.linearRampToValueAtTime(135, now + 0.36); }
-      else { creak.frequency.setValueAtTime(150, now + 0.04); creak.frequency.exponentialRampToValueAtTime(65, now + 0.24); }
-      const filter = audioCtx.createBiquadFilter(); filter.type = "lowpass"; filter.frequency.value = 420;
-      cGain.gain.setValueAtTime(0.01, now + 0.04); cGain.gain.linearRampToValueAtTime(0.14, now + 0.12); cGain.gain.exponentialRampToValueAtTime(0.001, now + 0.38);
-      creak.connect(filter); filter.connect(cGain); cGain.connect(audioCtx.destination);
-      creak.start(now + 0.04); creak.stop(now + 0.4);
     }
 
     function playPlayerKilledSFX() {
@@ -471,7 +386,7 @@
       osc1.type = "sawtooth"; osc2.type = "square";
       osc1.frequency.setValueAtTime(310, now); osc1.frequency.exponentialRampToValueAtTime(45, now + 1.15);
       osc2.frequency.setValueAtTime(295, now); osc2.frequency.exponentialRampToValueAtTime(40, now + 1.15);
-      g.gain.setValueAtTime(0.32, now); g.gain.exponentialRampToValueAtTime(0.001, now + 1.2);
+      g.gain.setValueAtTime(0.35, now); g.gain.exponentialRampToValueAtTime(0.001, now + 1.2);
       osc1.connect(g); osc2.connect(g); g.connect(audioCtx.destination);
       osc1.start(now); osc2.start(now); osc1.stop(now + 1.25); osc2.stop(now + 1.25);
     }
@@ -481,12 +396,13 @@
     const myAvatar = localStorage.getItem("currentUserAvatar") || "avatargaubasic.jpg";
     let myGem = 0, myWins = 0, roomId = "MANSION_" + Math.floor(1000 + Math.random() * 9000);
     let isHost = true, squad = {}, matchRunning = false, lastSharedEventId = "";
+    let isSpectating = false, spectateUser = null;
+    let teammateRenderPos = {};
 
     async function syncStudentProfile(addGem = 0, addWin = 0) {
       if (myUser.startsWith("guest_")) {
         myGem += addGem; myWins += addWin;
-        const el = document.getElementById("hudGemPoint");
-        if (el) el.innerText = myGem;
+        document.getElementById("hudGemPoint").innerText = myGem;
         return;
       }
       try {
@@ -494,8 +410,7 @@
         const data = (await (await fetch(ref)).json()) || {};
         myGem = (typeof data.gempoint === "number" ? data.gempoint : 0) + addGem;
         myWins = (typeof data.mansionWins === "number" ? data.mansionWins : 0) + addWin;
-        const el = document.getElementById("hudGemPoint");
-        if (el) el.innerText = myGem;
+        document.getElementById("hudGemPoint").innerText = myGem;
         if (addGem > 0 || addWin > 0) {
           await fetch(`${DB_URL}/students/${myUser}.json`, {
             method: "PATCH", headers: { "Content-Type": "application/json" },
@@ -514,8 +429,8 @@
           .filter(x => x.wins > 0).sort((a, b) => b.wins - a.wins);
         const box = document.getElementById("leaderboardList");
         if (!box) return;
-        if (arr.length === 0) { box.innerHTML = "<div style='color:#94a3b8; font-size:0.83rem;'>Chưa có người chơi nào thoát hiểm!</div>"; return; }
-        box.innerHTML = arr.map((u, i) => `<div class="lb-item"><span><b>#${i + 1}</b> ${u.name}</span><span style="color:#fbbf24; font-weight:800;"> ${u.wins} trận</span></div>`).join("");
+        if (arr.length === 0) { box.innerHTML = "<div style='color:#94a3b8; font-size:0.8rem;'>Chưa có người chơi nào thoát hiểm.</div>"; return; }
+        box.innerHTML = arr.map((u, i) => `<div class="lb-item"><span><b>#${i + 1}</b> ${u.name}</span><span style="color:#fbbf24; font-weight:800;">${u.wins} trận</span></div>`).join("");
       } catch (e) {}
     }
 
@@ -525,7 +440,7 @@
       roomId = "MANSION_" + Math.floor(1000 + Math.random() * 9000);
       isHost = true;
       document.getElementById("roomCodeText").innerText = roomId;
-      squad = { [myUser]: { username: myUser, name: myName, avatar: myAvatar, x: 465, y: 565, alive: true, ready: false, flipX: false } };
+      squad = { [myUser]: { username: myUser, name: myName, avatar: myAvatar, x: 465, y: 565, alive: true, ready: false, flipX: false, moving: false } };
       try {
         await fetch(`${DB_URL}/mansion_rooms/${roomId}.json`, {
           method: "PUT", headers: { "Content-Type": "application/json" },
@@ -537,7 +452,7 @@
             chestSolved: false, chestProgress: 0, talismansTaken: [false, false, false],
             wordSolved: false, coinsTaken: [false, false, false],
             flashlightsTaken: [false, false, false], crossTaken: false,
-            layoutSeed: null, doorRitualStarted: false, eventBanner: ""
+            layoutSeed: null, doorRitualStarted: false, bosses: [], eventBanner: ""
           })
         });
       } catch (e) {}
@@ -548,8 +463,8 @@
       const target = document.getElementById("inviteUserTxt").value.trim();
       if (!target || Object.keys(squad).length >= 4) return;
       const st = await (await fetch(`${DB_URL}/students/${target}.json`)).json();
-      if (!st) { showSubtleNotify("Không tìm thấy username này!"); return; }
-      squad[target] = { username: target, name: st.name || target, avatar: st.avatar || "avatargaubasic.jpg", x: 485, y: 565, alive: true, ready: false, flipX: false };
+      if (!st) { showSubtleNotify("Không tìm thấy username này."); return; }
+      squad[target] = { username: target, name: st.name || target, avatar: st.avatar || "avatargaubasic.jpg", x: 485, y: 565, alive: true, ready: false, flipX: false, moving: false };
       await fetch(`${DB_URL}/mansion_rooms/${roomId}/players/${target}.json`, { method: "PUT", body: JSON.stringify(squad[target]) });
       document.getElementById("inviteUserTxt").value = "";
       renderSquad();
@@ -559,16 +474,15 @@
       const code = document.getElementById("joinCodeTxt").value.trim().toUpperCase();
       if (!code) return;
       const data = await (await fetch(`${DB_URL}/mansion_rooms/${code}.json`)).json();
-      if (!data) { showSubtleNotify("Mã phòng không tồn tại!"); return; }
+      if (!data) { showSubtleNotify("Mã phòng không tồn tại."); return; }
       roomId = code; isHost = (data.host === myUser);
       document.getElementById("roomCodeText").innerText = roomId;
       await fetch(`${DB_URL}/mansion_rooms/${roomId}/players/${myUser}.json`, {
-        method: "PATCH", body: JSON.stringify({ username: myUser, name: myName, avatar: myAvatar, x: 465, y: 565, alive: true, ready: false, flipX: false })
+        method: "PATCH", body: JSON.stringify({ username: myUser, name: myName, avatar: myAvatar, x: 465, y: 565, alive: true, ready: false, flipX: false, moving: false })
       });
       if (data.status === "rules") openRulesReadyScreen();
       if (data.status === "playing") startMatchLocal(data);
     }
-
     function renderSquad() {
       const g = document.getElementById("squadGrid");
       if (!g) return;
@@ -583,12 +497,12 @@
 
     async function hostOpenRulesScreen() {
       initAudio();
-      const randomCode = [
+      const randomCode = new Array(
         Math.floor(Math.random() * 10), Math.floor(Math.random() * 10),
         Math.floor(Math.random() * 10), Math.floor(Math.random() * 10)
-      ];
+      );
       const randomOrder = Array.from({ length: 18 }, (_, idx) => idx).sort(() => Math.random() - 0.5);
-      Object.keys(squad).forEach(u => squad[u].ready = false);
+      Object.keys(squad).forEach(u => { squad[u].ready = false; squad[u].alive = true; });
       try {
         await fetch(`${DB_URL}/mansion_rooms/${roomId}.json`, {
           method: "PATCH",
@@ -599,7 +513,7 @@
             scrollSolved: false, chestSolved: false, chestProgress: 0,
             talismansTaken: [false, false, false], wordSolved: false,
             coinsTaken: [false, false, false], flashlightsTaken: [false, false, false],
-            crossTaken: false, doorRitualStarted: false, eventBanner: ""
+            crossTaken: false, doorRitualStarted: false, bosses: [], eventBanner: ""
           })
         });
       } catch (e) {}
@@ -610,7 +524,7 @@
       document.getElementById("lobbyScreen").style.display = "none";
       document.getElementById("rulesReadyScreen").style.display = "flex";
       const btn = document.getElementById("btnConfirmReady");
-      btn.disabled = false; btn.innerText = "ĐÃ HIỂU & SẴN SÀNG";
+      btn.disabled = false; btn.innerText = "Đã hiểu và sẵn sàng";
       renderReadySquad();
     }
 
@@ -624,7 +538,7 @@
       list.forEach(p => {
         g.innerHTML += `<div class="slot-box" style="border-color:${p.ready ? '#10b981' : '#475569'}">
           <img src="${p.avatar}"><div><b>${p.name}</b></div>
-          <div style="font-size:0.72rem; color:${p.ready ? '#34d399' : '#94a3b8'};">${p.ready ? '✓ Sẵn sàng' : 'Đang đọc...'}</div>
+          <div style="font-size:0.7rem; color:${p.ready ? '#34d399' : '#94a3b8'};">${p.ready ? 'Sẵn sàng' : 'Đang đọc...'}</div>
         </div>`;
       });
     }
@@ -632,17 +546,17 @@
     async function confirmPlayerReady() {
       initAudio();
       const btn = document.getElementById("btnConfirmReady");
-      btn.disabled = true; btn.innerText = "⏳ ĐANG CHỜ ĐỒNG ĐỘI...";
+      btn.disabled = true; btn.innerText = "Đang chờ đồng đội...";
       if (squad[myUser]) squad[myUser].ready = true;
       renderReadySquad();
       try { await fetch(`${DB_URL}/mansion_rooms/${roomId}/players/${myUser}/ready.json`, { method: "PUT", body: "true" }); } catch (e) {}
     }
+
     setInterval(async () => {
       try {
         const data = await (await fetch(`${DB_URL}/mansion_rooms/${roomId}.json?t=${Date.now()}`)).json();
         if (!data) return;
         squad = data.players || {};
-		if (playerTrapped && squad[myUser] && squad[myUser].trapped === false) { playerTrapped = false; showSubtleNotify("Bạn đã được đồng đội giải cứu!"); }
 
         if (data.status === "waiting") {
           renderSquad();
@@ -658,44 +572,73 @@
         } else if (data.status === "playing") {
           if (!matchRunning) startMatchLocal(data);
           else {
-            if (Array.isArray(data.secretCode)) secretCode = data.secretCode;
-            if (Array.isArray(data.foundDigits)) {
-              foundDigits = data.foundDigits;
-              document.getElementById("hudCode").innerText = `🔐 Mã: ${foundDigits.join(" - ")}`;
+            if (Array.isArray(data.secretCode) && data.secretCode.length === 4) secretCode = data.secretCode;
+
+            if (Array.isArray(data.foundDigits) && data.foundDigits.length === 4) {
+              for (let i = 0; i < 4; i++) {
+                if (data.foundDigits[i] !== "?" && data.foundDigits[i] !== undefined) {
+                  foundDigits[i] = data.foundDigits[i];
+                }
+              }
+              document.getElementById("hudCode").innerText = `Mã: ${foundDigits.join(" - ")}`;
             }
+
             if (typeof data.matchesCount === "number") questState.matchesCount = data.matchesCount;
             if (Array.isArray(data.matchesTaken)) questState.matchesTaken = data.matchesTaken;
             if (Array.isArray(data.litTorches)) questState.litTorches = data.litTorches;
-            if (typeof data.scrollSolved === "boolean") questState.scrollSolved = data.scrollSolved;
-            if (typeof data.chestSolved === "boolean") questState.chestSolved = data.chestSolved;
-            if (typeof data.chestProgress === "number") chestProgress = data.chestProgress;
+            if (typeof data.scrollSolved === "boolean" && data.scrollSolved) questState.scrollSolved = true;
+            if (typeof data.chestSolved === "boolean" && data.chestSolved) questState.chestSolved = true;
+            if (typeof data.chestProgress === "number") chestProgress = Math.max(chestProgress, data.chestProgress);
             if (Array.isArray(data.talismansTaken)) questState.talismansTaken = data.talismansTaken;
-            if (typeof data.wordSolved === "boolean") questState.wordSolved = data.wordSolved;
-            if (Array.isArray(data.coinsTaken)) data.coinsTaken.forEach((t, i) => { if (coinsList[i]) coinsList[i].taken = t; });
-            if (Array.isArray(data.flashlightsTaken)) data.flashlightsTaken.forEach((t, i) => { if (FLASHLIGHT_SPOTS[i]) FLASHLIGHT_SPOTS[i].taken = t; });
-            if (typeof data.crossTaken === "boolean") CROSS_SPOT.taken = data.crossTaken;
+            if (typeof data.wordSolved === "boolean" && data.wordSolved) questState.wordSolved = true;
+            if (Array.isArray(data.coinsTaken)) data.coinsTaken.forEach((t, i) => { if (coinsList[i] && t) coinsList[i].taken = true; });
+            if (Array.isArray(data.flashlightsTaken)) data.flashlightsTaken.forEach((t, i) => { if (FLASHLIGHT_SPOTS[i] && t) FLASHLIGHT_SPOTS[i].taken = true; });
+            if (data.crossTaken) CROSS_SPOT.taken = true;
             if (data.doorRitualStarted && !doorRitual.active) triggerDoorRitualLocally();
             updateItemsHUD();
 
+            if (!isHost) {
+              if (Array.isArray(data.bosses) && data.bosses.length > 0) {
+                if (bosses.length === 0) document.getElementById("redScreenEdge").style.opacity = "1";
+                bosses = data.bosses.map((sb, idx) => {
+                  const prev = bosses[idx] || sb;
+                  return {
+                    ...sb,
+                    renderX: prev.renderX !== undefined ? prev.renderX : sb.x,
+                    renderY: prev.renderY !== undefined ? prev.renderY : sb.y
+                  };
+                });
+                flashlight.stunTimer = data.bossStunTimer || 0;
+              } else if (bosses.length > 0) {
+                bosses = []; flashlight.stunTimer = 0;
+                document.getElementById("redScreenEdge").style.opacity = "0";
+              }
+            }
+
+            const allPlayers = Object.values(squad);
+            if (allPlayers.length > 0 && allPlayers.every(p => p.alive === false)) {
+              endMatch(false, "Toàn bộ thành viên trong đội đều đã bị Hobokuryo hạ gục.");
+              return;
+            }
+
             if (data.eventBanner && data.eventBanner !== lastSharedEventId) {
               lastSharedEventId = data.eventBanner;
-              showSubtleNotify(data.eventBanner, 3800);
+              showSubtleNotify(data.eventBanner, 3600);
             }
           }
         }
       } catch (e) {}
-    }, 1000);
-
+    }, 600);
     function cleanupMatchState() {
       matchRunning = false; clearInterval(clockInterval); bosses = []; playersSlowed = false; chestProgress = 0; woodChips = [];
+      isSpectating = false; spectateUser = null; teammateRenderPos = {};
       resetAllMovementInputs();
       flashlight = { owned: false, on: false, stunTimer: 0, cooldown: 0 };
       crossItem = { owned: false, on: false, timeLeft: 45 };
       doorRitual = { active: false, timeLeft: 15 };
-      document.getElementById("dangerAlert").style.display = "none";
-      document.getElementById("stunBanner").style.display = "none";
-      document.getElementById("slowBanner").style.display = "none";
-      document.getElementById("crossBanner").style.display = "none";
+      document.getElementById("aliveActionBtns").style.display = "flex";
+      document.getElementById("spectateActionBtns").style.display = "none";
+      document.getElementById("statusLineText").innerText = "";
       document.getElementById("redScreenEdge").style.opacity = "0";
       document.getElementById("puzzleModal").classList.remove("open");
       document.getElementById("keypadModal").classList.remove("open");
@@ -710,7 +653,7 @@
       try {
         await fetch(`${DB_URL}/mansion_rooms/${roomId}.json`, {
           method: "PATCH",
-          body: JSON.stringify({ status: "waiting", foundDigits: ["?", "?", "?", "?"], chestProgress: 0, eventBanner: "" })
+          body: JSON.stringify({ status: "waiting", foundDigits: ["?", "?", "?", "?"], chestProgress: 0, bosses: [], eventBanner: "" })
         });
       } catch (e) {}
       await loadLeaderboard();
@@ -718,21 +661,30 @@
 
     const MAP_W = SPRITE_CONFIG.map.w, MAP_H = SPRITE_CONFIG.map.h;
     const WALKABLE_ZONES = [
-      { x: 48, y: 185, w: 320, h: 178 }, { x: 175, y: 345, w: 92, h: 75 },
-      { x: 48, y: 405, w: 340, h: 252 }, { x: 350, y: 190, w: 342, h: 78 },
-      { x: 368, y: 520, w: 325, h: 86 }, { x: 578, y: 248, w: 112, h: 298 },
-      { x: 478, y: 335, w: 110, h: 125 }, { x: 498, y: 440, w: 70, h: 98 },
-      { x: 668, y: 218, w: 46, h: 60 }, { x: 690, y: 185, w: 278, h: 174 },
-      { x: 668, y: 530, w: 46, h: 62 }, { x: 690, y: 465, w: 278, h: 192 },
-      { x: 485, y: 590, w: 80, h: 68 }
+      { x: 48,  y: 185, w: 320, h: 178 },
+      { x: 175, y: 345, w: 92,  h: 75  },
+      { x: 48,  y: 405, w: 340, h: 252 },
+      { x: 350, y: 190, w: 342, h: 78  },
+      { x: 368, y: 520, w: 325, h: 86  },
+      { x: 578, y: 248, w: 112, h: 298 },
+      { x: 472, y: 332, w: 116, h: 130 },
+      { x: 486, y: 455, w: 88,  h: 80  },
+      { x: 668, y: 218, w: 46,  h: 60  },
+      { x: 690, y: 185, w: 278, h: 174 },
+      { x: 668, y: 530, w: 46,  h: 62  },
+      { x: 690, y: 465, w: 278, h: 192 },
+      { x: 485, y: 590, w: 80,  h: 68  }
     ];
     const FURNITURE_BLOCKS = [
-      { x: 162, y: 226, w: 58, h: 36 }, { x: 160, y: 510, w: 64, h: 58 },
-      { x: 286, y: 596, w: 54, h: 38 }, { x: 504, y: 376, w: 58, h: 24 },
-      { x: 842, y: 280, w: 96, h: 42 }, { x: 784, y: 626, w: 120, h: 24 }
+      { x: 162, y: 226, w: 58, h: 36 },
+      { x: 160, y: 510, w: 64, h: 58 },
+      { x: 286, y: 596, w: 54, h: 38 },
+      { x: 502, y: 366, w: 56, h: 22 },
+      { x: 842, y: 280, w: 96, h: 42 },
+      { x: 784, y: 626, w: 120, h: 24 }
     ];
 
-    function canWalkAt(px, py, rad = 10) {
+    function canWalkAt(px, py, rad = 9) {
       const pts = [{ x: px - rad, y: py - rad }, { x: px + rad, y: py - rad }, { x: px - rad, y: py + rad }, { x: px + rad, y: py + rad }];
       for (const p of pts) {
         let ok = false;
@@ -745,122 +697,48 @@
       return true;
     }
 
-        const QUIZ_BANK = [
-      // --- LEVEL: DỄ (20 CÂU) ---
-      { lvl: "Dễ", q: "Complete the rule: 'You must _____ quiet so Hobokuryo cannot hear your footsteps.'", opts: ["A. keeps", "B. keep", "C. keeping"], ans: 1 },
-      { lvl: "Dễ", q: "Which item do you need to light the three unlit candles in the mansion?", opts: ["A. A cross", "B. A coin", "C. A match"], ans: 2 },
-      { lvl: "Dễ", q: "Choose the correct word: 'Turn _____ the flashlight to freeze the monster for 10 seconds.'", opts: ["A. on", "B. at", "C. under"], ans: 0 },
-      { lvl: "Dễ", q: "How many digits are required to unlock the final exit door?", opts: ["A. Three digits", "B. Four digits", "C. Five digits"], ans: 1 },
-      { lvl: "Dễ", q: "Complete: 'My teammates _____ searching for the talismans in the kitchen right now.'", opts: ["A. is", "B. was", "C. are"], ans: 2 },
-      { lvl: "Dễ", q: "What happens when you hold the glowing Cross?", opts: ["A. Hobokuryo cannot see you", "B. The exit opens instantly", "C. You run twice as fast"], ans: 0 },
-      { lvl: "Dễ", q: "Choose the correct preposition: 'The golden coin is lying _____ the wooden floor.'", opts: ["A. into", "B. on", "C. between"], ans: 1 },
-      { lvl: "Dễ", q: "Complete: 'Run faster! The demon is right _____ you!'", opts: ["A. above", "B. inside", "C. behind"], ans: 2 },
-      { lvl: "Dễ", q: "Which room is best for cooking and finding hidden matches?", opts: ["A. The Kitchen", "B. The Bedroom", "C. The Study"], ans: 0 },
-      { lvl: "Dễ", q: "Complete: 'We _____ collected two talismans, so we only need one more.'", opts: ["A. has", "B. have", "C. having"], ans: 1 },
-      { lvl: "Dễ", q: "What is the opposite of 'DARK' inside the haunted mansion?", opts: ["A. Cold", "B. Heavy", "C. Bright"], ans: 2 },
-      { lvl: "Dễ", q: "Choose the right verb: 'Do not _____ a wrong answer, or the spirit will wake up!'", opts: ["A. choose", "B. chose", "C. chosen"], ans: 0 },
-      { lvl: "Dễ", q: "Complete: 'There _____ three flashlights hidden in different corners of the house.'", opts: ["A. is", "B. are", "C. be"], ans: 1 },
-      { lvl: "Dễ", q: "Which word describes a team working together to survive?", opts: ["A. Solo", "B. Enemy", "C. Co-op"], ans: 2 },
-      { lvl: "Dễ", q: "Complete: 'She _____ a secret scroll after lighting the third candle.'", opts: ["A. found", "B. find", "C. finding"], ans: 0 },
-      { lvl: "Dễ", q: "What should you check in the top-right corner to see where your friends are?", opts: ["A. The timer", "B. The radar map", "C. The keypad"], ans: 1 },
-      { lvl: "Dễ", q: "Complete: 'Listen carefully! Can you hear the loud _____ outside the window?'", opts: ["A. candle", "B. puzzle", "C. thunder"], ans: 2 },
-      { lvl: "Dễ", q: "Choose the correct pronoun: 'This flashlight belongs to me. It is _____.'", opts: ["A. mine", "B. my", "C. me"], ans: 0 },
-      { lvl: "Dễ", q: "Complete: 'Every player can carry _____ one flashlight at a time.'", opts: ["A. at least", "B. at most", "C. at last"], ans: 1 },
-      { lvl: "Dễ", q: "Which word means 'to get away safely from a dangerous place'?", opts: ["A. Trap", "B. Haunt", "C. Escape"], ans: 2 },
-
-      // --- LEVEL: TRUNG BÌNH (20 CÂU) ---
-      { lvl: "Trung bình", q: "Complete: 'If we _____ all three candles, the ancient scroll will unlock.'", opts: ["A. light", "B. lit", "C. will light"], ans: 0 },
-      { lvl: "Trung bình", q: "What does the word 'CURSED' mean when describing this mansion?", opts: ["A. Newly built and modern", "B. Under an evil magical spell", "C. Completely empty and safe"], ans: 1 },
-      { lvl: "Trung bình", q: "Complete: 'When Hobokuryo disappears, the whole team _____ slowed down by dark chains.'", opts: ["A. are", "B. were", "C. is"], ans: 2 },
-      { lvl: "Trung bình", q: "Which phrase means 'to stop a monster from moving'?", opts: ["A. Freeze it in place", "B. Let it pass by", "C. Follow its trail"], ans: 0 },
-      { lvl: "Trung bình", q: "Complete: 'You had better _____ your flashlight battery for the final 15 seconds.'", opts: ["A. saving", "B. save", "C. to save"], ans: 1 },
-      { lvl: "Trung bình", q: "What happens after the third minute of the match begins?", opts: ["A. All doors open automatically", "B. The storm stops completely", "C. A second demon joins the hunt"], ans: 2 },
-      { lvl: "Trung bình", q: "Choose the best word: 'Your heartbeat grows _____ as the monster gets closer to you.'", opts: ["A. faster", "B. fastest", "C. fastly"], ans: 0 },
-      { lvl: "Trung bình", q: "What is a 'TALISMAN' in this horror survival game?", opts: ["A. A heavy wooden table", "B. A mystical charm used to unlock a code", "C. A broken window"], ans: 1 },
-      { lvl: "Trung bình", q: "Complete: 'While one player solves the chest, another _____ guard the hallway.'", opts: ["A. ought", "B. have to", "C. should"], ans: 2 },
-      { lvl: "Trung bình", q: "Which word means 'strange, mysterious, and slightly frightening'?", opts: ["A. Eerie", "B. Cheerful", "C. Ordinary"], ans: 0 },
-      { lvl: "Trung bình", q: "Complete: 'Neither the lock _____ the darkness could stop our team from escaping.'", opts: ["A. or", "B. nor", "C. and"], ans: 1 },
-      { lvl: "Trung bình", q: "What does 'GUARD THE EXIT' mean?", opts: ["A. Run away from the door", "B. Lock your teammates outside", "C. Protect the door area until it opens"], ans: 2 },
-      { lvl: "Trung bình", q: "Complete: 'By the time the door opened, we _____ already solved all the riddles.'", opts: ["A. had", "B. have", "C. has"], ans: 0 },
-      { lvl: "Trung bình", q: "Which adjective describes a room with no light at all?", opts: ["A. Crystal-clear", "B. Pitch-black", "C. Sunlit"], ans: 1 },
-      { lvl: "Trung bình", q: "Complete: 'The ancient chest requires _____ correct answers from the squad.'", opts: ["A. fifth", "B. fives", "C. five"], ans: 2 },
-      { lvl: "Trung bình", q: "What does 'DIVIDE AND CONQUER' suggest for your squad?", opts: ["A. Split up to search different rooms", "B. Stand together in one corner", "C. Drop all your items"], ans: 0 },
-      { lvl: "Trung bình", q: "Complete: 'If you _____ attention to the radar map, you will never get lost.'", opts: ["A. paid", "B. pay", "C. paying"], ans: 1 },
-      { lvl: "Trung bình", q: "Which word refers to 'a secret word or number needed to enter'?", opts: ["A. A lantern", "B. A shadow", "C. A passcode"], ans: 2 },
-      { lvl: "Trung bình", q: "Complete: 'The wooden floorboards creak loudly _____ someone walks across them.'", opts: ["A. whenever", "B. wherever", "C. whoever"], ans: 0 },
-      { lvl: "Trung bình", q: "Choose the closest meaning to 'VANISH' (when the demon disappears for 20s):", opts: ["A. Attack suddenly", "B. Disappear from sight", "C. Scream loudly"], ans: 1 }
+    const QUIZ_BANK = [
+      { lvl: "Trung bình", q: "Choose the correct word: 'You must _____ quiet so the demon cannot hear you.'", opts: ["A. keeps", "B. keep", "C. keeping"], ans: 1 },
+      { lvl: "Trung bình", q: "If we _____ all the candles, the secret scroll will appear.", opts: ["A. light", "B. lit", "C. lighting"], ans: 0 },
+      { lvl: "Trung bình", q: "Which preposition fits: 'The matches are hidden _____ the corner of the kitchen.'", opts: ["A. between", "B. above", "C. in"], ans: 2 },
+      { lvl: "Trung bình", q: "By the time we reached the exit, the ghost _____ disappeared.", opts: ["A. had", "B. has", "C. was"], ans: 0 },
+      { lvl: "Trung bình", q: "We had better _____ a flashlight before entering the dark corridor.", opts: ["A. to find", "B. find", "C. finding"], ans: 1 },
+      { lvl: "Khó", q: "Which word means 'a ghostly apparition or haunting spirit'?", opts: ["A. Lantern", "B. Fortress", "C. Phantom"], ans: 2 },
+      { lvl: "Khó", q: "Complete: 'Hardly _____ the door opened when the demon rushed in.'", opts: ["A. had", "B. has", "C. was"], ans: 0 },
+      { lvl: "Khó", q: "Find the synonym of 'CURSED':", opts: ["A. Blessed", "B. Bewitched", "C. Protected"], ans: 1 },
+      { lvl: "Khó", q: "What does 'OMINOUS' mean in: 'An ominous shadow moved behind the curtain'?", opts: ["A. Bright and cheerful", "B. Weak and harmless", "C. Threatening and evil"], ans: 2 },
+      { lvl: "Khó", q: "Complete the inversion: 'Never before _____ such a terrifying scream.'", opts: ["A. have I heard", "B. I have heard", "C. I heard"], ans: 0 },
+      { lvl: "Khó", q: "Choose the closest meaning to 'EERIE':", opts: ["A. Loud and crowded", "B. Strange and frightening", "C. Warm and welcoming"], ans: 1 },
+      { lvl: "Khó", q: "If he _____ the flashlight earlier, the monster wouldn't have caught him.", opts: ["A. turned on", "B. turns on", "C. had turned on"], ans: 2 }
     ];
-
-        const WORD_SCRAMBLE_BANK = [
-      // --- NHÓM 1: VẬT PHẨM & PHONG ẤN TRONG DINH THỰ (10 từ) ---
-      { hint: "Ghép các chữ thành từ nghĩa là 'LÁ BÙA HỘ MỆNH' (8 chữ cái):", word: "TALISMAN" },
-      { hint: "Ghép các chữ thành từ nghĩa là 'ĐÈN PIN' (10 chữ cái):", word: "FLASHLIGHT" },
-      { hint: "Ghép các chữ thành từ nghĩa là 'CUỘN GIẤY CỔ' (6 chữ cái):", word: "SCROLL" },
-      { hint: "Ghép các chữ thành từ nghĩa là 'NGHI LỄ TÂM LINH' (6 chữ cái):", word: "RITUAL" },
-      { hint: "Ghép các chữ thành từ nghĩa là 'THÁNH GIÁ / CÂY THẬP TỰ' (8 chữ cái):", word: "CRUCIFIX" },
-      { hint: "Ghép các chữ thành từ nghĩa là 'ĐÈN LỒNG' (7 chữ cái):", word: "LANTERN" },
-      { hint: "Ghép các chữ thành từ nghĩa là 'MẬT MÃ KHÓA CỬA' (8 chữ cái):", word: "PASSCODE" },
-      { hint: "Ghép các chữ thành từ nghĩa là 'CỔ VẬT THIÊNG' (5 chữ cái):", word: "RELIC" },
-      { hint: "Ghép các chữ thành từ nghĩa là 'BÙA CHÚ PHÉP THUẬT' (11 chữ cái):", word: "INCANTATION" },
-      { hint: "Ghép các chữ thành từ nghĩa là 'LỜI NGUYỀN RỦA' (5 chữ cái):", word: "CURSE" },
-
-      // --- NHÓM 2: KHÔNG GIAN & KIẾN TRÚC MA ÁM (10 từ) ---
-      { hint: "Ghép các chữ thành từ nghĩa là 'DINH THỰ LỚN' (7 chữ cái):", word: "MANSION" },
-      { hint: "Ghép các chữ thành từ nghĩa là 'HÀNH LANG DÀI' (8 chữ cái):", word: "CORRIDOR" },
-      { hint: "Ghép các chữ thành từ nghĩa là 'MÊ CUNG RẮC RỐI' (9 chữ cái):", word: "LABYRINTH" },
-      { hint: "Ghép các chữ thành từ nghĩa là 'CĂN HẦM NGẦM' (8 chữ cái):", word: "BASEMENT" },
-      { hint: "Ghép các chữ thành từ nghĩa là 'NGƯỠNG CỬA' (9 chữ cái):", word: "THRESHOLD" },
-      { hint: "Ghép các chữ thành từ nghĩa là 'TẦNG ÁP MÁI' (5 chữ cái):", word: "ATTIC" },
-      { hint: "Ghép các chữ thành từ nghĩa là 'KHU RỪNG U ÁM' (6 chữ cái):", word: "FOREST" },
-      { hint: "Ghép các chữ thành từ nghĩa là 'NGÔI ĐỀN / MIẾU THỜ' (6 chữ cái):", word: "SHRINE" },
-      { hint: "Ghép các chữ thành từ nghĩa là 'BÓNG TỐI ĐẶC QUÁNH' (8 chữ cái):", word: "DARKNESS" },
-      { hint: "Ghép các chữ thành từ nghĩa là 'HOANG TÀN / ĐỔ NÁT' (8 chữ cái):", word: "DERELICT" },
-
-      // --- NHÓM 3: THỰC THỂ SIÊU NHIÊN & TRUYỀN THUYẾT (10 từ) ---
-      { hint: "Ghép các chữ thành từ nghĩa là 'BÓNG MA / ẢO ẢNH' (7 chữ cái):", word: "PHANTOM" },
-      { hint: "Ghép các chữ thành từ nghĩa là 'HỒN MA / BÓNG QUỶ' (7 chữ cái):", word: "SPECTER" },
-      { hint: "Ghép các chữ thành từ nghĩa là 'OAN HỒN / LINH HỒN' (6 chữ cái):", word: "WRAITH" },
-      { hint: "Ghép các chữ thành từ nghĩa là 'ÁM ẢNH / MA ÁM' (8 chữ cái):", word: "HAUNTING" },
-      { hint: "Ghép các chữ thành từ nghĩa là 'TRUYỀN THUYẾT DÂN GIAN' (8 chữ cái):", word: "FOLKLORE" },
-      { hint: "Ghép các chữ thành từ nghĩa là 'BÓNG ĐEN CHẬP CHỜN' (6 chữ cái):", word: "SHADOW" },
-      { hint: "Ghép các chữ thành từ nghĩa là 'ĐIỀM GỞ / ĐÁNG NGẠI' (7 chữ cái):", word: "OMINOUS" },
-      { hint: "Ghép các chữ thành từ nghĩa là 'QUÁI DỊ / RÙNG RỢN' (5 chữ cái):", word: "EERIE" },
-      { hint: "Ghép các chữ thành từ nghĩa là 'RÙNG MÌNH / KINH HÃI' (7 chữ cái):", word: "MACABRE" },
-      { hint: "Ghép các chữ thành từ nghĩa là 'SIÊU NHIÊN / MA QUÁI' (12 chữ cái):", word: "SUPERNATURAL" },
-
-      // --- NHÓM 4: HÀNH ĐỘNG SINH TỒN & ĐỒNG ĐỘI (10 từ) ---
-      { hint: "Ghép các chữ thành từ nghĩa là 'TRỐN THOÁT' (6 chữ cái):", word: "ESCAPE" },
-      { hint: "Ghép các chữ thành từ nghĩa là 'SỰ SINH TỒN' (8 chữ cái):", word: "SURVIVAL" },
-      { hint: "Ghép các chữ thành từ nghĩa là 'ĐỒNG ĐỘI' (8 chữ cái):", word: "TEAMMATE" },
-      { hint: "Ghép các chữ thành từ nghĩa là 'TIẾNG THÌ THẦM' (7 chữ cái):", word: "WHISPER" },
-      { hint: "Ghép các chữ thành từ nghĩa là 'TIẾNG BƯỚC CHÂN' (9 chữ cái):", word: "FOOTSTEP" },
-      { hint: "Ghép các chữ thành từ nghĩa là 'NHỊP TIM ĐẬP' (9 chữ cái):", word: "HEARTBEAT" },
-      { hint: "Ghép các chữ thành từ nghĩa là 'SỰ BẢO VỆ' (10 chữ cái):", word: "PROTECTION" },
-      { hint: "Ghép các chữ thành từ nghĩa là 'TAN BIẾN / BIẾN MẤT' (6 chữ cái):", word: "VANISH" },
-      { hint: "Ghép các chữ thành từ nghĩa là 'ĐÔNG CỨNG / ĐÓNG BĂNG' (6 chữ cái):", word: "FREEZE" },
-      { hint: "Ghép các chữ thành từ nghĩa là 'SỰ CẢNH GIÁC' (9 chữ cái):", word: "VIGILANCE" }
+    const WORD_SCRAMBLE_BANK = [
+      { hint: "Ghép các chữ thành từ nghĩa là đèn pin (10 chữ cái):", word: "FLASHLIGHT" },
+      { hint: "Ghép các chữ thành từ nghĩa là trốn thoát (6 chữ cái):", word: "ESCAPE" },
+      { hint: "Ghép các chữ thành từ nghĩa là bóng ma (7 chữ cái):", word: "PHANTOM" },
+      { hint: "Ghép các chữ thành từ nghĩa là lời nguyền (5 chữ cái):", word: "CURSE" },
+      { hint: "Ghép các chữ thành từ nghĩa là lá bùa (8 chữ cái):", word: "TALISMAN" },
+      { hint: "Ghép các chữ thành từ nghĩa là nghi lễ (6 chữ cái):", word: "RITUAL" }
     ];
-
     const canvas = document.getElementById("gameCanvas"), ctx = canvas.getContext("2d");
     const radarCanvas = document.getElementById("radarCanvas"), rctx = radarCanvas.getContext("2d");
     const EXIT_DOOR = { x: 525, y: 635 };
 
     const ITEM_SPAWN_POOL = [
-      { x: 75,  y: 210, area: "Góc Phòng Trà" }, { x: 335, y: 210, area: "Cạnh Cửa Phòng Trà" },
-      { x: 110, y: 330, area: "Góc Dưới Phòng Trà" }, { x: 75,  y: 430, area: "Góc Trên Phòng Sưởi" },
-      { x: 75,  y: 630, area: "Góc Dưới Phòng Sưởi" }, { x: 345, y: 430, area: "Cạnh Lò Sưởi" },
-      { x: 240, y: 625, area: "Chân Bàn Phòng Sưởi" }, { x: 375, y: 210, area: "Đầu Hành Lang Trên" },
-      { x: 655, y: 210, area: "Cuối Hành Lang Trên" }, { x: 495, y: 350, area: "Góc Trái Thư Phòng" },
-      { x: 565, y: 430, area: "Góc Phải Thư Phòng" }, { x: 515, y: 505, area: "Lối Ra Thư Phòng" },
-      { x: 390, y: 575, area: "Hành Lang Dưới Trái" }, { x: 665, y: 500, area: "Hành Lang Giữa Phải" },
-      { x: 720, y: 210, area: "Góc Trái Phòng Ngủ" }, { x: 940, y: 205, area: "Góc Phải Phòng Ngủ" },
-      { x: 945, y: 485, area: "Góc Trên Nhà Bếp" }, { x: 715, y: 630, area: "Góc Dưới Nhà Bếp" }
+      { x: 75,  y: 210, area: "Góc phòng trà" },       { x: 335, y: 210, area: "Cạnh cửa phòng trà" },
+      { x: 110, y: 330, area: "Góc dưới phòng trà" },  { x: 75,  y: 430, area: "Góc trên phòng sưởi" },
+      { x: 75,  y: 630, area: "Góc dưới phòng sưởi" }, { x: 345, y: 430, area: "Cạnh lò sưởi" },
+      { x: 240, y: 625, area: "Chân bàn phòng sưởi" }, { x: 375, y: 210, area: "Đầu hành lang trên" },
+      { x: 655, y: 210, area: "Cuối hành lang trên" }, { x: 488, y: 348, area: "Góc trái thư phòng" },
+      { x: 572, y: 435, area: "Góc phải thư phòng" },  { x: 530, y: 505, area: "Lối ra thư phòng" },
+      { x: 390, y: 575, area: "Hành lang dưới trái" }, { x: 665, y: 500, area: "Hành lang giữa phải" },
+      { x: 720, y: 210, area: "Góc trái phòng ngủ" },  { x: 940, y: 205, area: "Góc phải phòng ngủ" },
+      { x: 945, y: 485, area: "Góc trên nhà bếp" },    { x: 715, y: 630, area: "Góc dưới nhà bếp" }
     ];
 
     let FLASHLIGHT_SPOTS = [], CROSS_SPOT = { x: 810, y: 495, taken: false };
     let BRAZIER_SPOTS = [], TALISMAN_SPOTS = [], matchSpots = [], coinsList = [];
-    let SCROLL_SPOT = { x: 565, y: 430 }, LOCKED_CHEST_SPOT = { x: 720, y: 210 };
-    let usedQuizIdx = [], usedWordIdx = [], chestProgress = 0, woodChips = [];
+    let SCROLL_SPOT = { x: 572, y: 435 }, LOCKED_CHEST_SPOT = { x: 720, y: 210 };
+    let usedQuizIdx = [], usedWordIdx = [], chestProgress = 0, woodChips = [], currentScrambleItem = null;
 
     let secretCode = new Array(1, 2, 3, 4), foundDigits = ["?", "?", "?", "?"], dialValues = new Array(0, 0, 0, 0);
     let questState = {
@@ -875,11 +753,9 @@
     let flashlight = { owned: false, on: false, stunTimer: 0, cooldown: 0 };
     let crossItem = { owned: false, on: false, timeLeft: 45 };
     let bosses = [], playersSlowed = false;
-	    let stillSeconds = 0, playerTrapped = false, trappedTimeLeft = 0;
-
 
     let elapsedSeconds = 0, nextBossSpawn = 30, clockInterval = null, lastPosSync = 0;
-    let dustMotes = [], windLines = [], ghostShadows = [], lightningAlpha = 0, screenShake = 0;
+    let dustMotes = [], windLines = [], lightningAlpha = 0, screenShake = 0;
 
     const keys = {};
     window.addEventListener("keydown", e => {
@@ -895,29 +771,20 @@
     let floatingJoy = { active: false, touchId: null, originX: 0, originY: 0, curX: 0, curY: 0, maxR: 46 };
 
     function resetAllMovementInputs() {
-      floatingJoy.active = false;
-      floatingJoy.touchId = null;
-      joyDir = { x: 0, y: 0 };
+      floatingJoy.active = false; floatingJoy.touchId = null; joyDir = { x: 0, y: 0 };
       Object.keys(keys).forEach(k => keys[k] = false);
     }
 
-    document.addEventListener("touchmove", e => {
-      if (matchRunning && !puzzleOpen && e.cancelable) e.preventDefault();
-    }, { passive: false });
-
     canvas.addEventListener("touchstart", e => {
-      if (!matchRunning || puzzleOpen) return;
+      if (!matchRunning || puzzleOpen || isSpectating) return;
       if (e.cancelable) e.preventDefault();
       initAudio();
       for (let i = 0; i < e.changedTouches.length; i++) {
         const t = e.changedTouches[i];
         if (!floatingJoy.active && t.clientX < window.innerWidth * 0.65) {
-          floatingJoy.active = true;
-          floatingJoy.touchId = t.identifier;
-          floatingJoy.originX = t.clientX;
-          floatingJoy.originY = t.clientY;
-          floatingJoy.curX = t.clientX;
-          floatingJoy.curY = t.clientY;
+          floatingJoy.active = true; floatingJoy.touchId = t.identifier;
+          floatingJoy.originX = floatingJoy.curX = t.clientX;
+          floatingJoy.originY = floatingJoy.curY = t.clientY;
           joyDir = { x: 0, y: 0 };
         }
       }
@@ -929,32 +796,23 @@
       for (let i = 0; i < e.changedTouches.length; i++) {
         const t = e.changedTouches[i];
         if (t.identifier === floatingJoy.touchId) {
-          floatingJoy.curX = t.clientX;
-          floatingJoy.curY = t.clientY;
-          const dx = t.clientX - floatingJoy.originX;
-          const dy = t.clientY - floatingJoy.originY;
+          floatingJoy.curX = t.clientX; floatingJoy.curY = t.clientY;
+          const dx = t.clientX - floatingJoy.originX, dy = t.clientY - floatingJoy.originY;
           const dist = Math.hypot(dx, dy);
           if (dist > 6) {
-            const clamped = Math.min(floatingJoy.maxR, dist);
-            const ratio = clamped / floatingJoy.maxR;
-            joyDir.x = (dx / dist) * ratio;
-            joyDir.y = (dy / dist) * ratio;
-          } else {
-            joyDir = { x: 0, y: 0 };
-          }
+            const ratio = Math.min(floatingJoy.maxR, dist) / floatingJoy.maxR;
+            joyDir.x = (dx / dist) * ratio; joyDir.y = (dy / dist) * ratio;
+          } else joyDir = { x: 0, y: 0 };
         }
       }
     }, { passive: false });
 
     const endFloatingTouch = e => {
-      for (let i = 0; i < e.changedTouches.length; i++) {
-        if (e.changedTouches[i].identifier === floatingJoy.touchId) resetAllMovementInputs();
-      }
+      for (let i = 0; i < e.changedTouches.length; i++) if (e.changedTouches[i].identifier === floatingJoy.touchId) resetAllMovementInputs();
     };
     canvas.addEventListener("touchend", endFloatingTouch, { passive: false });
     canvas.addEventListener("touchcancel", endFloatingTouch, { passive: false });
     window.addEventListener("blur", resetAllMovementInputs);
-    document.addEventListener("visibilitychange", () => { if (document.hidden) resetAllMovementInputs(); });
 
     function bindInstantTouchAction(selector, actionFn) {
       const btn = document.querySelector(selector);
@@ -966,69 +824,57 @@
         const now = Date.now();
         if (now - lastTrigger < 180) return;
         lastTrigger = now;
-        initAudio();
-        actionFn();
+        initAudio(); actionFn();
       };
-      btn.removeAttribute("onclick");
       btn.addEventListener("touchstart", fire, { passive: false });
       btn.addEventListener("mousedown", fire);
     }
     bindInstantTouchAction("#btnCross", toggleCross);
     bindInstantTouchAction("#btnFlashlight", toggleFlashlight);
-    bindInstantTouchAction(".right-btns .btn-horror:last-child", tryInteract);
+    bindInstantTouchAction("#btnInteract", tryInteract);
     const resize = () => { canvas.width = document.documentElement.clientWidth; canvas.height = document.documentElement.clientHeight; };
     window.addEventListener("resize", resize); resize();
-
-    function tryLockLandscape() {
-      if (screen.orientation && screen.orientation.lock) screen.orientation.lock("landscape").catch(() => {});
-      if (document.documentElement.requestFullscreen && window.innerWidth < 900 && !document.fullscreenElement) {
-        document.documentElement.requestFullscreen().catch(() => {});
-      }
-    }
-    window.addEventListener("touchstart", tryLockLandscape, { once: true });
 
     function updateItemsHUD() {
       const litCnt = questState.litTorches.filter(Boolean).length;
       const talCnt = questState.talismansTaken.filter(Boolean).length;
-      document.getElementById("hudItems").innerText = `DIÊM ${questState.matchesCount} • NẾN ${litCnt}/3 • BÙA ${talCnt}/3`;
+      document.getElementById("hudItems").innerText = `Diêm ${questState.matchesCount} • Nến ${litCnt}/3 • Bùa ${talCnt}/3`;
     }
 
     function updateFlashlightBtnUI() {
       const btn = document.getElementById("btnFlashlight"), lbl = document.getElementById("flashLabel");
       btn.classList.toggle("active-glow", flashlight.owned && flashlight.on);
-      if (!flashlight.owned) lbl.innerText = "CHƯA CÓ";
-      else if (flashlight.cooldown > 0) lbl.innerText = `HỒI (${flashlight.cooldown}s)`;
-      else lbl.innerText = flashlight.on ? "ĐÈN: BẬT" : "ĐÈN (F)";
+	  btn.classList.toggle("has-item", flashlight.owned);
+      if (!flashlight.owned) lbl.innerText = "Chưa có";
+      else if (flashlight.cooldown > 0) lbl.innerText = `Hồi ${flashlight.cooldown}s`;
+      else lbl.innerText = flashlight.on ? "Đèn bật" : "Đèn tắt";
     }
 
     function updateCrossBtnUI() {
       const btn = document.getElementById("btnCross"), lbl = document.getElementById("crossLabel");
-      if (!btn || !lbl) return;
       btn.classList.toggle("active-glow", crossItem.owned && crossItem.on && crossItem.timeLeft > 0);
-      if (!crossItem.owned) lbl.innerText = "CHƯA CÓ";
-      else if (crossItem.timeLeft <= 0) lbl.innerText = "HẾT LỰC";
-      else {
-        const m = Math.floor(crossItem.timeLeft / 60), s = String(crossItem.timeLeft % 60).padStart(2, "0");
-        lbl.innerText = crossItem.on ? `BẬT ${m}:${s}` : `THÁNH GIÁ`;
-      }
+	  btn.classList.toggle("has-item", crossItem.owned);
+      if (!crossItem.owned) lbl.innerText = "Chưa có";
+      else if (crossItem.timeLeft <= 0) lbl.innerText = "Hết lực";
+      else lbl.innerText = crossItem.on ? `Bật ${crossItem.timeLeft}s` : "Thánh giá";
     }
 
     function toggleFlashlight() {
-      if (!matchRunning || puzzleOpen) return;
-      if (!flashlight.owned) { showSubtleNotify("Bạn chưa có Đèn Pin! Hãy tìm ở các góc phòng (có 3 cây trong nhà)."); return; }
+      if (!matchRunning || puzzleOpen || isSpectating) return;
+      if (!flashlight.owned) { showSubtleNotify("Bạn chưa có đèn pin."); return; }
       if (flashlight.cooldown > 0) return;
       flashlight.on = !flashlight.on;
       updateFlashlightBtnUI();
     }
 
     function toggleCross() {
-      if (!matchRunning || puzzleOpen) return;
-      if (!crossItem.owned) { showSubtleNotify("Bạn chưa nhặt Thánh Giá! Hãy tìm cây Thánh Giá giấu trong dinh thự."); return; }
-      if (crossItem.timeLeft <= 0) { showSubtleNotify("Thánh Giá đã cạn kiệt linh lực sau 45 giây bảo hộ!"); return; }
+      if (!matchRunning || puzzleOpen || isSpectating) return;
+      if (!crossItem.owned) { showSubtleNotify("Bạn chưa nhặt thánh giá."); return; }
+      if (crossItem.timeLeft <= 0) { showSubtleNotify("Thánh giá đã hết linh lực."); return; }
       crossItem.on = !crossItem.on;
       updateCrossBtnUI();
       syncCrossState();
-      if (crossItem.on) showSubtleNotify("Đã giơ cao Thánh Giá! Hobokuryo sẽ không thể rượt đuổi bạn!");
+      if (crossItem.on) showSubtleNotify("Đã bật thánh giá bảo hộ trong 45 giây.");
     }
 
     function syncCrossState() {
@@ -1039,45 +885,64 @@
       }).catch(() => {});
     }
 
+    function pickRandomTargetUser(excludeUser = null) {
+      const aliveList = Object.values(squad).filter(p => p.alive !== false && !p.crossProtected);
+      if (aliveList.length === 0) return null;
+      const filtered = aliveList.filter(p => p.username !== excludeUser);
+      const pool = filtered.length > 0 ? filtered : aliveList;
+      return pool[Math.floor(Math.random() * pool.length)].username;
+    }
+
     function spawnBossCycle(customDuration = 30) {
+      if (!isHost) return;
       const spots = [{ x: 80, y: 120 }, { x: 940, y: 120 }, { x: 80, y: 680 }, { x: 940, y: 680 }].sort(() => Math.random() - 0.5);
       const count = elapsedSeconds >= 180 ? 2 : 1;
       playersSlowed = false;
-      document.getElementById("slowBanner").style.display = "none";
 
       bosses = [];
+      let firstTarget = null;
       for (let i = 0; i < count; i++) {
-        const sp = spots.at(i % spots.length);
+        const sp = spots[i % spots.length];
+        const targetU = pickRandomTargetUser(firstTarget);
+        if (i === 0) firstTarget = targetU;
         bosses.push({
-          id: i, x: sp.x, y: sp.y, r: 14, speed: 1.92, lifeLeft: customDuration,
-          flipX: false, spriteKey: i === 0 ? "boss" : "boss2"
+          id: i, x: sp.x, y: sp.y, renderX: sp.x, renderY: sp.y,
+          r: 14, speed: 1.92, lifeLeft: customDuration, flipX: false,
+          spriteKey: i === 0 ? "boss" : "boss2", targetUser: targetU
         });
       }
       flashlight.stunTimer = 0;
-      showSubtleNotify(count === 2 ? `CẢNH BÁO: 2 ÁC QUỶ HOBOKURYO CÙNG XUẤT HIỆN (${customDuration}s)!` : `ÁC QUỶ HOBOKURYO ĐÃ XUẤT HIỆN (${customDuration}s)!`, 3600);
       document.getElementById("redScreenEdge").style.opacity = "1";
-      document.getElementById("dangerAlert").style.display = "block";
+      const msg = count === 2 ? "Cảnh báo hai ác quỷ Hobokuryo cùng xuất hiện." : "Ác quỷ Hobokuryo đã xuất hiện.";
+      showSubtleNotify(msg, 3500);
+      syncRoomState({ bosses, bossStunTimer: 0, eventBanner: msg });
     }
 
     function despawnBossCycle() {
+      if (!isHost) return;
       bosses = []; flashlight.stunTimer = 0; nextBossSpawn = elapsedSeconds + 20;
       document.getElementById("redScreenEdge").style.opacity = "0";
-      document.getElementById("dangerAlert").style.display = "none";
-      document.getElementById("stunBanner").style.display = "none";
       playersSlowed = true;
-      document.getElementById("slowBanner").style.display = "block";
-      showSubtleNotify("Cả đội bị lời nguyền Ác Xích làm chậm trong 20 giây!", 3400);
+      const msg = "Ác quỷ tạm biến mất, cả đội bị làm chậm trong 20 giây.";
+      showSubtleNotify(msg, 3400);
+      syncRoomState({ bosses: [], bossStunTimer: 0, eventBanner: msg });
     }
+
     function updateDynamicBottomHint() {
       const hintEl = document.getElementById("bottomHintBar");
+      if (isSpectating) {
+        const target = squad[spectateUser];
+        hintEl.innerText = formatSentenceCase(`Bạn đã tử nạn. Đang theo dõi đồng đội ${target ? target.name : ""}.`);
+        return;
+      }
       const litCnt = questState.litTorches.filter(Boolean).length;
       const talCnt = questState.talismansTaken.filter(Boolean).length;
-      if (doorRitual.active) hintEl.innerText = "🚨 Cửa đang mở! Hãy bật Đèn Pin (F) chiếu thẳng vào Hobokuryo để cầm chân nó!";
-      else if (!foundDigits.includes("?")) hintEl.innerText = "Đã thu thập đủ 4 chữ số mật mã! Hãy chạy xuống Cửa Thoát phía dưới để mở khóa!";
-      else if (litCnt < 3) hintEl.innerText = `💡 Gợi ý: Tìm 3 Que Diêm giấu ngẫu nhiên trong các phòng để thắp 3 Ngọn Nến (${litCnt}/3).`;
-      else if (!questState.scrollSolved) hintEl.innerText = "Đã đủ 3 Nến sáng! Hãy tìm và mở Cuộn Giấy Bí Mật để lấy số thứ 1.";
-      else if (!questState.chestSolved) hintEl.innerText = `Gợi ý: Cả đội cần giải đúng 5 câu tại Rương Khóa Cổ (Tiến độ: ${chestProgress}/5 câu).`;
-      else if (talCnt < 3) hintEl.innerText = `Gợi ý: Thu thập đủ 3 Mảnh Bùa ở góc phòng và rìa hành lang (${talCnt}/3).`;
+      if (doorRitual.active) hintEl.innerText = "Cửa đang mở, hãy dùng đèn pin ngăn chặn Hobokuryo.";
+      else if (!foundDigits.includes("?")) hintEl.innerText = "Đã đủ 4 chữ số mật mã, hãy chạy xuống cửa thoát phía dưới.";
+      else if (litCnt < 3) hintEl.innerText = `Tìm 3 que diêm giấu trong các phòng để thắp 3 ngọn nến (${litCnt}/3).`;
+      else if (!questState.scrollSolved) hintEl.innerText = "Đã đủ 3 nến sáng, hãy mở cuộn giấy bí mật để lấy số thứ 1.";
+      else if (!questState.chestSolved) hintEl.innerText = `Cả đội cần giải đúng 5 câu tại rương khóa cổ (${chestProgress}/5).`;
+      else if (talCnt < 3) hintEl.innerText = `Thu thập đủ 3 mảnh bùa ở góc phòng và hành lang (${talCnt}/3).`;
     }
 
     function tickClock() {
@@ -1085,106 +950,82 @@
       elapsedSeconds++;
       const mm = String(Math.floor(elapsedSeconds / 60)).padStart(2, "0");
       const ss = String(elapsedSeconds % 60).padStart(2, "0");
-      document.getElementById("hudTimer").innerText = `⏱️ ${mm}:${ss}`;
-	        // Tính năng 4: Đếm ngược 25s khi bị Hobokuryo trói chờ đồng đội cứu
-      if (playerTrapped) {
-        trappedTimeLeft--;
-        showSubtleNotify(`⛓️ Linh hồn bạn đang bị trói! Chờ đồng đội tới cứu còn ${trappedTimeLeft}s...`, 1100);
-        if (trappedTimeLeft <= 0) {
-          playerTrapped = false;
-          endMatch(false, "Đồng đội không kịp giải cứu linh hồn bạn khỏi lời nguyền của Hobokuryo!");
-          return;
-        }
-      }
-
-      // Tính năng 3: Nín thở khi đứng yên & tắt đèn pin (tối đa 8 giây)
-      if (!playerTrapped && !player.isMoving && !flashlight.on && bosses.length > 0) {
-        stillSeconds++;
-        if (stillSeconds <= 8) {
-          showSubtleNotify(`Đang nín thở ẩn nấp (${stillSeconds}/8s) — Hobokuryo khó phát hiện!`, 1100);
-        } else {
-          stillSeconds = 0;
-          playHeartbeatSFX();
-          showSubtleNotify("Hết hơi! Bạn thở dốc làm lộ vị trí cho Hobokuryo!", 2500);
-        }
-      } else {
-        stillSeconds = 0;
-      }
-
+      document.getElementById("hudTimer").innerText = `${mm}:${ss}`;
       updateDynamicBottomHint();
 
-      if (Math.random() < 0.12) { lightningAlpha = 0.85; playThunderSFX(); }
+      if (Math.random() < 0.14) { lightningAlpha = 0.8; playThunderSFX(); }
       if (flashlight.cooldown > 0) { flashlight.cooldown--; updateFlashlightBtnUI(); }
+
+      const statusLine = document.getElementById("statusLineText");
       if (flashlight.stunTimer > 0) {
         flashlight.stunTimer--;
-        document.getElementById("stunBanner").style.display = "block";
-        document.getElementById("stunBanner").innerText = `🔦 CHIẾU TRÚNG HOBOKURYO! ĐÓNG BĂNG: ${flashlight.stunTimer}s`;
+        statusLine.innerText = `Hobokuryo đang bị đóng băng (${flashlight.stunTimer}s)`;
         if (flashlight.stunTimer <= 0) {
           flashlight.on = false; flashlight.cooldown = 15;
-          document.getElementById("stunBanner").style.display = "none";
+          statusLine.innerText = "";
           updateFlashlightBtnUI();
         }
-      }
-
-      const crossBanner = document.getElementById("crossBanner");
-      if (crossItem.owned && crossItem.on && crossItem.timeLeft > 0) {
+      } else if (crossItem.owned && crossItem.on && crossItem.timeLeft > 0) {
         crossItem.timeLeft--;
         updateCrossBtnUI();
-        if (crossBanner) {
-          crossBanner.style.display = "block";
-          const cm = Math.floor(crossItem.timeLeft / 60), cs = String(crossItem.timeLeft % 60).padStart(2, "0");
-          crossBanner.innerText = `THÁNH GIÁ BẢO HỘ: ${cm}:${cs} (MIỄN NHIỄM HOBOKURYO)`;
-        }
+        statusLine.innerText = `Thánh giá bảo hộ còn ${crossItem.timeLeft} giây`;
         if (crossItem.timeLeft <= 0) {
           crossItem.on = false; updateCrossBtnUI(); syncCrossState();
-          if (crossBanner) crossBanner.style.display = "none";
-          showSubtleNotify("⚠️ Thánh Giá đã hết tác dụng sau 45 giây bảo hộ! Hobokuryo có thể nhìn thấy bạn!", 4200);
+          statusLine.innerText = "";
+          showSubtleNotify("Thánh giá đã hết tác dụng bảo hộ.");
         }
-      } else if (crossBanner) {
-        crossBanner.style.display = "none";
+      } else if (bosses.length > 0) {
+        const rem = Math.max(1, bosses.at(0).lifeLeft || 1);
+        statusLine.innerText = `${bosses.length} ác quỷ đang săn lùng (${rem}s)`;
+      } else {
+        statusLine.innerText = "";
       }
 
       if (doorRitual.active) {
         doorRitual.timeLeft--;
-        showSubtleNotify(`🚪 CỬA ĐANG MỞ... CÒN ${doorRitual.timeLeft}s! HÃY CẦM CHÂN HOBOKURYO!`, 1200);
         if (doorRitual.timeLeft <= 0) {
           doorRitual.active = false;
-          endMatch(true, "THOÁT HIỂM THÀNH CÔNG! ÁC MA HOBOKURYO BỊ PHONG ẤN, CẢ ĐỘI NHẬN +25 GemPoint!");
+          endMatch(true, "Thoát hiểm thành công, cả đội nhận thưởng 25 GemPoint.");
           return;
         }
       }
 
-      if (bosses.length === 0 && elapsedSeconds >= nextBossSpawn) spawnBossCycle(30);
-      else if (bosses.length > 0) {
-        bosses.forEach(b => b.lifeLeft--);
-        const remain = Math.max(0, bosses.at(0).lifeLeft);
-        if (remain <= 0 && !doorRitual.active) despawnBossCycle();
-        else document.getElementById("dangerAlert").innerText = `${bosses.length} HOBOKURYO ĐANG SĂN LÙNG! CÒN ${Math.max(1, remain)}s!`;
+      if (isHost) {
+        if (bosses.length === 0 && elapsedSeconds >= nextBossSpawn) spawnBossCycle(30);
+        else if (bosses.length > 0) {
+          bosses.forEach(b => {
+            b.lifeLeft--;
+            if (elapsedSeconds % 8 === 0 || !squad[b.targetUser] || squad[b.targetUser].alive === false || squad[b.targetUser].crossProtected) {
+              b.targetUser = pickRandomTargetUser();
+            }
+          });
+          if (bosses.at(0).lifeLeft <= 0 && !doorRitual.active) despawnBossCycle();
+        }
       }
     }
 
     function startMatchLocal(roomData = {}) {
       if (matchRunning) return;
       matchRunning = true;
-      stopLobbyHorrorBGM();
-      initAudio();
-      startWindAmbience();
-      resetAllMovementInputs();
+      isSpectating = false; spectateUser = null; teammateRenderPos = {};
+      stopLobbyHorrorBGM(); initAudio(); resetAllMovementInputs();
 
       document.getElementById("lobbyScreen").style.display = "none";
       document.getElementById("rulesReadyScreen").style.display = "none";
+      document.getElementById("aliveActionBtns").style.display = "flex";
+      document.getElementById("spectateActionBtns").style.display = "none";
 
-      secretCode = Array.isArray(roomData.secretCode) ? roomData.secretCode : new Array(1, 2, 3, 4);
-      foundDigits = Array.isArray(roomData.foundDigits) ? roomData.foundDigits : ["?", "?", "?", "?"];
+      secretCode = (Array.isArray(roomData.secretCode) && roomData.secretCode.length === 4) ? roomData.secretCode : new Array(1, 2, 3, 4);
+      foundDigits = ["?", "?", "?", "?"];
       dialValues = new Array(0, 0, 0, 0);
-      document.getElementById("hudCode").innerText = `🔐 Mã: ${foundDigits.join(" - ")}`;
+      document.getElementById("hudCode").innerText = "Mã: ? - ? - ? - ?";
 
       questState = {
         matchesCount: 0, matchesTaken: [false, false, false],
         litTorches: [false, false, false], scrollSolved: false,
         chestSolved: false, talismansTaken: [false, false, false], wordSolved: false
       };
-      usedQuizIdx = []; usedWordIdx = []; chestProgress = 0; woodChips = [];
+      usedQuizIdx = []; usedWordIdx = []; currentScrambleItem = null; chestProgress = 0; woodChips = [];
       doorRitual = { active: false, timeLeft: 15 };
       updateItemsHUD();
 
@@ -1192,60 +1033,33 @@
         ? roomData.layoutSeed
         : Array.from({ length: 18 }, (_, i) => i).sort(() => Math.random() - 0.5);
       let ptr = 0;
-      const pickSpot = () => ITEM_SPAWN_POOL.at(order.at(ptr++));
+      const pickSpot = () => ITEM_SPAWN_POOL[order[ptr++]];
 
-      FLASHLIGHT_SPOTS = [0, 1, 2].map(id => {
-        const s = pickSpot();
-        return { id, x: s.x, y: s.y, taken: false };
-      });
-
-      const cr = pickSpot();
-      CROSS_SPOT = { x: cr.x, y: cr.y, taken: false };
-
-      matchSpots = [0, 1, 2].map(id => {
-        const s = pickSpot();
-        return { id, x: s.x, y: s.y, room: s.area };
-      });
-
-      BRAZIER_SPOTS = [0, 1, 2].map(id => {
-        const s = pickSpot();
-        return { id, x: s.x, y: s.y, room: s.area };
-      });
-
-      const sc = pickSpot();
-      SCROLL_SPOT = { x: sc.x, y: sc.y };
-
-      const ch = pickSpot();
-      LOCKED_CHEST_SPOT = { x: ch.x, y: ch.y };
-
-      TALISMAN_SPOTS = [0, 1, 2].map(id => {
-        const s = pickSpot();
-        return { id, x: s.x, y: s.y, loc: s.area };
-      });
-
-      coinsList = [0, 1, 2].map(id => {
-        const pt = pickSpot();
-        return { id, x: pt.x, y: pt.y, val: 3 + Math.floor(Math.random() * 8), taken: false };
-      });
+      FLASHLIGHT_SPOTS = new Array(0, 1, 2).map(id => { const s = pickSpot(); return { id, x: s.x, y: s.y, taken: false }; });
+      const cr = pickSpot(); CROSS_SPOT = { x: cr.x, y: cr.y, taken: false };
+      matchSpots = new Array(0, 1, 2).map(id => { const s = pickSpot(); return { id, x: s.x, y: s.y, room: s.area }; });
+      BRAZIER_SPOTS = new Array(0, 1, 2).
+      BRAZIER_SPOTS = new Array(0, 1, 2).map(id => { const s = pickSpot(); return { id, x: s.x, y: s.y, room: s.area }; });
+      const sc = pickSpot(); SCROLL_SPOT = { x: sc.x, y: sc.y };
+      const ch = pickSpot(); LOCKED_CHEST_SPOT = { x: ch.x, y: ch.y };
+      TALISMAN_SPOTS = new Array(0, 1, 2).map(id => { const s = pickSpot(); return { id, x: s.x, y: s.y, loc: s.area }; });
+      coinsList = new Array(0, 1, 2).map(id => { const pt = pickSpot(); return { id, x: pt.x, y: pt.y, val: 3 + Math.floor(Math.random() * 8), taken: false }; });
 
       puzzleOpen = false; elapsedSeconds = 0; nextBossSpawn = 30; playersSlowed = false;
       player = { x: 465, y: 565, r: 10, baseSpeed: 2.15, slowSpeed: 1.45, facingAngle: -Math.PI / 2, flipX: false, isMoving: false, walkFrame: 0 };
       flashlight = { owned: false, on: false, stunTimer: 0, cooldown: 0 };
       crossItem = { owned: false, on: false, timeLeft: 45 };
-      updateFlashlightBtnUI();
-      updateCrossBtnUI();
+      updateFlashlightBtnUI(); updateCrossBtnUI();
 
       bosses = [];
-      dustMotes = Array.from({ length: 38 }, () => ({ x: Math.random() * MAP_W, y: Math.random() * MAP_H, vx: 0.4 + Math.random() * 0.5, vy: (Math.random() - 0.5) * 0.3, s: 2 }));
-      windLines = Array.from({ length: 9 }, () => ({ x: Math.random() * MAP_W, y: Math.random() * MAP_H, len: 35 + Math.random() * 40, speed: 1.5 + Math.random() * 1.2 }));
-      ghostShadows = Array.from({ length: 4 }, () => ({ x: Math.random() * MAP_W, y: Math.random() * MAP_H, vx: (Math.random() - 0.5) * 0.8, vy: (Math.random() - 0.5) * 0.8 }));
+      dustMotes = Array.from({ length: 30 }, () => ({ x: Math.random() * MAP_W, y: Math.random() * MAP_H, vx: 0.4 + Math.random() * 0.4, vy: (Math.random() - 0.5) * 0.3, s: 2 }));
+      windLines = Array.from({ length: 8 }, () => ({ x: Math.random() * MAP_W, y: Math.random() * MAP_H, len: 35 + Math.random() * 40, speed: 1.5 + Math.random() * 1.2 }));
 
-      showSubtleNotify("Bạn có 30 giây trước khi Hobokuryo xuất hiện. Hãy tỏa ra tìm vật phẩm!", 4500);
+      showSubtleNotify("Bạn có 30 giây trước khi Hobokuryo xuất hiện, hãy tìm vật phẩm.", 4000);
       clearInterval(clockInterval);
       clockInterval = setInterval(tickClock, 1000);
       requestAnimationFrame(loop);
     }
-
     async function syncRoomState(patchObj) {
       try { await fetch(`${DB_URL}/mansion_rooms/${roomId}.json`, { method: "PATCH", body: JSON.stringify(patchObj) }); } catch (e) {}
     }
@@ -1256,38 +1070,22 @@
         while (usedQuizIdx.includes(idx)) idx = Math.floor(Math.random() * QUIZ_BANK.length);
       }
       usedQuizIdx.push(idx);
-      return QUIZ_BANK.at(idx);
+      return QUIZ_BANK[idx];
     }
 
     function tryInteract() {
-      if (!matchRunning || puzzleOpen) return;
-	        if (playerTrapped) { showSubtleNotify("Bạn đang bị trói, hãy gọi đồng đội lại gần bấm NHẶT để cứu!"); return; }
+      if (!matchRunning || puzzleOpen || isSpectating) return;
 
-      // Tính năng 4: Giải cứu đồng đội đang bị trói trong bán kính 65px
-      for (const mate of Object.values(squad)) {
-        if (mate.username !== myUser && mate.trapped && Math.hypot(player.x - mate.x, player.y - mate.y) < 65) {
-          mate.trapped = false;
-          const msg = `${myName} đã giải cứu ${mate.name} khỏi xiềng xích (Phát ra tiếng động lớn khiến quỷ chú ý)!`;
-          showSubtleNotify(msg, 3800);
-          syncRoomState({ eventBanner: msg });
-          fetch(`${DB_URL}/mansion_rooms/${roomId}/players/${mate.username}.json`, {
-            method: "PATCH", body: JSON.stringify({ trapped: false })
-          }).catch(() => {});
-          return;
-        }
+      if (questState.talismansTaken.filter(Boolean).length === 3 && !questState.wordSolved) {
+        resetAllMovementInputs(); playRealisticChestSFX(true); openWordScrambleModal();
+        return;
       }
 
- if (questState.talismansTaken.filter(Boolean).length === 3 && !questState.wordSolved) {
-        resetAllMovementInputs();
-        playRealisticChestSFX(true);
-        openWordScrambleModal();
-        return;
-		}
       for (const fl of FLASHLIGHT_SPOTS) {
         if (!fl.taken && Math.hypot(player.x - fl.x, player.y - fl.y) < 55) {
-          if (flashlight.owned) { showSubtleNotify("Mỗi người chỉ được mang tối đa 1 cây Đèn Pin!"); return; }
+          if (flashlight.owned) { showSubtleNotify("Mỗi người chỉ mang tối đa 1 đèn pin."); return; }
           fl.taken = true; flashlight.owned = true; updateFlashlightBtnUI();
-          const msg = `${myName} đã nhặt được 1 cây Đèn Pin!`;
+          const msg = `${myName} đã nhặt được đèn pin.`;
           showSubtleNotify(msg);
           syncRoomState({ flashlightsTaken: FLASHLIGHT_SPOTS.map(x => x.taken), eventBanner: msg });
           return;
@@ -1297,16 +1095,16 @@
       if (!CROSS_SPOT.taken && Math.hypot(player.x - CROSS_SPOT.x, player.y - CROSS_SPOT.y) < 55) {
         CROSS_SPOT.taken = true; crossItem.owned = true; crossItem.on = true; crossItem.timeLeft = 45;
         updateCrossBtnUI(); syncCrossState();
-        const msg = `${myName} đã nhặt Thánh Giá! Ác quỷ sẽ không rượt ${myName} trong 45 giây!`;
-        showSubtleNotify(msg, 4200);
+        const msg = `${myName} đã nhặt thánh giá bảo hộ trong 45 giây.`;
+        showSubtleNotify(msg, 3800);
         syncRoomState({ crossTaken: true, eventBanner: msg });
         return;
       }
 
       for (const m of matchSpots) {
-        if (!questState.matchesTaken.at(m.id) && Math.hypot(player.x - m.x, player.y - m.y) < 55) {
-          questState.matchesTaken.splice(m.id, 1, true); questState.matchesCount++; updateItemsHUD();
-          const msg = `${myName} đã tìm thấy 1 Que Diêm tại ${m.room}! (Có ${questState.matchesCount} que)`;
+        if (!questState.matchesTaken[m.id] && Math.hypot(player.x - m.x, player.y - m.y) < 55) {
+          questState.matchesTaken[m.id] = true; questState.matchesCount++; updateItemsHUD();
+          const msg = `${myName} đã tìm thấy que diêm tại ${m.room}.`;
           showSubtleNotify(msg);
           syncRoomState({ matchesTaken: questState.matchesTaken, matchesCount: questState.matchesCount, eventBanner: msg });
           return;
@@ -1314,19 +1112,18 @@
       }
 
       for (const b of BRAZIER_SPOTS) {
-        if (!questState.litTorches.at(b.id) && Math.hypot(player.x - b.x, player.y - b.y) < 55) {
-          if (questState.matchesCount <= 0) { showSubtleNotify("Không đủ Que Diêm! Hãy tìm thêm que diêm giấu trong các góc phòng."); return; }
-          questState.matchesCount--; questState.litTorches.splice(b.id, 1, true); updateItemsHUD();
+        if (!questState.litTorches[b.id] && Math.hypot(player.x - b.x, player.y - b.y) < 55) {
+          if (questState.matchesCount <= 0) { showSubtleNotify("Không đủ que diêm để thắp nến."); return; }
+          questState.matchesCount--; questState.litTorches[b.id] = true; updateItemsHUD();
           const cnt = questState.litTorches.filter(Boolean).length;
-          const msg = cnt === 3 ? "Cả 3 Ngọn Nến đã cháy sáng! Cuộn Giấy Bí Mật đã mở khóa!" : `${myName} đã dùng 1 que diêm thắp sáng nến tại ${b.room} (${cnt}/3).`;
+          const msg = cnt === 3 ? "Cả 3 ngọn nến đã sáng, cuộn giấy bí mật đã mở." : `${myName} đã thắp sáng ngọn nến (${cnt}/3).`;
           showSubtleNotify(msg);
           syncRoomState({ matchesCount: questState.matchesCount, litTorches: questState.litTorches, eventBanner: msg });
           return;
         }
       }
-
       if (!questState.scrollSolved && Math.hypot(player.x - SCROLL_SPOT.x, player.y - SCROLL_SPOT.y) < 55) {
-        if (questState.litTorches.filter(Boolean).length < 3) { showSubtleNotify("Phải thắp sáng đủ 3 Ngọn Nến mới đọc được Cuộn Giấy!"); return; }
+        if (questState.litTorches.filter(Boolean).length < 3) { showSubtleNotify("Phải thắp sáng đủ 3 ngọn nến mới đọc được cuộn giấy."); return; }
         resetAllMovementInputs(); playRealisticChestSFX(true); openQuizModal("scroll"); return;
       }
 
@@ -1335,11 +1132,11 @@
       }
 
       for (const t of TALISMAN_SPOTS) {
-        if (!questState.talismansTaken.at(t.id) && Math.hypot(player.x - t.x, player.y - t.y) < 55) {
-          questState.talismansTaken.splice(t.id, 1, true); updateItemsHUD();
+        if (!questState.talismansTaken[t.id] && Math.hypot(player.x - t.x, player.y - t.y) < 55) {
+          questState.talismansTaken[t.id] = true; updateItemsHUD();
           const cnt = questState.talismansTaken.filter(Boolean).length;
           if (cnt < 3) {
-            const msg = `${myName} đã nhặt Mảnh Bùa tại ${t.loc} (${cnt}/3).`;
+            const msg = `${myName} đã nhặt mảnh bùa tại ${t.loc} (${cnt}/3).`;
             showSubtleNotify(msg); syncRoomState({ talismansTaken: questState.talismansTaken, eventBanner: msg });
           } else {
             syncRoomState({ talismansTaken: questState.talismansTaken });
@@ -1350,17 +1147,16 @@
       }
 
       if (Math.hypot(player.x - EXIT_DOOR.x, player.y - EXIT_DOOR.y) < 65) {
-        if (doorRitual.active) { showSubtleNotify(`Cửa đang mở (${doorRitual.timeLeft}s)... Hãy bảo vệ khu vực cửa!`); return; }
+        if (doorRitual.active) { showSubtleNotify(`Cửa đang mở còn ${doorRitual.timeLeft} giây.`); return; }
         resetAllMovementInputs(); openKeypadModal();
       }
     }
 
-   function closePuzzleModal() {
-      playRealisticChestSFX(false);
-      puzzleOpen = false;
+    function closePuzzleModal() {
+      playRealisticChestSFX(false); puzzleOpen = false;
       document.getElementById("puzzleModal").classList.remove("open");
       if (questState.talismansTaken.filter(Boolean).length === 3 && !questState.wordSolved) {
-        showSubtleNotify("Đã cất 3 Mảnh Bùa vào túi! Bấm nút NHẶT bất cứ lúc nào để mở lại bảng ghép chữ.", 4000);
+        showSubtleNotify("Bấm nút nhặt bất cứ lúc nào để mở lại bảng ghép chữ.", 3600);
       }
     }
 
@@ -1368,7 +1164,7 @@
       puzzleOpen = true;
       const qObj = getUniqueQuiz();
       const nextStep = chestProgress + 1;
-      document.getElementById("puzzleTitle").innerText = targetMode === "scroll" ? `Cuộn Giấy (${qObj.lvl})` : `Rương Khóa Cổ — Câu ${nextStep}/5 (${qObj.lvl})`;
+      document.getElementById("puzzleTitle").innerText = targetMode === "scroll" ? `Cuộn giấy (${qObj.lvl})` : `Rương khóa câu ${nextStep}/5 (${qObj.lvl})`;
       document.getElementById("puzzleQ").innerText = qObj.q;
       const body = document.getElementById("puzzleBody"); body.innerHTML = "";
       qObj.opts.forEach((opt, i) => {
@@ -1378,34 +1174,38 @@
           if (i === qObj.ans) {
             if (targetMode === "scroll") {
               await syncStudentProfile(5, 0);
-              questState.scrollSolved = true; foundDigits.splice(0, 1, secretCode.at(0));
-              document.getElementById("hudCode").innerText = `🔐 Mã: ${foundDigits.join(" - ")}`;
-              const msg = `🔑 ${myName} giải xong Cuộn Giấy (+5 GP) ➔ Số thứ 1 là [ ${secretCode.at(0)} ]!`;
-              showSubtleNotify(msg, 4200); syncRoomState({ scrollSolved: true, foundDigits, eventBanner: msg });
+              questState.scrollSolved = true;
+              foundDigits[0] = secretCode.at(0);
+              document.getElementById("hudCode").innerText = `Mã: ${foundDigits.join(" - ")}`;
+              const msg = `${myName} giải xong cuộn giấy, số thứ 1 là ${secretCode.at(0)}.`;
+              showSubtleNotify(msg, 4000);
+              syncRoomState({ scrollSolved: true, foundDigits, eventBanner: msg });
             } else {
               chestProgress++; await syncStudentProfile(3, 0);
               if (chestProgress < 5) {
-                const msg = `🔑 ${myName} giải đúng câu ${chestProgress}/5 của Rương Khóa (+3 GP)!`;
-                showSubtleNotify(msg, 3500); syncRoomState({ chestProgress, eventBanner: msg });
+                const msg = `${myName} giải đúng câu ${chestProgress}/5 của rương khóa.`;
+                showSubtleNotify(msg, 3400);
+                syncRoomState({ chestProgress, eventBanner: msg });
               } else {
-                questState.chestSolved = true; foundDigits.splice(1, 1, secretCode.at(1));
-                document.getElementById("hudCode").innerText = `🔐 Mã: ${foundDigits.join(" - ")}`;
-                const msg = `🔑 ${myName} hoàn tất câu 5/5 mở Rương Khóa (+3 GP) ➔ Số thứ 2 là [ ${secretCode.at(1)} ]!`;
-                showSubtleNotify(msg, 4200); syncRoomState({ chestSolved: true, chestProgress: 5, foundDigits, eventBanner: msg });
+                questState.chestSolved = true;
+                foundDigits[1] = secretCode.at(1);
+                document.getElementById("hudCode").innerText = `Mã: ${foundDigits.join(" - ")}`;
+                const msg = `${myName} mở xong rương khóa, số thứ 2 là ${secretCode.at(1)}.`;
+                showSubtleNotify(msg, 4000);
+                syncRoomState({ chestSolved: true, chestProgress: 5, foundDigits, eventBanner: msg });
               }
             }
           } else {
-            const msg = `❌ ${myName} trả lời sai! Tiếng động đã thu hút Ác Quỷ Hobokuryo!`;
-            showSubtleNotify(msg, 3600); syncRoomState({ eventBanner: msg });
-            if (bosses.length === 0) spawnBossCycle(30);
+            const msg = `${myName} trả lời sai, tiếng động đã thu hút Hobokuryo.`;
+            showSubtleNotify(msg, 3400);
+            syncRoomState({ eventBanner: msg });
+            if (isHost && bosses.length === 0) spawnBossCycle(30);
           }
         };
         body.appendChild(b);
       });
       document.getElementById("puzzleModal").classList.add("open");
     }
-        let currentScrambleItem = null;
-
     function openWordScrambleModal() {
       puzzleOpen = true;
       if (!currentScrambleItem) {
@@ -1414,10 +1214,9 @@
           while (usedWordIdx.includes(wIdx)) wIdx = Math.floor(Math.random() * WORD_SCRAMBLE_BANK.length);
         }
         usedWordIdx.push(wIdx);
-        currentScrambleItem = WORD_SCRAMBLE_BANK.at(wIdx);
+        currentScrambleItem = WORD_SCRAMBLE_BANK[wIdx];
       }
-
-      document.getElementById("puzzleTitle").innerText = "Ghép 3 Mảnh Bùa Chú";
+      document.getElementById("puzzleTitle").innerText = "Ghép 3 mảnh bùa chú";
       document.getElementById("puzzleQ").innerText = currentScrambleItem.hint;
       const shuffled = currentScrambleItem.word.split("").sort(() => Math.random() - 0.5);
       scrambleState = { target: currentScrambleItem.word, letters: shuffled, pickedIdx: [] };
@@ -1425,10 +1224,9 @@
       document.getElementById("puzzleModal").classList.add("open");
     }
 
-
     function renderScrambleUI() {
       const body = document.getElementById("puzzleBody");
-      const curWord = scrambleState.pickedIdx.map(i => scrambleState.letters.at(i)).join("");
+      const curWord = scrambleState.pickedIdx.map(i => scrambleState.letters[i]).join("");
       let html = "<div class='word-slots'>";
       for (let i = 0; i < scrambleState.target.length; i++) html += `<div class="w-slot">${curWord.charAt(i) || ""}</div>`;
       html += "</div><div class='letter-pool'>";
@@ -1436,70 +1234,99 @@
         const used = scrambleState.pickedIdx.includes(idx);
         html += `<button class="l-btn" ${used ? "disabled" : ""} onclick="pickScrambleLetter(${idx})">${ch}</button>`;
       });
-      html += `</div><button class="btn-dark" style="margin-top:8px;" onclick="resetScramblePick()">↺ Xếp lại chữ</button>`;
+      html += '</div><button class="btn-dark" style="margin-top:8px;" onclick="resetScramblePick()">Xếp lại chữ</button>';
       body.innerHTML = html;
     }
 
     async function pickScrambleLetter(idx) {
       scrambleState.pickedIdx.push(idx);
       renderScrambleUI();
-      const formed = scrambleState.pickedIdx.map(i => scrambleState.letters.at(i)).join("");
+      const formed = scrambleState.pickedIdx.map(i => scrambleState.letters[i]).join("");
       if (formed.length === scrambleState.target.length) {
         if (formed === scrambleState.target) {
           closePuzzleModal();
           questState.wordSolved = true;
-          foundDigits.splice(2, 1, secretCode.at(2));
-          foundDigits.splice(3, 1, secretCode.at(3));
-          document.getElementById("hudCode").innerText = `🔐 Mã: ${foundDigits.join(" - ")}`;
+          foundDigits[2] = secretCode.at(2);
+          foundDigits[3] = secretCode.at(3);
+          document.getElementById("hudCode").innerText = `Mã: ${foundDigits.join(" - ")}`;
           await syncStudentProfile(5, 0);
-          const msg = `🔑 ${myName} ghép xong Bùa Chú (+5 GP) ➔ Số 3 & 4 là [ ${secretCode.at(2)} - ${secretCode.at(3)} ]!`;
-          showSubtleNotify(msg, 4200);
+          const msg = `${myName} giải xong bùa chú, số 3 và 4 là ${secretCode.at(2)} và ${secretCode.at(3)}.`;
+          showSubtleNotify(msg, 4000);
           syncRoomState({ wordSolved: true, foundDigits, eventBanner: msg });
-        } else showSubtleNotify("Chưa đúng từ khóa, hãy bấm 'Xếp lại chữ'!");
+        } else showSubtleNotify("Chưa đúng từ khóa, hãy xếp lại chữ.");
       }
     }
     function resetScramblePick() { scrambleState.pickedIdx = []; renderScrambleUI(); }
 
     function openKeypadModal() { puzzleOpen = true; renderDialGrid(); document.getElementById("keypadModal").classList.add("open"); }
     function closeKeypad() { puzzleOpen = false; document.getElementById("keypadModal").classList.remove("open"); }
-    function spinDial(idx, delta) { dialValues.splice(idx, 1, (dialValues.at(idx) + delta + 10) % 10); renderDialGrid(); }
+    function spinDial(idx, delta) { dialValues[idx] = (dialValues[idx] + delta + 10) % 10; renderDialGrid(); }
     function renderDialGrid() {
       const g = document.getElementById("dialGrid"); g.innerHTML = "";
-      for (let i = 0; i < 4; i++) g.innerHTML += `<div class="dial-col"><button class="dial-btn" onclick="spinDial(${i}, 1)">▲</button><div class="dial-num">${dialValues.at(i)}</div><button class="dial-btn" onclick="spinDial(${i}, -1)">▼</button></div>`;
+      for (let i = 0; i < 4; i++) g.innerHTML += `<div class="dial-col"><button class="dial-btn" onclick="spinDial(${i}, 1)">▲</button><div class="dial-num">${dialValues[i]}</div><button class="dial-btn" onclick="spinDial(${i}, -1)">▼</button></div>`;
     }
 
     function verifyDoorCode() {
       if (dialValues.join("") === secretCode.join("")) {
         closeKeypad(); triggerDoorRitualLocally(); syncRoomState({ doorRitualStarted: true });
       } else {
-        closeKeypad(); showSubtleNotify("Sai mật mã! Hãy kiểm tra lại đủ 4 con số từ các nhiệm vụ.");
+        closeKeypad(); showSubtleNotify("Sai mật mã, hãy kiểm tra lại đủ 4 con số.");
       }
     }
 
     function triggerDoorRitualLocally() {
       if (doorRitual.active) return;
-      doorRitual.active = true; doorRitual.timeLeft = 15; spawnBossCycle(18);
+      doorRitual.active = true; doorRitual.timeLeft = 15;
+      if (isHost) spawnBossCycle(18);
+    }
+
+    function enterSpectatorMode() {
+      if (isSpectating) return;
+      isSpectating = true;
+      resetAllMovementInputs();
+      playPlayerKilledSFX();
+      if (squad[myUser]) squad[myUser].alive = false;
+      document.getElementById("aliveActionBtns").style.display = "none";
+      document.getElementById("spectateActionBtns").style.display = "flex";
+
+      fetch(`${DB_URL}/mansion_rooms/${roomId}/players/${myUser}.json`, {
+        method: "PATCH", body: JSON.stringify({ alive: false, crossProtected: false })
+      }).catch(() => {});
+
+      const aliveMates = Object.values(squad).filter(p => p.username !== myUser && p.alive !== false);
+      if (aliveMates.length === 0) {
+        endMatch(false, "Toàn bộ thành viên trong đội đều đã bị Hobokuryo hạ gục.");
+      } else {
+        spectateUser = aliveMates.at(0).username;
+        const msg = `${myName} đã tử nạn, chuyển sang góc nhìn theo dõi đồng đội.`;
+        showSubtleNotify(msg, 3800);
+        syncRoomState({ eventBanner: msg });
+      }
+    }
+
+    function cycleSpectateTarget() {
+      const aliveMates = Object.values(squad).filter(p => p.username !== myUser && p.alive !== false);
+      if (aliveMates.length === 0) return;
+      const idx = aliveMates.findIndex(p => p.username === spectateUser);
+      spectateUser = aliveMates[(idx + 1) % aliveMates.length].username;
+      showSubtleNotify(`Đang theo dõi ${squad[spectateUser].name}.`, 2000);
     }
 
     async function endMatch(win, msg) {
+      if (!matchRunning) return;
       matchRunning = false; clearInterval(clockInterval); resetAllMovementInputs();
       if (!win) playPlayerKilledSFX();
       if (win) await syncStudentProfile(25, 1);
       try {
         await fetch(`${DB_URL}/mansion_rooms/${roomId}.json`, {
           method: "PATCH",
-          body: JSON.stringify({ status: "waiting", foundDigits: ["?", "?", "?", "?"], chestProgress: 0, doorRitualStarted: false, eventBanner: "" })
+          body: JSON.stringify({ status: "waiting", foundDigits: ["?", "?", "?", "?"], chestProgress: 0, bosses: [], doorRitualStarted: false, eventBanner: "" })
         });
       } catch (e) {}
-      document.getElementById("dangerAlert").style.display = "none";
-      document.getElementById("stunBanner").style.display = "none";
-      document.getElementById("slowBanner").style.display = "none";
-      document.getElementById("crossBanner").style.display = "none";
       document.getElementById("redScreenEdge").style.opacity = "0";
-      document.getElementById("endIcon").innerText = win ? "🏆" : "💀";
-      document.getElementById("endTitle").innerText = win ? "THOÁT HIỂM THÀNH CÔNG! (+25 GP)" : "LINH HỒN BẠN ĐÃ BỊ ÁC QUỶ HOBOKURYO BẮT GIỮ!";
+      document.getElementById("endTitle").innerText = win ? "Thoát hiểm thành công" : "Nhiệm vụ thất bại";
       document.getElementById("endTitle").style.color = win ? "#34d399" : "#ef4444";
-      document.getElementById("endDesc").innerText = msg;
+      document.getElementById("endDesc").innerText = formatSentenceCase(msg);
       document.getElementById("endModal").classList.add("open");
     }
     function update() {
@@ -1507,7 +1334,7 @@
       const curSpeed = playersSlowed ? player.slowSpeed : player.baseSpeed;
       player.isMoving = false;
 
-      if (!puzzleOpen && !playerTrapped) {
+      if (!puzzleOpen && !isSpectating) {
         let dx = joyDir.x, dy = joyDir.y;
         if (keys.w || keys.arrowup) dy -= 1; if (keys.s || keys.arrowdown) dy += 1;
         if (keys.a || keys.arrowleft) dx -= 1; if (keys.d || keys.arrowright) dx += 1;
@@ -1528,122 +1355,106 @@
 
           if (Math.random() < 0.35) {
             woodChips.push({
-              x: player.x + (Math.random() - 0.5) * 10,
-              y: player.y + 14,
-              vx: (Math.random() - 0.5) * 1.3,
-              vy: -0.6 - Math.random() * 0.8,
-              s: 2 + Math.floor(Math.random() * 2),
-              color: Math.random() < 0.5 ? "#78350f" : "#92400e",
-              life: 18
+              x: player.x + (Math.random() - 0.5) * 10, y: player.y + 14,
+              vx: (Math.random() - 0.5) * 1.3, vy: -0.6 - Math.random() * 0.8,
+              s: 2 + Math.floor(Math.random() * 2), color: Math.random() < 0.5 ? "#78350f" : "#92400e", life: 18
             });
           }
 
           if (Date.now() - lastFootstep > (playersSlowed ? 460 : 340)) { lastFootstep = Date.now(); playWoodStepSound(); }
-          if (squad[myUser]) { squad[myUser].x = player.x; squad[myUser].y = player.y; squad[myUser].flipX = player.flipX; }
-          if (Date.now() - lastPosSync > 350) {
-            lastPosSync = Date.now();
-            fetch(`${DB_URL}/mansion_rooms/${roomId}/players/${myUser}.json`, {
-              method: "PATCH", body: JSON.stringify({ x: Math.round(player.x), y: Math.round(player.y), flipX: player.flipX })
-            }).catch(() => {});
-          }
+        }
+
+        if (squad[myUser]) {
+          squad[myUser].x = player.x; squad[myUser].y = player.y;
+          squad[myUser].flipX = player.flipX; squad[myUser].moving = player.isMoving;
+        }
+        if (Date.now() - lastPosSync > 140) {
+          lastPosSync = Date.now();
+          fetch(`${DB_URL}/mansion_rooms/${roomId}/players/${myUser}.json`, {
+            method: "PATCH", body: JSON.stringify({ x: Math.round(player.x), y: Math.round(player.y), flipX: player.flipX, moving: player.isMoving })
+          }).catch(() => {});
         }
       }
 
-      coinsList.forEach(c => {
-        if (!c.taken && Math.hypot(player.x - c.x, player.y - c.y) < 28) {
-          c.taken = true; playCoinPickupSFX(); syncStudentProfile(c.val, 0);
-          showSubtleNotify(`Nhặt được Đồng Xu cổ (+${c.val} GemPoint)!`, 2400);
-          syncRoomState({ coinsTaken: coinsList.map(x => x.taken) });
-        }
-      });
+      if (!isSpectating) {
+        coinsList.forEach(c => {
+          if (!c.taken && Math.hypot(player.x - c.x, player.y - c.y) < 28) {
+            c.taken = true; playCoinPickupSFX(); syncStudentProfile(c.val, 0);
+            showSubtleNotify(`Nhặt được đồng xu cổ cộng ${c.val} GemPoint.`, 2400);
+            syncRoomState({ coinsTaken: coinsList.map(x => x.taken) });
+          }
+        });
+      }
 
       dustMotes.forEach(d => { d.x += d.vx; d.y += d.vy; if (d.x > MAP_W) d.x = 0; if (d.y < 0) d.y = MAP_H; if (d.y > MAP_H) d.y = 0; });
       windLines.forEach(w => { w.x += w.speed; if (w.x > MAP_W) { w.x = -w.len; w.y = Math.random() * MAP_H; } });
-      ghostShadows.forEach(g => { g.x += g.vx; g.y += g.vy; if (g.x < 50 || g.x > MAP_W - 50) g.vx *= -1; if (g.y < 100 || g.y > MAP_H - 100) g.vy *= -1; });
       if (lightningAlpha > 0) lightningAlpha = Math.max(0, lightningAlpha - 0.04);
       screenShake = 0;
 
       if (bosses.length > 0) {
-        const alivePlayers = Object.values(squad).filter(p => p.alive !== false);
-        if (!alivePlayers.some(p => p.username === myUser)) alivePlayers.push({ username: myUser, x: player.x, y: player.y, crossProtected: false });
-        alivePlayers.forEach(p => {
-          if (p.username === myUser) {
-            p.x = player.x; p.y = player.y;
-            p.crossProtected = crossItem.owned && crossItem.on && crossItem.timeLeft > 0;
-          }
-        });
-
-        const huntablePlayers = alivePlayers.filter(p => !p.crossProtected);
-        const claimedUsers = new Set();
         let minDistToMe = 9999;
 
         bosses.forEach((b, i) => {
-          const distToMe = Math.hypot(b.x - player.x, b.y - player.y);
-          if (distToMe < minDistToMe) minDistToMe = distToMe;
+          const bx = b.renderX !== undefined ? b.renderX : b.x;
+          const by = b.renderY !== undefined ? b.renderY : b.y;
+          const distToMe = Math.hypot(bx - player.x, by - player.y);
+          if (!isSpectating && distToMe < minDistToMe) minDistToMe = distToMe;
 
-          const angleToBoss = Math.atan2(b.y - player.y, b.x - player.x);
-          const angleDiff = Math.abs(Math.atan2(Math.sin(angleToBoss - player.facingAngle), Math.cos(angleToBoss - player.facingAngle)));
-          if (flashlight.owned && flashlight.on && flashlight.stunTimer === 0 && distToMe < 190 && angleDiff < 0.48) flashlight.stunTimer = 10;
-
-          if (flashlight.stunTimer <= 0) {
-            let vx = 0, vy = 0;
-            if (huntablePlayers.length > 0) {
-              let candidates = huntablePlayers.filter(p => !claimedUsers.has(p.username));
-              if (candidates.length === 0) candidates = huntablePlayers;
-
-              let nearest = candidates.at(0);
-              let bestDist = Infinity;
-              candidates.forEach(p => {
-                const d = Math.hypot(b.x - p.x, b.y - p.y);
-                if (d < bestDist) { bestDist = d; nearest = p; }
-              });
-              if (nearest) claimedUsers.add(nearest.username);
-
-              const tx = nearest ? nearest.x : player.x;
-              const ty = nearest ? nearest.y : player.y;
-              const ang = Math.atan2(ty - b.y, tx - b.x);
-              vx = Math.cos(ang) * b.speed;
-              vy = Math.sin(ang) * b.speed;
+          if (!isSpectating && flashlight.owned && flashlight.on && flashlight.stunTimer === 0 && distToMe < 190) {
+            const angleToBoss = Math.atan2(by - player.y, bx - player.x);
+            const angleDiff = Math.abs(Math.atan2(Math.sin(angleToBoss - player.facingAngle), Math.cos(angleToBoss - player.facingAngle)));
+            if (angleDiff < 0.48) {
+              flashlight.stunTimer = 10;
+              syncRoomState({ bossStunTimer: 10 });
             }
+          }
 
-            bosses.forEach((other, j) => {
-              if (i !== j) {
-                const sepDist = Math.hypot(b.x - other.x, b.y - other.y);
-                if (sepDist < 85 && sepDist > 0.1) {
-                  const pushAng = Math.atan2(b.y - other.y, b.x - other.x);
-                  vx += Math.cos(pushAng) * 1.45;
-                  vy += Math.sin(pushAng) * 1.45;
-                }
+          if (isHost) {
+            if (flashlight.stunTimer <= 0) {
+              const targetP = (b.targetUser && squad[b.targetUser] && squad[b.targetUser].alive !== false && !squad[b.targetUser].crossProtected)
+                ? squad[b.targetUser]
+                : Object.values(squad).find(p => p.alive !== false && !p.crossProtected);
+
+              let vx = 0, vy = 0;
+              if (targetP) {
+                const tx = targetP.username === myUser ? player.x : targetP.x;
+                const ty = targetP.username === myUser ? player.y : targetP.y;
+                const ang = Math.atan2(ty - b.y, tx - b.x);
+                vx = Math.cos(ang) * b.speed;
+                vy = Math.sin(ang) * b.speed;
               }
-            });
+              bosses.forEach((other, j) => {
+                if (i !== j) {
+                  const sep = Math.hypot(b.x - other.x, b.y - other.y);
+                  if (sep < 85 && sep > 0.1) {
+                    const pushAng = Math.atan2(b.y - other.y, b.x - other.x);
+                    vx += Math.cos(pushAng) * 1.4; vy += Math.sin(pushAng) * 1.4;
+                  }
+                }
+              });
+              if (vx < -0.05) b.flipX = true; else if (vx > 0.05) b.flipX = false;
+              b.x += vx; b.y += vy;
+            }
+            b.renderX = b.x; b.renderY = b.y;
+          } else {
+            b.renderX += (b.x - b.renderX) * 0.25;
+            b.renderY += (b.y - b.renderY) * 0.25;
+          }
 
-            if (vx < -0.05) b.flipX = true;
-            else if (vx > 0.05) b.flipX = false;
-
-            b.x += vx; b.y += vy;
-
-            const iAmProtected = crossItem.owned && crossItem.on && crossItem.timeLeft > 0;
-const isHidingBreath = (stillSeconds > 0 && stillSeconds <= 8 && distToMe > 65);
-if (!iAmProtected && !isHidingBreath && !playerTrapped && distToMe < player.r + b.r) {
-  const freeMates = Object.values(squad).filter(p => p.username !== myUser && p.alive !== false && !p.trapped);
-  if (freeMates.length === 0) {
-    endMatch(false, "Ác quỷ Hobokuryo đã tóm gọn cả đội trong bóng tối!");
-  } else {
-    playerTrapped = true; trappedTimeLeft = 25;
-    playPlayerKilledSFX();
-    const msg = `⛓️ ${myName} đã bị Hobokuryo trói! Hãy tới cứu trong 25 giây!`;
-    showSubtleNotify(msg, 4000);
-    syncRoomState({ eventBanner: msg });
-    fetch(`${DB_URL}/mansion_rooms/${roomId}/players/${myUser}.json`, {
-      method: "PATCH", body: JSON.stringify({ trapped: true })
-    }).catch(() => {});
-  }
-}
-
+          const iAmProtected = crossItem.owned && crossItem.on && crossItem.timeLeft > 0;
+          if (!isSpectating && !iAmProtected && flashlight.stunTimer <= 0 && distToMe < player.r + b.r) {
+            enterSpectatorMode();
           }
         });
 
-        if (minDistToMe < 235) {
+        if (isHost && Date.now() - lastPosSync > 140) {
+          syncRoomState({
+            bosses: bosses.map(b => ({ id: b.id, x: Math.round(b.x), y: Math.round(b.y), r: b.r, speed: b.speed, lifeLeft: b.lifeLeft, flipX: b.flipX, spriteKey: b.spriteKey, targetUser: b.targetUser })),
+            bossStunTimer: flashlight.stunTimer
+          });
+        }
+
+        if (!isSpectating && minDistToMe < 235) {
           screenShake = Math.max(1, Math.floor((235 - minDistToMe) / 55));
           const beatInterval = Math.max(360, minDistToMe * 3.1);
           if (Date.now() - lastHeartbeat > beatInterval) { lastHeartbeat = Date.now(); playHeartbeatSFX(); }
@@ -1653,11 +1464,10 @@ if (!iAmProtected && !isHidingBreath && !playerTrapped && distToMe < player.r + 
       woodChips.forEach(w => { w.x += w.vx; w.y += w.vy; w.vy += 0.12; w.life--; });
       woodChips = woodChips.filter(w => w.life > 0);
     }
-
     const RADAR_ROOM_LABELS = [
       { name: "Phòng Trà",  x: 205, y: 275 },
       { name: "Phòng Sưởi", x: 215, y: 530 },
-      { name: "Thư Phòng",  x: 530, y: 410 },
+      { name: "Thư Phòng",  x: 530, y: 398 },
       { name: "Phòng Ngủ",  x: 830, y: 275 },
       { name: "Nhà Bếp",    x: 830, y: 560 }
     ];
@@ -1669,8 +1479,7 @@ if (!iAmProtected && !isHidingBreath && !playerTrapped && distToMe < player.r + 
 
       rctx.fillStyle = "rgba(71, 85, 105, 0.55)";
       WALKABLE_ZONES.forEach(z => rctx.fillRect(z.x * sx, z.y * sy, z.w * sx, z.h * sy));
-      rctx.strokeStyle = "rgba(148, 163, 184, 0.45)";
-      rctx.lineWidth = 0.8;
+      rctx.strokeStyle = "rgba(148, 163, 184, 0.45)"; rctx.lineWidth = 0.8;
       WALKABLE_ZONES.forEach(z => rctx.strokeRect(z.x * sx, z.y * sy, z.w * sx, z.h * sy));
 
       rctx.font = "bold 7.5px sans-serif"; rctx.textAlign = "center"; rctx.textBaseline = "middle";
@@ -1679,21 +1488,23 @@ if (!iAmProtected && !isHidingBreath && !playerTrapped && distToMe < player.r + 
         rctx.fillStyle = "rgba(226, 232, 240, 0.85)"; rctx.fillText(rm.name, rm.x * sx, rm.y * sy);
       });
 
-      const doorBlink = 0.65 + 0.35 * Math.sin(Date.now() * 0.008);
-      rctx.fillStyle = `rgba(250, 204, 21, ${doorBlink})`;
+      rctx.fillStyle = "#facc15";
       rctx.fillRect(EXIT_DOOR.x * sx - 4, EXIT_DOOR.y * sy - 2.5, 8, 5);
 
       Object.values(squad).forEach(mate => {
         if (mate.username !== myUser && mate.alive !== false) {
+          const rp = teammateRenderPos[mate.username] || mate;
           rctx.fillStyle = "#34d399";
-          rctx.beginPath(); rctx.arc(mate.x * sx, mate.y * sy, 2.8, 0, Math.PI * 2); rctx.fill();
+          rctx.beginPath(); rctx.arc(rp.x * sx, rp.y * sy, 2.8, 0, Math.PI * 2); rctx.fill();
         }
       });
 
-      rctx.fillStyle = "#38bdf8";
-      rctx.beginPath(); rctx.arc(player.x * sx, player.y * sy, 3.2, 0, Math.PI * 2); rctx.fill();
-      rctx.strokeStyle = "#ffffff"; rctx.lineWidth = 1; rctx.stroke();
+      if (!isSpectating) {
+        rctx.fillStyle = "#38bdf8";
+        rctx.beginPath(); rctx.arc(player.x * sx, player.y * sy, 3.2, 0, Math.PI * 2); rctx.fill();
+      }
     }
+
     function drawPixelHint(text, x, y, color = "#e2e8f0") {
       ctx.font = "bold 10px monospace"; ctx.textAlign = "center";
       ctx.fillStyle = "rgba(0,0,0,0.78)"; ctx.fillText(text, x + 1, y + 1);
@@ -1703,21 +1514,14 @@ if (!iAmProtected && !isHidingBreath && !playerTrapped && distToMe < player.r + 
     function drawFloatingJoystickUI() {
       if (!floatingJoy.active) return;
       ctx.save();
-      ctx.beginPath();
-      ctx.arc(floatingJoy.originX, floatingJoy.originY, floatingJoy.maxR, 0, Math.PI * 2);
+      ctx.beginPath(); ctx.arc(floatingJoy.originX, floatingJoy.originY, floatingJoy.maxR, 0, Math.PI * 2);
       ctx.fillStyle = "rgba(15, 23, 42, 0.38)"; ctx.fill();
       ctx.lineWidth = 2; ctx.strokeStyle = "rgba(248, 250, 252, 0.45)"; ctx.stroke();
-
-      const dx = floatingJoy.curX - floatingJoy.originX;
-      const dy = floatingJoy.curY - floatingJoy.originY;
+      const dx = floatingJoy.curX - floatingJoy.originX, dy = floatingJoy.curY - floatingJoy.originY;
       const dist = Math.min(floatingJoy.maxR, Math.hypot(dx, dy));
       const ang = Math.atan2(dy, dx);
-      const kx = floatingJoy.originX + Math.cos(ang) * dist;
-      const ky = floatingJoy.originY + Math.sin(ang) * dist;
-
-      ctx.beginPath(); ctx.arc(kx, ky, 18, 0, Math.PI * 2);
+      ctx.beginPath(); ctx.arc(floatingJoy.originX + Math.cos(ang) * dist, floatingJoy.originY + Math.sin(ang) * dist, 18, 0, Math.PI * 2);
       ctx.fillStyle = "rgba(239, 68, 68, 0.85)"; ctx.fill();
-      ctx.lineWidth = 2; ctx.strokeStyle = "#ffffff"; ctx.stroke();
       ctx.restore();
     }
 
@@ -1726,30 +1530,32 @@ if (!iAmProtected && !isHidingBreath && !playerTrapped && distToMe < player.r + 
       update();
       ctx.fillStyle = "#040406"; ctx.fillRect(0, 0, canvas.width, canvas.height);
 
+      let camX = player.x, camY = player.y;
+      if (isSpectating) {
+        const aliveMates = Object.values(squad).filter(p => p.username !== myUser && p.alive !== false);
+        if (aliveMates.length > 0) {
+          if (!spectateUser || !squad[spectateUser] || squad[spectateUser].alive === false) spectateUser = aliveMates.at(0).username;
+          const rp = teammateRenderPos[spectateUser] || squad[spectateUser];
+          camX = rp.x; camY = rp.y;
+        }
+      }
+
       const shakeX = screenShake ? (Math.random() - 0.5) * screenShake * 2 : 0;
       const shakeY = screenShake ? (Math.random() - 0.5) * screenShake * 2 : 0;
       ctx.save();
-      ctx.translate(Math.floor(canvas.width / 2 - player.x + shakeX), Math.floor(canvas.height / 2 - player.y + shakeY));
+      ctx.translate(Math.floor(canvas.width / 2 - camX + shakeX), Math.floor(canvas.height / 2 - camY + shakeY));
 
       if (!drawConfiguredSprite("map", MAP_W / 2, MAP_H / 2)) { ctx.fillStyle = "#292524"; ctx.fillRect(0, 0, MAP_W, MAP_H); }
 
-      const doorPulse = 45 + Math.sin(Date.now() * 0.006) * 10;
-      const doorGlow = ctx.createRadialGradient(EXIT_DOOR.x, EXIT_DOOR.y, 6, EXIT_DOOR.x, EXIT_DOOR.y, doorPulse);
-      doorGlow.addColorStop(0, doorRitual.active ? "rgba(250, 204, 21, 0.95)" : "rgba(52, 211, 153, 0.85)");
-      doorGlow.addColorStop(1, "rgba(16, 185, 129, 0)");
-      ctx.fillStyle = doorGlow; ctx.beginPath(); ctx.arc(EXIT_DOOR.x, EXIT_DOOR.y, doorPulse, 0, Math.PI * 2); ctx.fill();
       ctx.fillStyle = doorRitual.active ? "#854d0e" : "#065f46"; ctx.fillRect(EXIT_DOOR.x - 30, EXIT_DOOR.y - 12, 60, 24);
       ctx.strokeStyle = "#fde047"; ctx.lineWidth = 2; ctx.strokeRect(EXIT_DOOR.x - 30, EXIT_DOOR.y - 12, 60, 24);
-      drawPixelHint(doorRitual.active ? `MỞ CỬA (${doorRitual.timeLeft}s)` : "CỬA MẬT MÃ [E]", EXIT_DOOR.x, EXIT_DOOR.y - 18, "#fef08a");
+      drawPixelHint(doorRitual.active ? `Mở cửa (${doorRitual.timeLeft}s)` : "Cửa mật mã", EXIT_DOOR.x, EXIT_DOOR.y - 18, "#fef08a");
 
       const spinScale = Math.abs(Math.cos(Date.now() * 0.005));
       coinsList.forEach(c => {
         if (!c.taken) {
           ctx.save(); ctx.translate(c.x, c.y); ctx.scale(Math.max(0.2, spinScale), 1);
-          if (!drawConfiguredSprite("coin", 0, 0)) {
-            ctx.fillStyle = "#fbbf24"; ctx.beginPath(); ctx.arc(0, 0, 9, 0, Math.PI * 2); ctx.fill();
-            ctx.strokeStyle = "#fef08a"; ctx.lineWidth = 2; ctx.stroke();
-          }
+          if (!drawConfiguredSprite("coin", 0, 0)) { ctx.fillStyle = "#fbbf24"; ctx.beginPath(); ctx.arc(0, 0, 9, 0, Math.PI * 2); ctx.fill(); }
           ctx.restore();
         }
       });
@@ -1757,103 +1563,109 @@ if (!iAmProtected && !isHidingBreath && !playerTrapped && distToMe < player.r + 
       FLASHLIGHT_SPOTS.forEach(fl => {
         if (!fl.taken) {
           if (!drawConfiguredSprite("flashlight", fl.x, fl.y)) { ctx.fillStyle = "#38bdf8"; ctx.fillRect(fl.x - 9, fl.y - 5, 18, 10); }
-          drawPixelHint("ĐÈN PIN", fl.x, fl.y - 22, "#7dd3fc");
+          drawPixelHint("Đèn pin", fl.x, fl.y - 22, "#7dd3fc");
         }
       });
 
       if (!CROSS_SPOT.taken) {
         if (!drawConfiguredSprite("cross", CROSS_SPOT.x, CROSS_SPOT.y)) { ctx.fillStyle = "#facc15"; ctx.fillRect(CROSS_SPOT.x - 6, CROSS_SPOT.y - 12, 12, 24); }
-        drawPixelHint("THÁNH GIÁ", CROSS_SPOT.x, CROSS_SPOT.y - 24, "#fde047");
+        drawPixelHint("Thánh giá", CROSS_SPOT.x, CROSS_SPOT.y - 24, "#fde047");
       }
 
       matchSpots.forEach(m => {
-        if (!questState.matchesTaken.at(m.id)) {
+        if (!questState.matchesTaken[m.id]) {
           if (!drawConfiguredSprite("match", m.x, m.y)) { ctx.fillStyle = "#ef4444"; ctx.fillRect(m.x - 6, m.y - 6, 12, 12); }
-          drawPixelHint("QUE DIÊM", m.x, m.y - 22, "#fca5a5");
+          drawPixelHint("Que diêm", m.x, m.y - 22, "#fca5a5");
         }
       });
 
       BRAZIER_SPOTS.forEach(b => {
-        const isLit = questState.litTorches.at(b.id);
+        const isLit = questState.litTorches[b.id];
         if (!drawConfiguredSprite(isLit ? "candleOn" : "candleOff", b.x, b.y)) { ctx.fillStyle = isLit ? "#f97316" : "#44403c"; ctx.fillRect(b.x - 10, b.y - 10, 20, 20); }
-        drawPixelHint(isLit ? "NGỌN NẾN" : "NGỌN NẾN TẮT", b.x, b.y - 22, isLit ? "#fdba74" : "#a8a29e");
-        if (isLit) {
-          const tGlow = ctx.createRadialGradient(b.x, b.y, 6, b.x, b.y, 130);
-          tGlow.addColorStop(0, "rgba(251, 146, 60, 0.52)"); tGlow.addColorStop(1, "rgba(251, 146, 60, 0)");
-          ctx.fillStyle = tGlow; ctx.beginPath(); ctx.arc(b.x, b.y, 130, 0, Math.PI * 2); ctx.fill();
-        }
+        drawPixelHint(isLit ? "Ngọn nến sáng" : "Ngọn nến tắt", b.x, b.y - 22, isLit ? "#fdba74" : "#a8a29e");
       });
 
       if (!questState.scrollSolved) {
         const unlocked = questState.litTorches.filter(Boolean).length === 3;
         if (!drawConfiguredSprite("scroll", SCROLL_SPOT.x, SCROLL_SPOT.y)) { ctx.fillStyle = unlocked ? "#eab308" : "#52525b"; ctx.fillRect(SCROLL_SPOT.x - 11, SCROLL_SPOT.y - 9, 22, 18); }
-        drawPixelHint(unlocked ? "CUỘN GIẤY" : "CUỘN GIẤY (CẦN 3 NẾN)", SCROLL_SPOT.x, SCROLL_SPOT.y - 22, unlocked ? "#fef08a" : "#94a3b8");
+        drawPixelHint(unlocked ? "Cuộn giấy" : "Cuộn giấy (cần 3 nến)", SCROLL_SPOT.x, SCROLL_SPOT.y - 22, unlocked ? "#fef08a" : "#94a3b8");
       }
 
       if (!questState.chestSolved) {
         if (!drawConfiguredSprite("chest", LOCKED_CHEST_SPOT.x, LOCKED_CHEST_SPOT.y)) { ctx.fillStyle = "#d97706"; ctx.fillRect(LOCKED_CHEST_SPOT.x - 12, LOCKED_CHEST_SPOT.y - 10, 24, 20); }
-        drawPixelHint(`RƯƠNG KHÓA (${chestProgress}/5 CÂU)`, LOCKED_CHEST_SPOT.x, LOCKED_CHEST_SPOT.y - 22, "#fde68a");
+        drawPixelHint(`Rương khóa (${chestProgress}/5)`, LOCKED_CHEST_SPOT.x, LOCKED_CHEST_SPOT.y - 22, "#fde68a");
       }
 
       TALISMAN_SPOTS.forEach(t => {
-        if (!questState.talismansTaken.at(t.id)) {
+        if (!questState.talismansTaken[t.id]) {
           if (!drawConfiguredSprite("talisman", t.x, t.y)) { ctx.fillStyle = "#c084fc"; ctx.fillRect(t.x - 8, t.y - 10, 16, 20); }
-          drawPixelHint("MẢNH BÙA", t.x, t.y - 20, "#e9d5ff");
+          drawPixelHint("Mảnh bùa", t.x, t.y - 20, "#e9d5ff");
         }
       });
 
       woodChips.forEach(w => { ctx.fillStyle = w.color; ctx.fillRect(Math.floor(w.x), Math.floor(w.y), w.s, w.s); });
 
+      const walkCycle = new Array(1, 2, 3, 2);
+      const stepFrame = walkCycle[Math.floor(Date.now() / 130) % 4];
       Object.values(squad).forEach(mate => {
         if (mate.username !== myUser && mate.alive !== false) {
-          if (!drawConfiguredSprite("teammate", mate.x, mate.y, mate.flipX)) { ctx.fillStyle = "#34d399"; ctx.fillRect(mate.x - 10, mate.y - 13, 20, 26); }
-          drawPixelHint(mate.name, mate.x, mate.y - 28, "#ffffff");
+          if (!teammateRenderPos[mate.username]) teammateRenderPos[mate.username] = { x: mate.x, y: mate.y };
+          const rp = teammateRenderPos[mate.username];
+          const moveDist = Math.hypot(mate.x - rp.x, mate.y - rp.y);
+          rp.x += (mate.x - rp.x) * 0.25;
+          rp.y += (mate.y - rp.y) * 0.25;
+
+          const isMateMoving = mate.moving || moveDist > 1.2;
+          let tKey = "teammateIdle";
+          let fallbackKey = "playerIdle";
+          if (isMateMoving) {
+            if (stepFrame === 1) { tKey = "teammateLeft"; fallbackKey = "playerLeft"; }
+            else if (stepFrame === 2) { tKey = "teammateMid"; fallbackKey = "playerMid"; }
+            else { tKey = "teammateRight"; fallbackKey = "playerRight"; }
+          }
+
+          const drawn = drawConfiguredSprite(tKey, rp.x, rp.y, mate.flipX)
+                     || drawConfiguredSprite("teammate", rp.x, rp.y, mate.flipX)
+                     || drawConfiguredSprite(fallbackKey, rp.x, rp.y, mate.flipX);
+          if (!drawn) { ctx.fillStyle = "#34d399"; ctx.fillRect(rp.x - 10, rp.y - 13, 20, 26); }
+          drawPixelHint(mate.name, rp.x, rp.y - 28, "#ffffff");
         }
       });
-
-      ghostShadows.forEach(g => { ctx.fillStyle = "rgba(148, 163, 184, 0.14)"; ctx.beginPath(); ctx.arc(g.x, g.y, 16, 0, Math.PI * 2); ctx.fill(); });
 
       bosses.forEach(b => {
+        const bx = b.renderX !== undefined ? b.renderX : b.x;
+        const by = b.renderY !== undefined ? b.renderY : b.y;
         const pulseR = 78 + Math.sin(Date.now() * 0.012) * 10;
-        const redGlow = ctx.createRadialGradient(b.x, b.y, 6, b.x, b.y, pulseR);
+        const redGlow = ctx.createRadialGradient(bx, by, 6, bx, by, pulseR);
         redGlow.addColorStop(0, flashlight.stunTimer > 0 ? "rgba(56, 189, 248, 0.85)" : "rgba(239, 68, 68, 0.92)");
         redGlow.addColorStop(1, "rgba(0, 0, 0, 0)");
-        ctx.fillStyle = redGlow; ctx.beginPath(); ctx.arc(b.x, b.y, pulseR, 0, Math.PI * 2); ctx.fill();
+        ctx.fillStyle = redGlow; ctx.beginPath(); ctx.arc(bx, by, pulseR, 0, Math.PI * 2); ctx.fill();
 
         const spriteKey = b.spriteKey || "boss";
-        if (!drawConfiguredSprite(spriteKey, b.x, b.y, b.flipX)) {
-          ctx.fillStyle = flashlight.stunTimer > 0 ? "#0284c7" : (spriteKey === "boss2" ? "#581c87" : "#450a0a");
-          ctx.fillRect(b.x - 12, b.y - 15, 24, 30);
-          ctx.fillStyle = "#ff2a2a"; ctx.fillRect(b.x - 7, b.y - 7, 4, 4); ctx.fillRect(b.x + 3, b.y - 7, 4, 4);
+        if (!drawConfiguredSprite(spriteKey, bx, by, b.flipX)) {
+          ctx.fillStyle = flashlight.stunTimer > 0 ? "#0284c7" : "#450a0a";
+          ctx.fillRect(bx - 12, by - 15, 24, 30);
         }
       });
 
-      let pKey = "playerIdle";
-      if (player.isMoving) {
-        if (player.walkFrame === 1) pKey = "playerLeft";
-        else if (player.walkFrame === 2) pKey = "playerMid";
-        else pKey = "playerRight";
-      }
-      if (!drawConfiguredSprite(pKey, player.x, player.y, player.flipX)) {
-        ctx.fillStyle = "#38bdf8"; ctx.fillRect(player.x - 10, player.y - 13, 20, 26);
-        ctx.fillStyle = "#fef08a"; ctx.fillRect(player.x - 6, player.y - 9, 12, 7);
-      }
+      if (!isSpectating) {
+        let pKey = "playerIdle";
+        if (player.isMoving) {
+          if (player.walkFrame === 1) pKey = "playerLeft";
+          else if (player.walkFrame === 2) pKey = "playerMid";
+          else pKey = "playerRight";
+        }
+        if (!drawConfiguredSprite(pKey, player.x, player.y, player.flipX)) {
+          ctx.fillStyle = "#38bdf8"; ctx.fillRect(player.x - 10, player.y - 13, 20, 26);
+        }
 
-      if (crossItem.owned && crossItem.on && crossItem.timeLeft > 0) {
-        const holy = ctx.createRadialGradient(player.x, player.y, 8, player.x, player.y, 65);
-        holy.addColorStop(0, "rgba(250, 204, 21, 0.35)"); holy.addColorStop(1, "rgba(250, 204, 21, 0)");
-        ctx.fillStyle = holy; ctx.beginPath(); ctx.arc(player.x, player.y, 65, 0, Math.PI * 2); ctx.fill();
-      }
-
-            const bossNear = bosses.some(b => Math.hypot(b.x - player.x, b.y - player.y) < 185);
-      const flickerOk = !bossNear || Math.random() > 0.28;
-      if (flashlight.owned && flashlight.on && flickerOk) {
-
-        ctx.save(); ctx.translate(player.x, player.y); ctx.rotate(player.facingAngle);
-        const beam = ctx.createRadialGradient(0, 0, 10, 0, 0, 190);
-        beam.addColorStop(0, "rgba(254, 240, 138, 0.68)"); beam.addColorStop(1, "rgba(254, 240, 138, 0)");
-        ctx.fillStyle = beam; ctx.beginPath(); ctx.moveTo(0, 0); ctx.arc(0, 0, 190, -0.45, 0.45); ctx.closePath(); ctx.fill();
-        ctx.restore();
+        if (flashlight.owned && flashlight.on) {
+          ctx.save(); ctx.translate(player.x, player.y); ctx.rotate(player.facingAngle);
+          const beam = ctx.createRadialGradient(0, 0, 10, 0, 0, 190);
+          beam.addColorStop(0, "rgba(254, 240, 138, 0.68)"); beam.addColorStop(1, "rgba(254, 240, 138, 0)");
+          ctx.fillStyle = beam; ctx.beginPath(); ctx.moveTo(0, 0); ctx.arc(0, 0, 190, -0.45, 0.45); ctx.closePath(); ctx.fill();
+          ctx.restore();
+        }
       }
 
       ctx.fillStyle = "rgba(226, 232, 240, 0.35)"; dustMotes.forEach(d => ctx.fillRect(Math.floor(d.x), Math.floor(d.y), d.s, d.s));
@@ -1861,25 +1673,12 @@ if (!iAmProtected && !isHidingBreath && !playerTrapped && distToMe < player.r + 
       ctx.restore();
 
       const cx = canvas.width / 2, cy = canvas.height / 2;
-      const visionR = (flashlight.owned && flashlight.on) ? 215 : 168;
+      const visionR = (!isSpectating && flashlight.owned && flashlight.on) ? 215 : 175;
       const fog = ctx.createRadialGradient(cx, cy, 35, cx, cy, visionR);
       fog.addColorStop(0, "rgba(4, 4, 6, 0)"); fog.addColorStop(0.65, "rgba(4, 4, 6, 0.74)"); fog.addColorStop(1, "rgba(4, 4, 6, 0.985)");
       ctx.fillStyle = fog; ctx.fillRect(0, 0, canvas.width, canvas.height);
 
       drawFloatingJoystickUI();
-	        // Tính năng 1: Nhiễu sóng tĩnh CRT khi Hobokuryo ở gần (< 185px)
-      if (bossNear) {
-        ctx.fillStyle = "rgba(255, 255, 255, 0.08)";
-        for (let i = 0; i < 6; i++) {
-          ctx.fillRect(0, Math.random() * canvas.height, canvas.width, 2 + Math.random() * 3);
-        }
-      }
-      // Hiển thị cảnh báo nếu bản thân đang bị trói
-      if (playerTrapped) {
-        ctx.strokeStyle = "#ef4444"; ctx.lineWidth = 4;
-        ctx.beginPath(); ctx.arc(cx, cy, 26 + Math.sin(Date.now() * 0.015) * 4, 0, Math.PI * 2); ctx.stroke();
-      }
-
       drawRadarMap();
       document.getElementById("lightningFlash").style.opacity = lightningAlpha.toFixed(2);
       requestAnimationFrame(loop);
