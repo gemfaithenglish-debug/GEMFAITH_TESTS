@@ -101,6 +101,9 @@
       #rulesReadyScreen .slot-box img { width: 24px !important; height: 24px !important; }
       #rulesReadyScreen .btn-blood { padding: 8px !important; margin-top: 6px !important; }
     }
+	#btnFlashlight span { display: block !important; position: absolute; font-size: 0.72rem; font-weight: 900; color: #fef08a; text-shadow: 0 1px 4px #000; }
+#btnFlashlight { position: relative; }
+
   </style>
 </head>
 <body>
@@ -211,9 +214,8 @@
       <button class="btn-blood" onclick="exitAndResetToLobby()">Về sảnh chờ</button>
     </div>
   </div>
-
-  <script>
-      (function loadFirebaseSDK() {
+    <script>
+    (function loadFirebaseSDK() {
       const base = "https://www.gstatic." + "com/firebasejs/9.23.0/";
       const s1 = document.createElement("script");
       s1.src = base + "firebase-app-compat.js";
@@ -284,6 +286,7 @@
       clearTimeout(notifyTimer);
       notifyTimer = setTimeout(() => el.classList.remove("show"), duration);
     }
+
     let audioCtx = null, lastFootstep = 0, lastHeartbeat = 0, lobbyMusicTimer = null;
     function initAudio() {
       if (!audioCtx) {
@@ -292,7 +295,6 @@
       }
       if (audioCtx && audioCtx.state === "suspended") audioCtx.resume();
     }
-
     function startLobbyHorrorBGM() {
       initAudio();
       if (!audioCtx || lobbyMusicTimer || matchRunning) return;
@@ -386,9 +388,8 @@
       osc1.connect(g); osc2.connect(g); g.connect(audioCtx.destination);
       osc1.start(now); osc2.start(now); osc1.stop(now + 1.25); osc2.stop(now + 1.25);
     }
-        const DB_URL = "https://" + "tich-luy-gempoint-default-rtdb" + ".asia-southeast1." + "firebasedatabase.app";
+    const DB_URL = "https://" + "tich-luy-gempoint-default-rtdb" + ".asia-southeast1." + "firebasedatabase.app";
 
-    // Bộ điều khiển Realtime siêu tốc dùng EventSource (không cần thư viện ngoài)
     const rtdb = {
       ref(path) {
         const cleanPath = path.replace(/^\/+|\/+$/g, "");
@@ -447,6 +448,7 @@
         };
       }
     };
+
     const myUser = localStorage.getItem("currentUsername") || "guest_" + Math.floor(Math.random() * 999);
     const myName = localStorage.getItem("currentStudentName") || myUser;
     const myAvatar = localStorage.getItem("currentUserAvatar") || "avatargaubasic.jpg";
@@ -486,14 +488,13 @@
         box.innerHTML = arr.map((u, i) => `<div class="lb-item"><span><b>#${i + 1}</b> ${u.name}</span><span style="color:#fbbf24; font-weight:800;">${u.wins} trận</span></div>`).join("");
       } catch (e) {}
     }
-
     async function initLobby() {
       await syncStudentProfile(0, 0);
       await loadLeaderboard();
       roomId = "MANSION_" + Math.floor(1000 + Math.random() * 9000);
       isHost = true;
       document.getElementById("roomCodeText").innerText = roomId;
-      squad = { [myUser]: { username: myUser, name: myName, avatar: myAvatar, x: 465, y: 565, vx: 0, vy: 0, alive: true, ready: false, flipX: false, moving: false } };
+      squad = { [myUser]: { username: myUser, name: myName, avatar: myAvatar, x: 465, y: 565, vx: 0, vy: 0, alive: true, ready: false, flipX: false, moving: false, flashOn: false, facingAngle: -Math.PI / 2 } };
       await rtdb.ref(`mansion_rooms/${roomId}`).set({
         host: myUser, status: "waiting", players: squad,
         secretCode: new Array(1, 2, 3, 4), foundDigits: ["?", "?", "?", "?"],
@@ -502,7 +503,7 @@
         chestSolved: false, chestProgress: 0, talismansTaken: [false, false, false],
         wordSolved: false, coinsTaken: [false, false, false],
         flashlightsTaken: [false, false, false], crossTaken: false,
-        layoutSeed: null, doorRitualStarted: false, bosses: [], bossStunTimer: 0, eventBanner: ""
+        layoutSeed: null, doorRitualStarted: false, bosses: [], bossStunTimer: 0, bossStunUntil: 0, eventBanner: ""
       });
       attachRealtimeRoomListener(roomId);
       renderSquad();
@@ -514,7 +515,7 @@
       const snap = await rtdb.ref(`students/${target}`).once("value");
       const st = snap.val();
       if (!st) { showSubtleNotify("Không tìm thấy username này."); return; }
-      const newMember = { username: target, name: st.name || target, avatar: st.avatar || "avatargaubasic.jpg", x: 485, y: 565, vx: 0, vy: 0, alive: true, ready: false, flipX: false, moving: false };
+      const newMember = { username: target, name: st.name || target, avatar: st.avatar || "avatargaubasic.jpg", x: 485, y: 565, vx: 0, vy: 0, alive: true, ready: false, flipX: false, moving: false, flashOn: false, facingAngle: -Math.PI / 2 };
       await rtdb.ref(`mansion_rooms/${roomId}/players/${target}`).set(newMember);
       document.getElementById("inviteUserTxt").value = "";
     }
@@ -528,7 +529,7 @@
       roomId = code; isHost = (data.host === myUser);
       document.getElementById("roomCodeText").innerText = roomId;
       await rtdb.ref(`mansion_rooms/${roomId}/players/${myUser}`).update({
-        username: myUser, name: myName, avatar: myAvatar, x: 465, y: 565, vx: 0, vy: 0, alive: true, ready: false, flipX: false, moving: false
+        username: myUser, name: myName, avatar: myAvatar, x: 465, y: 565, vx: 0, vy: 0, alive: true, ready: false, flipX: false, moving: false, flashOn: false, facingAngle: -Math.PI / 2
       });
       attachRealtimeRoomListener(roomId);
     }
@@ -552,7 +553,7 @@
         Math.floor(Math.random() * 10), Math.floor(Math.random() * 10)
       );
       const randomOrder = Array.from({ length: 18 }, (_, idx) => idx).sort(() => Math.random() - 0.5);
-      Object.keys(squad).forEach(u => { squad[u].ready = false; squad[u].alive = true; });
+      Object.keys(squad).forEach(u => { squad[u].ready = false; squad[u].alive = true; squad[u].flashOn = false; });
       await rtdb.ref(`mansion_rooms/${roomId}`).update({
         status: "rules", players: squad, secretCode: randomCode, layoutSeed: randomOrder,
         foundDigits: ["?", "?", "?", "?"], matchesCount: 0,
@@ -560,7 +561,7 @@
         scrollSolved: false, chestSolved: false, chestProgress: 0,
         talismansTaken: [false, false, false], wordSolved: false,
         coinsTaken: [false, false, false], flashlightsTaken: [false, false, false],
-        crossTaken: false, doorRitualStarted: false, bosses: [], bossStunTimer: 0, eventBanner: ""
+        crossTaken: false, doorRitualStarted: false, bosses: [], bossStunTimer: 0, bossStunUntil: 0, eventBanner: ""
       });
     }
 
@@ -593,169 +594,6 @@
       btn.disabled = true; btn.innerText = "Đang chờ đồng đội...";
       await rtdb.ref(`mansion_rooms/${roomId}/players/${myUser}/ready`).set(true);
     }
-
-    function attachRealtimeRoomListener(targetRoomId) {
-      if (roomListenerRef) roomListenerRef.off();
-      roomListenerRef = rtdb.ref(`mansion_rooms/${targetRoomId}`);
-      roomListenerRef.on("value", snapshot => {
-        const data = snapshot.val();
-        if (!data) return;
-        squad = data.players || {};
-
-        if (data.status === "waiting") {
-          renderSquad();
-          if (matchRunning) cleanupMatchState();
-        } else if (data.status === "rules") {
-          if (document.getElementById("rulesReadyScreen").style.display !== "flex" && !matchRunning) openRulesReadyScreen();
-          renderReadySquad();
-          const list = Object.values(squad);
-          if (list.length > 0 && list.every(p => p.ready)) {
-            if (isHost) rtdb.ref(`mansion_rooms/${targetRoomId}/status`).set("playing");
-            startMatchLocal(data);
-          }
-        } else if (data.status === "playing") {
-          if (!matchRunning) startMatchLocal(data);
-          else {
-            if (Array.isArray(data.secretCode) && data.secretCode.length === 4) secretCode = data.secretCode;
-
-            if (Array.isArray(data.foundDigits) && data.foundDigits.length === 4) {
-              for (let i = 0; i < 4; i++) {
-                if (data.foundDigits[i] !== "?" && data.foundDigits[i] !== undefined) foundDigits[i] = data.foundDigits[i];
-              }
-              document.getElementById("hudCode").innerText = `Mã: ${foundDigits.join(" - ")}`;
-            }
-
-            if (typeof data.matchesCount === "number") questState.matchesCount = data.matchesCount;
-            if (Array.isArray(data.matchesTaken)) questState.matchesTaken = data.matchesTaken;
-            if (Array.isArray(data.litTorches)) questState.litTorches = data.litTorches;
-            if (data.scrollSolved) questState.scrollSolved = true;
-            if (data.chestSolved) questState.chestSolved = true;
-            if (typeof data.chestProgress === "number") chestProgress = Math.max(chestProgress, data.chestProgress);
-            if (Array.isArray(data.talismansTaken)) questState.talismansTaken = data.talismansTaken;
-            if (data.wordSolved) questState.wordSolved = true;
-            if (Array.isArray(data.coinsTaken)) data.coinsTaken.forEach((t, i) => { if (coinsList[i] && t) coinsList[i].taken = true; });
-			            if (Array.isArray(data.flashlightsTaken)) data.flashlightsTaken.forEach((t, i) => { if (FLASHLIGHT_SPOTS[i] && t) FLASHLIGHT_SPOTS[i].taken = true; });
-            if (data.crossTaken) CROSS_SPOT.taken = true;
-            if (data.doorRitualStarted && !doorRitual.active) triggerDoorRitualLocally();
-            updateItemsHUD();
-
-            const hasBoss = Array.isArray(data.bosses) && data.bosses.length > 0;
-            document.getElementById("redScreenEdge").style.opacity = hasBoss ? "1" : "0";
-            flashlight.stunTimer = data.bossStunTimer || 0;
-
-            if (!isHost) {
-              if (hasBoss) {
-                bosses = data.bosses.map((sb, idx) => {
-                  const prev = bosses[idx] || sb;
-                  return { ...sb, renderX: prev.renderX !== undefined ? prev.renderX : sb.x, renderY: prev.renderY !== undefined ? prev.renderY : sb.y };
-                });
-              } else {
-                bosses = [];
-              }
-            }
-
-            const allPlayers = Object.values(squad);
-            if (allPlayers.length > 0 && allPlayers.every(p => p.alive === false)) {
-              endMatch(false, "Toàn bộ thành viên trong đội đều đã bị Hobokuryo hạ gục.");
-              return;
-            }
-
-            if (data.eventBanner && data.eventBanner !== lastSharedEventId) {
-              lastSharedEventId = data.eventBanner;
-              showSubtleNotify(data.eventBanner, 3600);
-            }
-          }
-        }
-      });
-    }
-
-
-
-    async function invitePlayer() {
-      const target = document.getElementById("inviteUserTxt").value.trim();
-      if (!target || Object.keys(squad).length >= 4) return;
-      const snap = await rtdb.ref(`students/${target}`).once("value");
-      const st = snap.val();
-      if (!st) { showSubtleNotify("Không tìm thấy username này."); return; }
-      const newMember = { username: target, name: st.name || target, avatar: st.avatar || "avatargaubasic.jpg", x: 485, y: 565, vx: 0, vy: 0, alive: true, ready: false, flipX: false, moving: false };
-      await rtdb.ref(`mansion_rooms/${roomId}/players/${target}`).set(newMember);
-      document.getElementById("inviteUserTxt").value = "";
-    }
-
-    async function joinRoomByCode() {
-      const code = document.getElementById("joinCodeTxt").value.trim().toUpperCase();
-      if (!code) return;
-      const snap = await rtdb.ref(`mansion_rooms/${code}`).once("value");
-      const data = snap.val();
-      if (!data) { showSubtleNotify("Mã phòng không tồn tại."); return; }
-      roomId = code; isHost = (data.host === myUser);
-      document.getElementById("roomCodeText").innerText = roomId;
-      await rtdb.ref(`mansion_rooms/${roomId}/players/${myUser}`).update({
-        username: myUser, name: myName, avatar: myAvatar, x: 465, y: 565, vx: 0, vy: 0, alive: true, ready: false, flipX: false, moving: false
-      });
-      attachRealtimeRoomListener(roomId);
-    }
-    function renderSquad() {
-      const g = document.getElementById("squadGrid");
-      if (!g) return;
-      g.innerHTML = "";
-      const list = Object.values(squad);
-      for (let i = 0; i < 4; i++) {
-        g.innerHTML += list[i]
-          ? `<div class="slot-box"><img src="${list[i].avatar}"><div><b>${list[i].name}</b></div></div>`
-          : `<div class="slot-box" style="opacity:0.4; display:flex; align-items:center; justify-content:center;">Trống</div>`;
-      }
-    }
-
-    async function hostOpenRulesScreen() {
-      initAudio();
-      const randomCode = new Array(
-        Math.floor(Math.random() * 10), Math.floor(Math.random() * 10),
-        Math.floor(Math.random() * 10), Math.floor(Math.random() * 10)
-      );
-      const randomOrder = Array.from({ length: 18 }, (_, idx) => idx).sort(() => Math.random() - 0.5);
-      Object.keys(squad).forEach(u => { squad[u].ready = false; squad[u].alive = true; });
-      await rtdb.ref(`mansion_rooms/${roomId}`).update({
-        status: "rules", players: squad, secretCode: randomCode, layoutSeed: randomOrder,
-        foundDigits: ["?", "?", "?", "?"], matchesCount: 0,
-        matchesTaken: [false, false, false], litTorches: [false, false, false],
-        scrollSolved: false, chestSolved: false, chestProgress: 0,
-        talismansTaken: [false, false, false], wordSolved: false,
-        coinsTaken: [false, false, false], flashlightsTaken: [false, false, false],
-        crossTaken: false, doorRitualStarted: false, bosses: [], bossStunTimer: 0, eventBanner: ""
-      });
-    }
-
-    function openRulesReadyScreen() {
-      document.getElementById("lobbyScreen").style.display = "none";
-      document.getElementById("rulesReadyScreen").style.display = "flex";
-      const btn = document.getElementById("btnConfirmReady");
-      btn.disabled = false; btn.innerText = "Đã hiểu và sẵn sàng";
-      renderReadySquad();
-    }
-
-    function renderReadySquad() {
-      const list = Object.values(squad);
-      const readyCount = list.filter(p => p.ready).length;
-      document.getElementById("readyCounterText").innerText = `${readyCount}/${list.length} Sẵn sàng`;
-      const g = document.getElementById("readySquadGrid");
-      if (!g) return;
-      g.innerHTML = "";
-      list.forEach(p => {
-        g.innerHTML += `<div class="slot-box" style="border-color:${p.ready ? '#10b981' : '#475569'}">
-          <img src="${p.avatar}"><div><b>${p.name}</b></div>
-          <div style="font-size:0.7rem; color:${p.ready ? '#34d399' : '#94a3b8'};">${p.ready ? 'Sẵn sàng' : 'Đang đọc...'}</div>
-        </div>`;
-      });
-    }
-
-    async function confirmPlayerReady() {
-      initAudio();
-      const btn = document.getElementById("btnConfirmReady");
-      btn.disabled = true; btn.innerText = "Đang chờ đồng đội...";
-      await rtdb.ref(`mansion_rooms/${roomId}/players/${myUser}/ready`).set(true);
-    }
-
     function attachRealtimeRoomListener(targetRoomId) {
       if (roomListenerRef) roomListenerRef.off();
       roomListenerRef = rtdb.ref(`mansion_rooms/${targetRoomId}`);
@@ -803,7 +641,14 @@
 
             const hasBoss = Array.isArray(data.bosses) && data.bosses.length > 0;
             document.getElementById("redScreenEdge").style.opacity = hasBoss ? "1" : "0";
-            flashlight.stunTimer = data.bossStunTimer || 0;
+
+            // Đồng bộ đóng băng ma chuẩn xác từ server
+            const serverStunRem = data.bossStunUntil ? Math.max(0, Math.ceil((data.bossStunUntil - Date.now()) / 1000)) : (data.bossStunTimer || 0);
+            if (serverStunRem > 0) {
+              flashlight.stunTimer = Math.max(flashlight.stunTimer, serverStunRem);
+            } else if (!isHost) {
+              flashlight.stunTimer = 0;
+            }
 
             if (!isHost) {
               if (hasBoss) {
@@ -830,6 +675,7 @@
         }
       });
     }
+
     function cleanupMatchState() {
       matchRunning = false; clearInterval(clockInterval); bosses = []; playersSlowed = false; chestProgress = 0; woodChips = [];
       isSpectating = false; spectateUser = null; teammateRenderPos = {};
@@ -852,7 +698,7 @@
     async function exitAndResetToLobby() {
       cleanupMatchState();
       await rtdb.ref(`mansion_rooms/${roomId}`).update({
-        status: "waiting", foundDigits: ["?", "?", "?", "?"], chestProgress: 0, bosses: [], bossStunTimer: 0, eventBanner: ""
+        status: "waiting", foundDigits: ["?", "?", "?", "?"], chestProgress: 0, bosses: [], bossStunTimer: 0, bossStunUntil: 0, eventBanner: ""
       }).catch(() => {});
       await loadLeaderboard();
     }
@@ -894,29 +740,101 @@
       }
       return true;
     }
-
     const QUIZ_BANK = [
-      { lvl: "Trung bình", q: "Choose the correct word: 'You must _____ quiet so the demon cannot hear you.'", opts: ["A. keeps", "B. keep", "C. keeping"], ans: 1 },
-      { lvl: "Trung bình", q: "If we _____ all the candles, the secret scroll will appear.", opts: ["A. light", "B. lit", "C. lighting"], ans: 0 },
-      { lvl: "Trung bình", q: "Which preposition fits: 'The matches are hidden _____ the corner of the kitchen.'", opts: ["A. between", "B. above", "C. in"], ans: 2 },
-      { lvl: "Trung bình", q: "By the time we reached the exit, the ghost _____ disappeared.", opts: ["A. had", "B. has", "C. was"], ans: 0 },
-      { lvl: "Trung bình", q: "We had better _____ a flashlight before entering the dark corridor.", opts: ["A. to find", "B. find", "C. finding"], ans: 1 },
-      { lvl: "Khó", q: "Which word means 'a ghostly apparition or haunting spirit'?", opts: ["A. Lantern", "B. Fortress", "C. Phantom"], ans: 2 },
-      { lvl: "Khó", q: "Complete: 'Hardly _____ the door opened when the demon rushed in.'", opts: ["A. had", "B. has", "C. was"], ans: 0 },
-      { lvl: "Khó", q: "Find the synonym of 'CURSED':", opts: ["A. Blessed", "B. Bewitched", "C. Protected"], ans: 1 },
-      { lvl: "Khó", q: "What does 'OMINOUS' mean in: 'An ominous shadow moved behind the curtain'?", opts: ["A. Bright and cheerful", "B. Weak and harmless", "C. Threatening and evil"], ans: 2 },
-      { lvl: "Khó", q: "Complete the inversion: 'Never before _____ such a terrifying scream.'", opts: ["A. have I heard", "B. I have heard", "C. I heard"], ans: 0 },
-      { lvl: "Khó", q: "Choose the closest meaning to 'EERIE':", opts: ["A. Loud and crowded", "B. Strange and frightening", "C. Warm and welcoming"], ans: 1 },
-      { lvl: "Khó", q: "If he _____ the flashlight earlier, the monster wouldn't have caught him.", opts: ["A. turned on", "B. turns on", "C. had turned on"], ans: 2 }
+      // --- 10 CÂU DỄ (Đáp án phân bố đều A, B, C, D) ---
+      { lvl: "Dễ", q: "Choose the correct word: 'Turn on the _____ to see in the dark hallway.'", opts: ["A. flashlight", "B. pillow", "C. blanket", "D. spoon"], ans: 0 },
+      { lvl: "Dễ", q: "Which word means 'a small stick used to light a candle'?", opts: ["A. mirror", "B. match", "C. curtain", "D. carpet"], ans: 1 },
+      { lvl: "Dễ", q: "Complete: 'We must _____ quiet or the ghost will find us.'", opts: ["A. keeps", "B. keeping", "C. keep", "D. kept"], ans: 2 },
+      { lvl: "Dễ", q: "What do you need to unlock the main exit gate?", opts: ["A. A recipe", "B. A painting", "C. A broom", "D. A passcode"], ans: 3 },
+      { lvl: "Dễ", q: "Choose the correct preposition: 'The talisman is hidden _____ the corner.'", opts: ["A. in", "B. between", "C. above", "D. across"], ans: 0 },
+      { lvl: "Dễ", q: "Which item protects you from the demon for 45 seconds?", opts: ["A. A candle", "B. A cross", "C. A coin", "D. A scroll"], ans: 1 },
+      { lvl: "Dễ", q: "Complete: 'Run fast! The monster is _____ behind you!'", opts: ["A. slow", "B. quiet", "C. right", "D. bright"], ans: 2 },
+      { lvl: "Dễ", q: "What is the opposite of 'ESCAPE'?", opts: ["A. Survive", "B. Flee", "C. Depart", "D. Capture"], ans: 3 },
+      { lvl: "Dễ", q: "Complete: 'There are three _____ on the floor that need lighting.'", opts: ["A. candles", "B. windows", "C. tables", "D. chairs"], ans: 0 },
+      { lvl: "Dễ", q: "Choose the right verb: 'We need to _____ together to survive.'", opts: ["A. working", "B. work", "C. worked", "D. works"], ans: 1 },
+
+      // --- 15 CÂU TRUNG BÌNH ---
+      { lvl: "Trung bình", q: "If we _____ all three candles, the secret scroll will unlock.", opts: ["A. lit", "B. lighting", "C. light", "D. lights"], ans: 2 },
+      { lvl: "Trung bình", q: "By the time we reached the exit door, the demon _____ vanished.", opts: ["A. has", "B. is", "C. was", "D. had"], ans: 3 },
+      { lvl: "Trung bình", q: "We had better _____ our flashlight battery for emergencies.", opts: ["A. save", "B. to save", "C. saving", "D. saved"], ans: 0 },
+      { lvl: "Trung bình", q: "Which word describes 'an old, spooky, and abandoned mansion'?", opts: ["A. Cheerful", "B. Haunted", "C. Modern", "D. Crowded"], ans: 1 },
+      { lvl: "Trung bình", q: "Complete: 'Do not make a sound _____ you want to attract Hobokuryo.'", opts: ["A. because", "B. although", "C. unless", "D. therefore"], ans: 2 },
+      { lvl: "Trung bình", q: "What does 'CURSED' mean in: 'This room holds a cursed chest'?", opts: ["A. Newly painted", "B. Safe and warm", "C. Very expensive", "D. Under an evil spell"], ans: 3 },
+      { lvl: "Trung bình", q: "Choose the correct form: 'She heard footsteps _____ closer in the dark.'", opts: ["A. coming", "B. came", "C. comes", "D. to come"], ans: 0 },
+      { lvl: "Trung bình", q: "Which word means 'a sudden feeling of intense fear'?", opts: ["A. Relief", "B. Terror", "C. Comfort", "D. Joy"], ans: 1 },
+      { lvl: "Trung bình", q: "Complete: 'Neither the host _____ the teammates knew where the key was.'", opts: ["A. or", "B. and", "C. nor", "D. but"], ans: 2 },
+      { lvl: "Trung bình", q: "The ancient scroll contains a _____ clue to the first digit.", opts: ["A. noisy", "B. colorful", "C. heavy", "D. cryptic"], ans: 3 },
+      { lvl: "Trung bình", q: "Complete: 'I wish I _____ a cross when the monster appeared.'", opts: ["A. had", "B. have", "C. will have", "D. am having"], ans: 0 },
+      { lvl: "Trung bình", q: "Which phrase means 'to stay hidden from sight'?", opts: ["A. Stand out", "B. Lie low", "C. Show off", "D. Speak up"], ans: 1 },
+      { lvl: "Trung bình", q: "The cold wind blew _____ the broken hallway windows.", opts: ["A. under", "B. among", "C. through", "D. beside"], ans: 2 },
+      { lvl: "Trung bình", q: "What do you call 'three pieces of a magical charm'?", opts: ["A. Lanterns", "B. Statues", "C. Portraits", "D. Talismans"], ans: 3 },
+      { lvl: "Trung bình", q: "Complete: 'You _____ touch the demon without a protective cross.'", opts: ["A. mustn't", "B. needn't", "C. couldn't", "D. wouldn't"], ans: 0 },
+
+      // --- 15 CÂU KHÓ ---
+      { lvl: "Khó", q: "Which word means 'a ghostly apparition or haunting spirit'?", opts: ["A. Fortress", "B. Phantom", "C. Pilgrim", "D. Merchant"], ans: 1 },
+      { lvl: "Khó", q: "Complete the inversion: 'Hardly _____ the door opened when the demon rushed in.'", opts: ["A. has", "B. was", "C. had", "D. did"], ans: 2 },
+      { lvl: "Khó", q: "What does 'OMINOUS' mean in: 'An ominous shadow moved behind the curtain'?", opts: ["A. Bright and welcoming", "B. Weak and harmless", "C. Funny and playful", "D. Threatening and evil"], ans: 3 },
+      { lvl: "Khó", q: "Complete the inversion: 'Never before _____ such a blood-curdling scream.'", opts: ["A. have I heard", "B. I have heard", "C. I heard", "D. had I hear"], ans: 0 },
+      { lvl: "Khó", q: "Choose the closest synonym to 'EERIE':", opts: ["A. Crowded", "B. Uncanny", "C. Ordinary", "D. Festive"], ans: 1 },
+      { lvl: "Khó", q: "If he _____ the flashlight earlier, the monster wouldn't have caught him.", opts: ["A. turned on", "B. turns on", "C. had turned on", "D. has turned on"], ans: 2 },
+      { lvl: "Khó", q: "Which word refers to 'a mysterious urban legend passed down by word of mouth'?", opts: ["A. Biography", "B. Chronicle", "C. Almanac", "D. Folklore"], ans: 3 },
+      { lvl: "Khó", q: "Complete: 'The demon's aura was so _____ that everyone's movement slowed down.'", opts: ["A. oppressive", "B. refreshing", "C. trivial", "D. benevolent"], ans: 0 },
+      { lvl: "Khó", q: "What does 'MALEVOLENT' describe?", opts: ["A. Kind and generous", "B. Wishing evil to others", "C. Easily frightened", "D. Deeply asleep"], ans: 1 },
+      { lvl: "Khó", q: "Complete: 'Scarcely had we solved the riddle _____ the second demon spawned.'", opts: ["A. than", "B. then", "C. when", "D. while"], ans: 2 },
+      { lvl: "Khó", q: "Which word means 'impossible to escape or avoid'?", opts: ["A. Fragile", "B. Optional", "C. Temporary", "D. Inescapable"], ans: 3 },
+      { lvl: "Khó", q: "Choose the best word: 'The survivors tried to _____ the ancient seal on the gate.'", opts: ["A. decipher", "B. decorate", "C. ignore", "D. polish"], ans: 0 },
+      { lvl: "Khó", q: "What is a 'SPECTER'?", opts: ["A. A brave knight", "B. A terrifying ghost", "C. A silver key", "D. A secret map"], ans: 1 },
+      { lvl: "Khó", q: "Complete: 'Were the team _____ split up, Hobokuryo would hunt them one by one.'", opts: ["A. split", "B. splitting", "C. to split", "D. splits"], ans: 2 },
+      { lvl: "Khó", q: "Which adjective means 'causing cold fear and trembling'?", opts: ["A. Soothing", "B. Mundane", "C. Radiant", "D. Spine-chilling"], ans: 3 }
     ];
     const WORD_SCRAMBLE_BANK = [
-      { hint: "Ghép các chữ thành từ nghĩa là đèn pin (10 chữ cái):", word: "FLASHLIGHT" },
-      { hint: "Ghép các chữ thành từ nghĩa là trốn thoát (6 chữ cái):", word: "ESCAPE" },
-      { hint: "Ghép các chữ thành từ nghĩa là bóng ma (7 chữ cái):", word: "PHANTOM" },
-      { hint: "Ghép các chữ thành từ nghĩa là lời nguyền (5 chữ cái):", word: "CURSE" },
-      { hint: "Ghép các chữ thành từ nghĩa là lá bùa (8 chữ cái):", word: "TALISMAN" },
-      { hint: "Ghép các chữ thành từ nghĩa là nghi lễ (6 chữ cái):", word: "RITUAL" }
+      // --- 12 CÂU DỄ (4 - 6 chữ cái) ---
+      { lvl: "Dễ", hint: "Dễ • Bóng ma (5 chữ cái):", word: "GHOST" },
+      { lvl: "Dễ", hint: "Dễ • Que diêm (5 chữ cái):", word: "MATCH" },
+      { lvl: "Dễ", hint: "Dễ • Thánh giá (5 chữ cái):", word: "CROSS" },
+      { lvl: "Dễ", hint: "Dễ • Lời nguyền (5 chữ cái):", word: "CURSE" },
+      { lvl: "Dễ", hint: "Dễ • Ác quỷ (5 chữ cái):", word: "DEMON" },
+      { lvl: "Dễ", hint: "Dễ • Bóng tối (6 chữ cái):", word: "SHADOW" },
+      { lvl: "Dễ", hint: "Dễ • Ngọn nến (6 chữ cái):", word: "CANDLE" },
+      { lvl: "Dễ", hint: "Dễ • Cuộn giấy (6 chữ cái):", word: "SCROLL" },
+      { lvl: "Dễ", hint: "Dễ • Trốn thoát (6 chữ cái):", word: "ESCAPE" },
+      { lvl: "Dễ", hint: "Dễ • Nghi lễ (6 chữ cái):", word: "RITUAL" },
+      { lvl: "Dễ", hint: "Dễ • Kinh hoàng (6 chữ cái):", word: "TERROR" },
+      { lvl: "Dễ", hint: "Dễ • Bị nguyền rủa (6 chữ cái):", word: "CURSED" },
+
+      // --- 16 CÂU TRUNG BÌNH (7 - 8 chữ cái) ---
+      { lvl: "Trung bình", hint: "Trung bình • Bóng ma thoắt ẩn thoắt hiện (7 chữ cái):", word: "PHANTOM" },
+      { lvl: "Trung bình", hint: "Trung bình • Dinh thự cổ (7 chữ cái):", word: "MANSION" },
+      { lvl: "Trung bình", hint: "Trung bình • Đèn lồng (7 chữ cái):", word: "LANTERN" },
+      { lvl: "Trung bình", hint: "Trung bình • Hồn ma (7 chữ cái):", word: "SPECTER" },
+      { lvl: "Trung bình", hint: "Trung bình • Đóng băng (7 chữ cái):", word: "FREEZING" },
+      { lvl: "Trung bình", hint: "Trung bình • Lời thì thầm (7 chữ cái):", word: "WHISPER" },
+      { lvl: "Trung bình", hint: "Trung bình • Tiếng hét (7 chữ cái):", word: "SCREAMS" },
+      { lvl: "Trung bình", hint: "Trung bình • Bí ẩn (7 chữ cái):", word: "MYSTERY" },
+      { lvl: "Trung bình", hint: "Trung bình • Bị ma ám (7 chữ cái):", word: "HAUNTED" },
+      { lvl: "Trung bình", hint: "Trung bình • Lá bùa hộ mệnh (8 chữ cái):", word: "TALISMAN" },
+      { lvl: "Trung bình", hint: "Trung bình • Mật mã mở cửa (8 chữ cái):", word: "PASSCODE" },
+      { lvl: "Trung bình", hint: "Trung bình • Hành lang tối (8 chữ cái):", word: "CORRIDOR" },
+      { lvl: "Trung bình", hint: "Trung bình • Bóng tối bao trùm (8 chữ cái):", word: "DARKNESS" },
+      { lvl: "Trung bình", hint: "Trung bình • Sự sống còn (8 chữ cái):", word: "SURVIVAL" },
+      { lvl: "Trung bình", hint: "Trung bình • Điềm gở (7 chữ cái):", word: "OMINOUS" },
+      { lvl: "Trung bình", hint: "Trung bình • Tiếng bước chân (8 chữ cái):", word: "FOOTSTEP" },
+
+      // --- 12 CÂU KHÓ (9 - 11 chữ cái) ---
+      { lvl: "Khó", hint: "Khó • Ác mộng kinh hoàng (9 chữ cái):", word: "NIGHTMARE" },
+      { lvl: "Khó", hint: "Khó • Đèn pin soi quỷ (10 chữ cái):", word: "FLASHLIGHT" },
+      { lvl: "Khó", hint: "Khó • Linh hồn báo oán (9 chữ cái):", word: "APPARITION" },
+      { lvl: "Khó", hint: "Khó • Sự bảo vệ thiêng liêng (10 chữ cái):", word: "PROTECTION" },
+      { lvl: "Khó", hint: "Khó • Mê cung phòng kín (9 chữ cái):", word: "LABYRINTH" },
+      { lvl: "Khó", hint: "Khó • Kẻ săn mồi bóng đêm (8 chữ cái):", word: "PREDATOR" },
+      { lvl: "Khó", hint: "Khó • Giải mã phong ấn (8 chữ cái):", word: "DECIPHER" },
+      { lvl: "Khó", hint: "Khó • Nỗi sợ tột độ (10 chữ cái):", word: "TERRIFYING" },
+      { lvl: "Khó", hint: "Khó • Siêu nhiên (12 chữ cái):", word: "SUPERNATURAL" },
+      { lvl: "Khó", hint: "Khó • Bị giam cầm (10 chữ cái):", word: "IMPRISONED" },
+      { lvl: "Khó", hint: "Khó • Sự biến mất bí ẩn (13 chữ cái):", word: "DISAPPEARANCE" },
+      { lvl: "Khó", hint: "Khó • Truyền thuyết đô thị (11 chữ cái):", word: "URBANLEGEND" }
     ];
+
     const canvas = document.getElementById("gameCanvas"), ctx = canvas.getContext("2d");
     const radarCanvas = document.getElementById("radarCanvas"), rctx = radarCanvas.getContext("2d");
     const EXIT_DOOR = { x: 525, y: 635 };
@@ -952,9 +870,8 @@
     let crossItem = { owned: false, on: false, timeLeft: 45 };
     let bosses = [], playersSlowed = false;
 
-    let elapsedSeconds = 0, nextBossSpawn = 30, clockInterval = null, lastPosSync = 0;
+    let elapsedSeconds = 0, nextBossSpawn = 30, clockInterval = null, lastPosSync = 0, lastBossSync = 0;
     let dustMotes = [], windLines = [], lightningAlpha = 0, screenShake = 0;
-
     const keys = {};
     window.addEventListener("keydown", e => {
       const k = e.key.toLowerCase();
@@ -1030,6 +947,7 @@
     bindInstantTouchAction("#btnCross", toggleCross);
     bindInstantTouchAction("#btnFlashlight", toggleFlashlight);
     bindInstantTouchAction("#btnInteract", tryInteract);
+
     const resize = () => { canvas.width = document.documentElement.clientWidth; canvas.height = document.documentElement.clientHeight; };
     window.addEventListener("resize", resize); resize();
 
@@ -1045,7 +963,7 @@
       btn.classList.toggle("active-glow", flashlight.owned && flashlight.on);
       if (!flashlight.owned) lbl.innerText = "Chưa có";
       else if (flashlight.cooldown > 0) lbl.innerText = `Hồi ${flashlight.cooldown}s`;
-      else lbl.innerText = flashlight.on ? "Đèn bật" : "Đèn tắt";
+      else lbl.innerText = flashlight.cooldown > 0 ? flashlight.cooldown + "s" : "";
     }
 
     function updateCrossBtnUI() {
@@ -1060,9 +978,10 @@
     function toggleFlashlight() {
       if (!matchRunning || puzzleOpen || isSpectating) return;
       if (!flashlight.owned) { showSubtleNotify("Bạn chưa có đèn pin."); return; }
-      if (flashlight.cooldown > 0) return;
+      if (flashlight.cooldown > 0) { showSubtleNotify(`Đèn pin đang hồi năng lượng (${flashlight.cooldown}s).`); return; }
       flashlight.on = !flashlight.on;
       updateFlashlightBtnUI();
+      rtdb.ref(`mansion_rooms/${roomId}/players/${myUser}`).update({ flashOn: flashlight.on, facingAngle: player.facingAngle }).catch(() => {});
     }
 
     function toggleCross() {
@@ -1080,7 +999,6 @@
       if (squad[myUser]) squad[myUser].crossProtected = active;
       rtdb.ref(`mansion_rooms/${roomId}/players/${myUser}`).update({ crossProtected: active }).catch(() => {});
     }
-
     function pickRandomTargetUser(excludeUser = null) {
       const aliveList = Object.values(squad).filter(p => p.alive !== false && !p.crossProtected);
       if (aliveList.length === 0) return null;
@@ -1111,7 +1029,7 @@
       document.getElementById("redScreenEdge").style.opacity = "1";
       const msg = count === 2 ? "Cảnh báo hai ác quỷ Hobokuryo cùng xuất hiện." : "Ác quỷ Hobokuryo đã xuất hiện.";
       showSubtleNotify(msg, 3500);
-      syncRoomState({ bosses, bossStunTimer: 0, eventBanner: msg });
+      syncRoomState({ bosses, bossStunTimer: 0, bossStunUntil: 0, eventBanner: msg });
     }
 
     function despawnBossCycle() {
@@ -1121,7 +1039,7 @@
       playersSlowed = true;
       const msg = "Ác quỷ tạm biến mất, cả đội bị làm chậm trong 20 giây.";
       showSubtleNotify(msg, 3400);
-      syncRoomState({ bosses: [], bossStunTimer: 0, eventBanner: msg });
+      syncRoomState({ bosses: [], bossStunTimer: 0, bossStunUntil: 0, eventBanner: msg });
     }
 
     function updateDynamicBottomHint() {
@@ -1157,10 +1075,10 @@
         flashlight.stunTimer--;
         statusLine.innerText = `Hobokuryo đang bị đóng băng (${flashlight.stunTimer}s)`;
         if (flashlight.stunTimer <= 0) {
-          flashlight.on = false; flashlight.cooldown = 15;
-          statusLine.innerText = "";
-          updateFlashlightBtnUI();
-        }
+  statusLine.innerText = "";
+  if (isHost) syncRoomState({ bossStunTimer: 0, bossStunUntil: 0 });
+}
+
       } else if (crossItem.owned && crossItem.on && crossItem.timeLeft > 0) {
         crossItem.timeLeft--;
         updateCrossBtnUI();
@@ -1188,7 +1106,7 @@
 
       if (isHost) {
         if (bosses.length === 0 && elapsedSeconds >= nextBossSpawn) spawnBossCycle(30);
-        else if (bosses.length > 0) {
+        else if (bosses.length > 0 && flashlight.stunTimer <= 0) {
           bosses.forEach(b => { b.lifeLeft--; });
           if (bosses.at(0).lifeLeft <= 0 && !doorRitual.active) despawnBossCycle();
         }
@@ -1231,7 +1149,7 @@
       matchSpots = new Array(0, 1, 2).map(id => { const s = pickSpot(); return { id, x: s.x, y: s.y, room: s.area }; });
       BRAZIER_SPOTS = new Array(0, 1, 2).map(id => { const s = pickSpot(); return { id, x: s.x, y: s.y, room: s.area }; });
       const sc = pickSpot(); SCROLL_SPOT = { x: sc.x, y: sc.y };
-	        const ch = pickSpot(); LOCKED_CHEST_SPOT = { x: ch.x, y: ch.y };
+      const ch = pickSpot(); LOCKED_CHEST_SPOT = { x: ch.x, y: ch.y };
       TALISMAN_SPOTS = new Array(0, 1, 2).map(id => { const s = pickSpot(); return { id, x: s.x, y: s.y, loc: s.area }; });
       coinsList = new Array(0, 1, 2).map(id => { const pt = pickSpot(); return { id, x: pt.x, y: pt.y, val: 3 + Math.floor(Math.random() * 8), taken: false }; });
 
@@ -1473,19 +1391,21 @@
     function enterSpectatorMode() {
       if (isSpectating) return;
       isSpectating = true;
+      flashlight.on = false;
       resetAllMovementInputs();
       playPlayerKilledSFX();
-      if (squad[myUser]) squad[myUser].alive = false;
+      if (squad[myUser]) { squad[myUser].alive = false; squad[myUser].flashOn = false; }
       document.getElementById("aliveActionBtns").style.display = "none";
       document.getElementById("spectateActionBtns").style.display = "flex";
 
-      rtdb.ref(`mansion_rooms/${roomId}/players/${myUser}`).update({ alive: false, crossProtected: false }).catch(() => {});
+      rtdb.ref(`mansion_rooms/${roomId}/players/${myUser}`).update({ alive: false, crossProtected: false, flashOn: false }).catch(() => {});
 
       const aliveMates = Object.values(squad).filter(p => p.username !== myUser && p.alive !== false);
       if (aliveMates.length === 0) {
         endMatch(false, "Toàn bộ thành viên trong đội đều đã bị Hobokuryo hạ gục.");
       } else {
         spectateUser = aliveMates.at(0).username;
+        if (!teammateRenderPos[spectateUser]) teammateRenderPos[spectateUser] = { x: aliveMates.at(0).x, y: aliveMates.at(0).y };
         const msg = `${myName} đã tử nạn, chuyển sang góc nhìn theo dõi đồng đội.`;
         showSubtleNotify(msg, 3800);
         syncRoomState({ eventBanner: msg });
@@ -1496,8 +1416,11 @@
       const aliveMates = Object.values(squad).filter(p => p.username !== myUser && p.alive !== false);
       if (aliveMates.length === 0) return;
       const idx = aliveMates.findIndex(p => p.username === spectateUser);
-      spectateUser = aliveMates[(idx + 1) % aliveMates.length].username;
-      showSubtleNotify(`Đang theo dõi ${squad[spectateUser].name}.`, 2000);
+      const nextMate = aliveMates[(idx + 1) % aliveMates.length];
+      spectateUser = nextMate.username;
+      if (!teammateRenderPos[spectateUser]) teammateRenderPos[spectateUser] = { x: nextMate.x, y: nextMate.y };
+      updateDynamicBottomHint();
+      showSubtleNotify(`Đang theo dõi ${nextMate.name}.`, 2000);
     }
 
     async function endMatch(win, msg) {
@@ -1505,7 +1428,7 @@
       matchRunning = false; clearInterval(clockInterval); resetAllMovementInputs();
       if (!win) playPlayerKilledSFX();
       if (win) await syncStudentProfile(25, 1);
-      syncRoomState({ status: "waiting", foundDigits: ["?", "?", "?", "?"], chestProgress: 0, bosses: [], bossStunTimer: 0, doorRitualStarted: false, eventBanner: "" });
+      syncRoomState({ status: "waiting", foundDigits: ["?", "?", "?", "?"], chestProgress: 0, bosses: [], bossStunTimer: 0, bossStunUntil: 0, doorRitualStarted: false, eventBanner: "" });
       document.getElementById("redScreenEdge").style.opacity = "0";
       document.getElementById("endTitle").innerText = win ? "Thoát hiểm thành công" : "Nhiệm vụ thất bại";
       document.getElementById("endTitle").style.color = win ? "#34d399" : "#ef4444";
@@ -1551,13 +1474,16 @@
         if (squad[myUser]) {
           squad[myUser].x = player.x; squad[myUser].y = player.y;
           squad[myUser].flipX = player.flipX; squad[myUser].moving = player.isMoving;
+          squad[myUser].flashOn = flashlight.owned && flashlight.on;
+          squad[myUser].facingAngle = player.facingAngle;
         }
         if (Date.now() - lastPosSync > 75) {
           lastPosSync = Date.now();
           rtdb.ref(`mansion_rooms/${roomId}/players/${myUser}`).update({
             x: Math.round(player.x), y: Math.round(player.y),
             vx: Number((vx * curSpeed).toFixed(2)), vy: Number((vy * curSpeed).toFixed(2)),
-            flipX: player.flipX, moving: player.isMoving
+            flipX: player.flipX, moving: player.isMoving,
+            flashOn: flashlight.owned && flashlight.on, facingAngle: Number(player.facingAngle.toFixed(2))
           }).catch(() => {});
         }
       }
@@ -1586,14 +1512,21 @@
           const distToMe = Math.hypot(bx - player.x, by - player.y);
           if (!isSpectating && distToMe < minDistToMe) minDistToMe = distToMe;
 
-          if (!isSpectating && flashlight.owned && flashlight.on && flashlight.stunTimer === 0 && distToMe < 190) {
-            const angleToBoss = Math.atan2(by - player.y, bx - player.x);
-            const angleDiff = Math.abs(Math.atan2(Math.sin(angleToBoss - player.facingAngle), Math.cos(angleToBoss - player.facingAngle)));
-            if (angleDiff < 0.48) {
-              flashlight.stunTimer = 10;
-              syncRoomState({ bossStunTimer: 10 });
-            }
-          }
+         if (!isSpectating && flashlight.owned && flashlight.on && flashlight.cooldown <= 0 && flashlight.stunTimer <= 0 && distToMe < 210) {
+  const angleToBoss = Math.atan2(by - player.y, bx - player.x);
+  const angleDiff = Math.abs(Math.atan2(Math.sin(angleToBoss - player.facingAngle), Math.cos(angleToBoss - player.facingAngle)));
+  if (angleDiff < 0.62) {
+    flashlight.stunTimer = 10;
+    flashlight.on = false;
+    flashlight.cooldown = 20;
+    updateFlashlightBtnUI();
+    rtdb.ref(`mansion_rooms/${roomId}/players/${myUser}`).update({ flashOn: false }).catch(() => {});
+    const stunMsg = `${myName} đã dùng đèn pin đóng băng Hobokuryo trong 10 giây.`;
+    showSubtleNotify(stunMsg, 3200);
+    syncRoomState({ bossStunTimer: 10, bossStunUntil: Date.now() + 10000, eventBanner: stunMsg });
+  }
+}
+
 
           if (isHost) {
             if (flashlight.stunTimer <= 0) {
@@ -1609,13 +1542,16 @@
                 const nearest = candidates.at(0);
                 const currentTarget = candidates.find(c => c.username === b.targetUser);
 
-                if (!currentTarget || nearest.dist < currentTarget.dist - 35 || nearest.dist < 145) {
+                if (!currentTarget || nearest.dist < currentTarget.dist - 35 || nearest.dist < 155) {
                   b.targetUser = nearest.username;
                 }
                 const chosen = candidates.find(c => c.username === b.targetUser) || nearest;
-                const ang = Math.atan2(chosen.y - b.y, chosen.x - b.x);
-                bvx = Math.cos(ang) * b.speed;
-                bvy = Math.sin(ang) * b.speed;
+                const distToChosen = Math.hypot(chosen.x - b.x, chosen.y - b.y);
+                if (distToChosen > 2) {
+                  const ang = Math.atan2(chosen.y - b.y, chosen.x - b.x);
+                  bvx = Math.cos(ang) * b.speed;
+                  bvy = Math.sin(ang) * b.speed;
+                }
               }
 
               bosses.forEach((other, j) => {
@@ -1642,7 +1578,8 @@
           }
         });
 
-        if (isHost && Date.now() - lastPosSync > 75) {
+        if (isHost && Date.now() - lastBossSync > 75) {
+          lastBossSync = Date.now();
           syncRoomState({
             bosses: bosses.map(b => ({ id: b.id, x: Math.round(b.x), y: Math.round(b.y), r: b.r, speed: b.speed, lifeLeft: b.lifeLeft, flipX: b.flipX, spriteKey: b.spriteKey, targetUser: b.targetUser })),
             bossStunTimer: flashlight.stunTimer
@@ -1725,12 +1662,28 @@
       update();
       ctx.fillStyle = "#040406"; ctx.fillRect(0, 0, canvas.width, canvas.height);
 
+      Object.values(squad).forEach(mate => {
+        if (mate.username !== myUser && mate.alive !== false) {
+          if (!teammateRenderPos[mate.username]) teammateRenderPos[mate.username] = { x: mate.x, y: mate.y };
+          const rp = teammateRenderPos[mate.username];
+          const predX = mate.x + (mate.vx || 0);
+          const predY = mate.y + (mate.vy || 0);
+          rp.x += (predX - rp.x) * 0.35;
+          rp.y += (predY - rp.y) * 0.35;
+        }
+      });
+
       let camX = player.x, camY = player.y;
+      let specMate = null;
       if (isSpectating) {
         const aliveMates = Object.values(squad).filter(p => p.username !== myUser && p.alive !== false);
         if (aliveMates.length > 0) {
-          if (!spectateUser || !squad[spectateUser] || squad[spectateUser].alive === false) spectateUser = aliveMates.at(0).username;
-          const rp = teammateRenderPos[spectateUser] || squad[spectateUser];
+          if (!spectateUser || !squad[spectateUser] || squad[spectateUser].alive === false) {
+            spectateUser = aliveMates.at(0).username;
+            updateDynamicBottomHint();
+          }
+          specMate = squad[spectateUser];
+          const rp = teammateRenderPos[spectateUser] || specMate;
           camX = rp.x; camY = rp.y;
         }
       }
@@ -1804,13 +1757,7 @@
       const stepFrame = walkCycle[Math.floor(Date.now() / 130) % 4];
       Object.values(squad).forEach(mate => {
         if (mate.username !== myUser && mate.alive !== false) {
-          if (!teammateRenderPos[mate.username]) teammateRenderPos[mate.username] = { x: mate.x, y: mate.y };
-          const rp = teammateRenderPos[mate.username];
-          const predX = mate.x + (mate.vx || 0);
-          const predY = mate.y + (mate.vy || 0);
-          rp.x += (predX - rp.x) * 0.35;
-          rp.y += (predY - rp.y) * 0.35;
-
+          const rp = teammateRenderPos[mate.username] || mate;
           let pKey = "playerIdle";
           if (mate.moving) {
             if (stepFrame === 1) pKey = "playerLeft";
@@ -1822,6 +1769,14 @@
             ctx.fillStyle = "#34d399"; ctx.fillRect(rp.x - 10, rp.y - 13, 20, 26);
           }
           drawPixelHint(mate.name, rp.x, rp.y - 28, "#6ee7b7");
+
+          if (mate.flashOn) {
+            ctx.save(); ctx.translate(rp.x, rp.y); ctx.rotate(mate.facingAngle || 0);
+            const mBeam = ctx.createRadialGradient(0, 0, 10, 0, 0, 190);
+            mBeam.addColorStop(0, "rgba(254, 240, 138, 0.55)"); mBeam.addColorStop(1, "rgba(254, 240, 138, 0)");
+            ctx.fillStyle = mBeam; ctx.beginPath(); ctx.moveTo(0, 0); ctx.arc(0, 0, 190, -0.45, 0.45); ctx.closePath(); ctx.fill();
+            ctx.restore();
+          }
         }
       });
 
@@ -1866,7 +1821,8 @@
       ctx.restore();
 
       const cx = canvas.width / 2, cy = canvas.height / 2;
-      const visionR = (!isSpectating && flashlight.owned && flashlight.on) ? 215 : 175;
+      const hasLight = isSpectating ? (specMate && specMate.flashOn) : (flashlight.owned && flashlight.on);
+      const visionR = hasLight ? 215 : 175;
       const fog = ctx.createRadialGradient(cx, cy, 35, cx, cy, visionR);
       fog.addColorStop(0, "rgba(4, 4, 6, 0)"); fog.addColorStop(0.65, "rgba(4, 4, 6, 0.74)"); fog.addColorStop(1, "rgba(4, 4, 6, 0.985)");
       ctx.fillStyle = fog; ctx.fillRect(0, 0, canvas.width, canvas.height);
@@ -1881,4 +1837,5 @@
   </script>
 </body>
 </html>
+
 
