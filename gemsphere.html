@@ -60,7 +60,7 @@
       padding: 10px 18px; border-radius: 12px; font-weight: 800; cursor: pointer; font-size: 0.9rem;
     }
     .btn-gold { 
-      width: 100%; background: linear-gradient(135deg, #fde047 0%, #facc15 100%); color: #2e1065; 
+      width: 100%; background: white; color: #2e1065; 
       border: 2px solid #5b21b6; padding: 13px; border-radius: 14px; font-size: 1rem; font-weight: 900; 
       cursor: pointer; text-transform: uppercase; margin-top: 12px; box-shadow: 0 6px 16px rgba(250, 204, 21, 0.35);
     }
@@ -231,11 +231,11 @@
       });
     }
 
-    function playClickSFX()   { playTone(new Array(620, 840), "triangle", 0.04, 0.14); }
-    function playTickSFX()    { playTone(new Array(980), "sine", 0.05, 0.16); }
-    function playWinRoundSFX(){ playTone(new Array(523.25, 659.25, 783.99, 1046.5), "triangle", 0.07, 0.22); }
+    function playClickSFX()    { playTone(new Array(620, 840), "triangle", 0.04, 0.14); }
+    function playTickSFX()     { playTone(new Array(980), "sine", 0.05, 0.16); }
+    function playWinRoundSFX() { playTone(new Array(523.25, 659.25, 783.99, 1046.5), "triangle", 0.07, 0.22); }
     function playLoseRoundSFX(){ playTone(new Array(300, 220, 160), "sawtooth", 0.09, 0.16); }
-    function playVictorySFX() { playTone(new Array(523.25, 659.25, 783.99, 1046.5, 1318.5, 1568), "triangle", 0.09, 0.25); }
+    function playVictorySFX()  { playTone(new Array(523.25, 659.25, 783.99, 1046.5, 1318.5, 1568), "triangle", 0.09, 0.25); }
 
     // =========================================================================
     // KẾT NỐI FIREBASE & ĐỒNG BỘ PHÒNG ĐẤU
@@ -292,7 +292,6 @@
 
       startRoomSync();
     }
-
     function pickRandom10Indices() {
       const bank = (typeof questions !== "undefined" && Array.isArray(questions)) ? questions : [];
       let arr = Array.from({ length: bank.length }, (_, i) => i);
@@ -381,16 +380,24 @@
           })
         });
       }
+      startRoomSync();
     }
+
     async function kickPlayer(targetUser) {
       await fetch(`${DB_ROOT}/gemsphere_rooms/${roomId}/players/${targetUser}.json`, { method: "DELETE" });
     }
 
     async function startMatch() {
       if (!roomData || !roomData.players) return;
-      if (Object.keys(roomData.players).length < 2) {
+      const playersCount = Object.keys(roomData.players).length;
+      if (playersCount < 2) {
         alert("⚠️ Cần ít nhất 2 Học viên trong phòng để bắt đầu!");
         return;
+      }
+      const btn = document.getElementById("startMatchBtn");
+      if (btn) {
+        btn.disabled = true;
+        btn.innerText = "⏳ Đang khởi tạo đấu trường...";
       }
       await fetch(`${DB_ROOT}/gemsphere_rooms/${roomId}.json`, {
         method: "PATCH",
@@ -398,7 +405,6 @@
         body: JSON.stringify({ status: "playing", currentRound: 0, roundStartTime: Date.now() })
       });
     }
-
     function startRoomSync() {
       if (syncInterval) clearInterval(syncInterval);
       syncInterval = setInterval(async () => {
@@ -407,6 +413,7 @@
           const data = await res.json();
           if (!data) return;
           roomData = data;
+          isHost = (data.host === myUser);
 
           if (data.status === "waiting") {
             switchScreen("lobbyScreen");
@@ -438,7 +445,7 @@
       const players = Object.values(data.players || {});
       grid.innerHTML = "";
 
-            players.forEach(p => {
+      players.forEach(p => {
         const isRoomHost = (p.username === data.host);
         const kickBtnHTML = (isHost && !isRoomHost)
           ? '<button class="kick-btn" onclick="kickPlayer(\'' + p.username + '\')">✕</button>'
@@ -453,7 +460,22 @@
         `;
       });
 
+      // Mở khóa nút Vào Đấu Trường ngay khi có đủ >= 2 Học viên
+      const startBtn = document.getElementById("startMatchBtn");
+      if (startBtn) {
+        startBtn.style.display = "block";
+        if (isHost) {
+          startBtn.disabled = (players.length < 2);
+          startBtn.innerText = players.length < 2
+            ? `Vào Đấu Trường GemSphere (Đang có ${players.length}/2 Học viên)`
+            : `Vào Đấu Trường GemSphere (${players.length} Học viên)`;
+        } else {
+          startBtn.disabled = true;
+          startBtn.innerText = "⏳ Đang chờ chủ phòng bấm Vào Đấu Trường...";
+        }
+      }
     }
+
     let lastRenderedRound = -1;
 
     function renderBattle(data) {
@@ -473,7 +495,7 @@
         const hasAnswered = (ansObj !== null && ansObj !== -1);
         let statusHTML = hasAnswered
           ? '<span class="b-status-tag" style="background:#0284c7;">✓ Đã chọn đáp án</span>'
-          : '<span class="b-status-tag">🤔 Đang chọn...</span>';
+          : '<span class="b-status-tag">Đang chọn...</span>';
         let extraClass = hasAnswered ? "answered" : "";
 
         if (revealedRound === rIdx) {
@@ -528,7 +550,6 @@
         revealAndSettleRound(data, rIdx, qObj);
       }
     }
-
     async function selectSecretOption(rIdx, choiceIdx, btnEl) {
       if (revealedRound === rIdx) return;
       playClickSFX();
@@ -542,6 +563,7 @@
         body: JSON.stringify(choiceIdx)
       });
     }
+
     async function revealAndSettleRound(data, rIdx, qObj) {
       const optBtns = document.querySelectorAll(".opt-item");
       optBtns.forEach((b, i) => {
@@ -651,7 +673,6 @@
       if (joinCode) {
         document.getElementById("joinRoomCodeInput").value = joinCode;
         await joinRoomByCode();
-        startRoomSync();
       } else {
         await initMyRoom();
       }
