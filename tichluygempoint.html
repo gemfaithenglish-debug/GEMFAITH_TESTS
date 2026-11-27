@@ -433,7 +433,7 @@ function soundWrong() {
     async function saveScoreToDB(newGem) {
       try {
         await fetch(`${DB_URL}/${currentUsername}.json`, {
-          method: "PUT",
+          method: "PATCH",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             name: currentStudentName,
@@ -441,6 +441,7 @@ function soundWrong() {
             lastUpdated: new Date().toLocaleString("vi-VN")
           })
         });
+		await addGemToUserClan(username, earnedGem, newGem);
       } catch (err) {
         console.error("Lỗi lưu điểm:", err);
       }
@@ -670,7 +671,41 @@ async function watchOtherPlayers() {
 watchOtherPlayers();
 setInterval(watchOtherPlayers, 3000);
 
-  
+  async function addGemToUserClan(username, earnedGem, newTotalGem) {
+  if (!username || earnedGem <= 0) return;
+  const db = "https://" + "tich-luy-gempoint-default-rtdb" + ".asia-southeast1." + "firebasedatabase.app";
+  try {
+    const st = (await (await fetch(`${db}/students/${username}.json`)).json()) || {};
+    let clanId = st.clanId;
+    if (!clanId) {
+      const clans = (await (await fetch(`${db}/clans.json`)).json()) || {};
+      for (const [cid, c] of Object.entries(clans)) {
+        if (c && c.members && c.members[username]) {
+          clanId = cid;
+          await fetch(`${db}/students/${username}.json`, {
+            method: "PATCH", headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ clanId: cid })
+          });
+          break;
+        }
+      }
+    }
+    if (clanId) {
+      const cObj = await (await fetch(`${db}/clans/${clanId}.json`)).json();
+      if (cObj) {
+        const nextAcc = Math.round((Number(cObj.accumulatedGem || 0) + earnedGem) * 100) / 100;
+        await fetch(`${db}/clans/${clanId}.json`, {
+          method: "PATCH", headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            accumulatedGem: nextAcc,
+            memberSnapshots: { ...(cObj.memberSnapshots || {}), [username]: newTotalGem }
+          })
+        });
+      }
+    }
+  } catch (e) {}
+}
+
   
   </script>
   
