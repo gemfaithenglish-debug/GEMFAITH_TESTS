@@ -299,7 +299,24 @@ function renderClanModalBody() {
 
     body.innerHTML = `
       <div style="text-align:center; padding:16px; background:#f5ebe0; border-radius:18px; border:1.5px solid #dcc3a6; margin-bottom:14px;">
-        <img src="${clan.avatar}" style="width:64px; height:64px; border-radius:50%; border:2px solid #7f5539; object-fit:cover; background:#fff;">
+                <div style="position:relative; display:inline-block;">
+          <img id="currentClanAvtImg" src="${clan.avatar}" style="width:68px; height:68px; border-radius:50%; border:2.5px solid #7f5539; object-fit:cover; background:#fff;">
+          ${isLeader ? `<button type="button" onclick="toggleChangeClanAvatarBox()" style="display:block; margin:6px auto 0; background:#9c6644; color:#fdf8f2; border:none; padding:4px 12px; border-radius:99px; font-size:0.74rem; font-weight:800; cursor:pointer; box-shadow:0 2px 6px rgba(67,40,24,0.2);">Đổi Avatar Clan</button>` : ''}
+        </div>
+
+        ${isLeader ? `
+        <div id="changeClanAvatarBox" style="display:none; margin-top:12px; padding:12px; background:#ffffff; border:1.5px dashed #d5bdaf; border-radius:14px;">
+          <div style="font-size:0.78rem; font-weight:800; color:#582f0e; margin-bottom:6px;">Chọn Avatar mới cho Clan:</div>
+          <div class="clan-avt-grid" style="margin-bottom:0;">
+            ${CLAN_AVATARS.map(a => `
+              <div class="clan-avt-item ${a.url === clan.avatar ? 'selected' : ''}" onclick="saveChangedClanAvatar('${myClanId}', '${a.url}')">
+                <img src="${a.url}" alt="${a.name}">
+                <div>${a.name}</div>
+              </div>
+            `).join("")}
+          </div>
+        </div>` : ''}
+
         <div style="margin-top:8px;">${window.getClanBadgeHTML(clanUser)}</div>
         <div style="font-size:0.9rem; font-weight:900; color:#432818; margin-top:6px;">
           Rank hiện tại: <span style="color:#9c6644;">${stats.rank.name}</span> • Quyền lợi: <span style="color:#15803d;">x${stats.rank.mult} GemPoint</span>
@@ -456,5 +473,39 @@ async function leaveCurrentClan(clanId, isLeader) {
   await syncClanSystemData();
   renderClanModalBody();
 }
+
+function toggleChangeClanAvatarBox() {
+  const box = document.getElementById("changeClanAvatarBox");
+  if (box) {
+    box.style.display = (box.style.display === "none") ? "block" : "none";
+  }
+}
+
+async function saveChangedClanAvatar(clanId, newAvatarUrl) {
+  if (!clanId || !newAvatarUrl) return;
+  try {
+    // Lưu trực tiếp avatar mới lên Firebase (PATCH để giữ nguyên toàn bộ dữ liệu Clan)
+    await fetch(`${CLAN_DB_ROOT}/clans/${clanId}.json`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ avatar: newAvatarUrl })
+    });
+
+    // Cập nhật ngay trong bộ nhớ tạm và vẽ lại Modal + Bảng Xếp Hạng (nếu đang mở)
+    if (window.allClansCache[clanId]) {
+      window.allClansCache[clanId].avatar = newAvatarUrl;
+    }
+    renderClanModalBody();
+    if (typeof loadClanLeaderboard === "function") {
+      await loadClanLeaderboard();
+    }
+    if (typeof loadLeaderboard === "function") {
+      await loadLeaderboard();
+    }
+  } catch (e) {
+    alert("Lỗi kết nối khi đổi Avatar Clan, vui lòng thử lại!");
+  }
+}
+
 
 window.addEventListener("DOMContentLoaded", syncClanSystemData);
