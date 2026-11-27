@@ -234,12 +234,27 @@
 
         const fallbackAvt = (typeof DEFAULT_AVATAR !== "undefined") ? DEFAULT_AVATAR : "avatargaubasic.jpg";
 
-        const students = Object.keys(data).map(username => ({
-          username: username,
-          name: data[username].name || username,
-          gempoint: data[username].gempoint || 0,
-          avatar: data[username].avatar || fallbackAvt
-        }));
+        const students = Object.keys(data).map(username => {
+  let avt = data[username].avatar || "";
+  if (username === currentUsername) {
+    const localAvt = localStorage.getItem("currentUserAvatar");
+    if (localAvt && localAvt !== avt) {
+      avt = localAvt;
+      fetch(`${DB_ROOT}/students/${username}.json`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ avatar: localAvt })
+      }).catch(() => {});
+    }
+  }
+  return {
+    username: username,
+    name: data[username].name || username,
+    gempoint: data[username].gempoint || 0,
+    avatar: avt || fallbackAvt
+  };
+});
+
         students.sort((a, b) => b.gempoint - a.gempoint);
 
         listEl.innerHTML = "";
