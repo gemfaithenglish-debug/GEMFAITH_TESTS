@@ -246,7 +246,7 @@ async function handleAvatarClick(avtId) {
     const navScore = document.getElementById("navGemScore");
     if (navScore) navScore.innerText = userCurrentGem;
     const hubScore = document.getElementById("currentScoreDisplay");
-	    if (hubScore) hubScore.innerText = userCurrentGem;
+    if (hubScore) hubScore.innerText = userCurrentGem;
 
     await saveProfileToDB({
       gempoint: userCurrentGem,
@@ -263,6 +263,15 @@ async function handleAvatarClick(avtId) {
   localStorage.setItem("currentUserAvatar", item.url);
   applyAvatarToDOM(item.url);
   renderAvatarOptions();
+
+  // Đồng bộ Avatar mới vào bộ nhớ tạm và vẽ lại Bảng Xếp Hạng ngay lập tức
+  const curUser = localStorage.getItem("currentUsername");
+  if (curUser && window.allStudentsCache && window.allStudentsCache[curUser]) {
+    window.allStudentsCache[curUser].avatar = item.url;
+  }
+  if (typeof loadLeaderboard === "function") {
+    await loadLeaderboard();
+  }
 }
 
 function openAvatarPicker() {
@@ -319,6 +328,8 @@ async function syncMyAvatar() {
         if (data.avatar) {
           currentAvt = data.avatar;
           localStorage.setItem("currentUserAvatar", currentAvt);
+        } else if (currentAvt && currentAvt !== DEFAULT_AVATAR) {
+          await saveProfileToDB({ avatar: currentAvt });
         }
         applyAvatarToDOM(currentAvt);
       }
@@ -327,4 +338,5 @@ async function syncMyAvatar() {
 }
 
 window.addEventListener("DOMContentLoaded", syncMyAvatar);
+
 
