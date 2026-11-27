@@ -457,7 +457,7 @@
     let isSpectating = false, spectateUser = null, roomListenerRef = null;
     let teammateRenderPos = {};
 
-    async function syncStudentProfile(addGem = 0, addWin = 0) {
+        async function syncStudentProfile(addGem = 0, addWin = 0) {
       if (myUser.startsWith("guest_")) {
         myGem += addGem; myWins += addWin;
         document.getElementById("hudGemPoint").innerText = myGem;
@@ -472,8 +472,30 @@
         if (addGem > 0 || addWin > 0) {
           await rtdb.ref(`students/${myUser}`).update({ gempoint: myGem, mansionWins: myWins, name: myName });
         }
+        // Cộng thẳng điểm kiếm được vào quỹ tích lũy của Clan
+        if (addGem > 0) {
+          let cId = data.clanId;
+          if (!cId) {
+            const allClans = (await rtdb.ref("clans").once("value")).val() || {};
+            for (const [id, c] of Object.entries(allClans)) {
+              if (c && c.members && c.members[myUser]) { cId = id; break; }
+            }
+          }
+          if (cId) {
+            const cSnap = await rtdb.ref(`clans/${cId}`).once("value");
+            const cObj = cSnap.val();
+            if (cObj) {
+              const nextAcc = Math.round((Number(cObj.accumulatedGem || 0) + addGem) * 100) / 100;
+              await rtdb.ref(`clans/${cId}`).update({
+                accumulatedGem: nextAcc,
+                [`memberSnapshots/${myUser}`]: myGem
+              });
+            }
+          }
+        }
       } catch (e) {}
     }
+
 
     async function loadLeaderboard() {
       try {
