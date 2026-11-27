@@ -643,7 +643,44 @@
   background: #fef2f2 !important;
   color: #991b1b !important;
 }
+    /* Nút quét QR nhỏ gọn kế bên ô Giftcode */
+    .btn-qr-scan {
+      width: 40px; height: 40px; border-radius: 10px;
+      background: #fffbeb; border: 1.5px solid #f59e0b; color: #b45309;
+      display: inline-flex; justify-content: center; align-items: center;
+      cursor: pointer; flex-shrink: 0; transition: 0.2s;
+      box-shadow: 0 2px 6px rgba(245, 158, 11, 0.18);
+    }
+    .btn-qr-scan:hover { background: #fef3c7; transform: translateY(-1px); }
+    .btn-qr-scan:active { transform: scale(0.95); }
 
+    /* Cửa sổ bật Camera quét QR */
+    .qr-modal-overlay {
+      position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(15, 23, 42, 0.72); backdrop-filter: blur(5px);
+      display: none; justify-content: center; align-items: center; padding: 16px; z-index: 10050;
+    }
+    .qr-modal-overlay.open { display: flex; }
+    .qr-modal-box {
+      background: #ffffff; width: 100%; max-width: 360px; border-radius: 20px;
+      padding: 18px; text-align: center; border: 2px solid #fcd34d;
+      box-shadow: 0 20px 45px rgba(0, 0, 0, 0.3);
+    }
+    #qrReaderContainer {
+      width: 100%; border-radius: 12px; overflow: hidden;
+      background: #0f172a; margin: 12px 0; min-height: 240px;
+    }
+
+    #qrReaderContainer { position: relative; border: 2px solid #f59e0b; box-shadow: 0 0 18px rgba(245, 158, 11, 0.35); }
+    #qrReaderContainer::after {
+      content: ""; position: absolute; left: 8%; width: 84%; height: 3px;
+      background: linear-gradient(90deg, transparent, #22c55e, #fde047, #22c55e, transparent);
+      box-shadow: 0 0 10px #22c55e; border-radius: 99px; pointer-events: none; z-index: 10;
+      animation: qrLaserSweep 1.8s ease-in-out infinite alternate;
+    }
+    @keyframes qrLaserSweep { from { top: 14%; } to { top: 84%; } }
+	
+	
 
   </style>
 </head>
@@ -678,6 +715,14 @@
         <div class="giftcode-box">
           <input type="text" id="giftcodeInput" class="giftcode-input" placeholder="Nhập mã quà tặng ...">
           <button type="button" class="giftcode-btn" onclick="redeemGiftcode()">Nhận quà</button>
+		  <button type="button" class="btn-qr-scan" onclick="openQrScannerModal()" title="Quét mã QR nhận GemPoint">
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+    <path d="M3 7V5a2 2 0 0 1 2-2h2M17 3h2a2 2 0 0 1 2 2v2M21 17v2a2 2 0 0 1-2 2h-2M7 21H5a2 2 0 0 1-2-2v-2"/>
+    <rect x="7" y="7" width="4" height="4"/><rect x="13" y="7" width="4" height="4"/>
+    <rect x="7" y="13" width="4" height="4"/><path d="M13 13h4v4h-4z"/>
+  </svg>
+</button>
+
         </div>
         <div class="giftcode-msg" id="giftcodeMsg"></div>
       </div>
@@ -792,6 +837,38 @@
     </div>
   </div>
 
+<div id="qrScannerModal" class="qr-modal-overlay" onclick="if(event.target.id==='qrScannerModal') closeQrScannerModal()">
+  <div class="qr-modal-box">
+    <h3 style="font-size:1.05rem; font-weight:800; color:#0f172a;">Quét Mã QR GemPoint</h3>
+    <p style="font-size:0.8rem; color:#64748b; margin-top:4px;">Đưa camera hướng vào mã GemQR</p>
+    <div id="qrReaderContainer"></div>
+    <button type="button" onclick="closeQrScannerModal()" style="width:100%; padding:10px; border-radius:10px; border:none; background:#e2e8f0; color:#334155; font-weight:700; cursor:pointer;">Đóng Camera</button>
+  </div>
+</div>
+
+  <!-- MODAL TẠO GIFTCODE & SINH MÃ QR (CHỈ ADMIN THẤY) -->
+  <div id="adminQrCreatorModal" class="qr-modal-overlay" onclick="if(event.target.id==='adminQrCreatorModal') closeAdminQrModal()">
+    <div class="qr-modal-box" style="max-width:380px;">
+      <h3 style="font-size:1.08rem; font-weight:800; color:#b45309;">TẠO GIFTCODE & MÃ QR</h3>
+      <p style="font-size:0.78rem; color:#64748b; margin:4px 0 12px;">Mã được lưu trực tiếp lên hệ thống, học sinh quét là nhận điểm ngay</p>
+
+      <div style="display:flex; flex-direction:column; gap:8px; text-align:left;">
+        <input type="text" id="adminNewCodeInput" placeholder="Tên mã (VD: VIETTINDEPTRAI)" style="padding:10px; border:1.5px solid #cbd5e1; border-radius:10px; font-weight:700; text-transform:uppercase;">
+        <input type="number" id="adminNewGemInput" placeholder="Số GemPoint thưởng (VD: 100)" style="padding:10px; border:1.5px solid #cbd5e1; border-radius:10px; font-weight:700;">
+        <button type="button" onclick="createDynamicGiftQr()" style="padding:11px; border-radius:10px; border:none; background:linear-gradient(135deg,#f59e0b,#d97706); color:#fff; font-weight:800; cursor:pointer;">Lưu Mã & Hiện QR Ngay</button>
+      </div>
+
+      <div id="adminGeneratedQrBox" style="display:none; margin-top:14px; padding:12px; background:#fffbeb; border:1.5px dashed #f59e0b; border-radius:14px;">
+        <div id="adminQrCodeLabel" style="font-weight:900; color:#92400e; font-size:0.95rem; margin-bottom:8px;"></div>
+        <img id="adminQrImg" src="" alt="QR Code" style="width:210px; height:210px; border-radius:10px; border:2px solid #fff; box-shadow:0 4px 12px rgba(0,0,0,0.12);">
+        <div style="font-size:0.74rem; color:#78350f; margin-top:6px;">Chiếu mã này lên màn hình cho học sinh quét!</div>
+      </div>
+
+      <button type="button" onclick="closeAdminQrModal()" style="width:100%; margin-top:12px; padding:9px; border-radius:10px; border:none; background:#e2e8f0; color:#334155; font-weight:700; cursor:pointer;">Đóng</button>
+    </div>
+  </div>
+
+
   <script>
       // =========================================================================
     // DANH SÁCH MÃ THƯỞNG GIFTCODE (Bạn tự điền mã viết hoa & số điểm cộng)
@@ -802,7 +879,6 @@
       "CEOKHANHNGOC": 1000000, 
 	  "GEMSPHERE": 1000,
 	  "TOSHIDENSETSU": 1000,
-	  "VIETCULTURE": 1124,
 	  "UPDATE1.1": 110,
 	  
       
@@ -813,6 +889,19 @@
       const inputEl = document.getElementById("giftcodeInput");
       const msgEl = document.getElementById("giftcodeMsg");
       const code = inputEl.value.trim().toUpperCase();
+	      // Lấy thêm danh sách mã động từ Firebase
+    let rewardGem = GIFT_CODES[code];
+    if (rewardGem === undefined) {
+      try {
+        const dbUrl = "https://" + "tich-luy-gempoint-default-rtdb" + ".asia-southeast1." + "firebasedatabase.app";
+        const res = await fetch(`${dbUrl}/dynamic_giftcodes/${code}.json?t=${Date.now()}`);
+        const dynamicVal = await res.json();
+        if (typeof dynamicVal === "number" && dynamicVal > 0) {
+          rewardGem = dynamicVal;
+        }
+      } catch (e) {}
+    }
+
 
       if (!currentUsername) {
         msgEl.style.color = "#b91c1c";
@@ -1030,15 +1119,197 @@ watchOtherPlayers();
 setInterval(watchOtherPlayers, 3000);
 
   
-  
-</script>
+         let html5QrScanner = null;
+
+    function playQrBeepSuccess() {
+      try {
+        const AC = window.AudioContext || window.webkitAudioContext;
+        if (!AC) return;
+        const ctx = new AC(), now = ctx.currentTime;
+        [880, 1318.5].forEach((freq, i) => {
+          const osc = ctx.createOscillator(), g = ctx.createGain();
+          osc.type = "triangle"; osc.frequency.setValueAtTime(freq, now + i * 0.08);
+          g.gain.setValueAtTime(0.2, now + i * 0.08);
+          g.gain.exponentialRampToValueAtTime(0.001, now + i * 0.08 + 0.2);
+          osc.connect(g); g.connect(ctx.destination);
+          osc.start(now + i * 0.08); osc.stop(now + i * 0.08 + 0.22);
+        });
+      } catch (e) {}
+    }
+
+    function ensureQrLibrary() {
+      return new Promise((resolve, reject) => {
+        if (window.Html5Qrcode) return resolve();
+        const s = document.createElement("script");
+        s.src = "https://unpkg." + "com/html5-qrcode@2.3.8/html5-qrcode.min.js";
+        s.onload = resolve;
+        s.onerror = reject;
+        document.head.appendChild(s);
+      });
+    }
+
+    async function openQrScannerModal() {
+      const modal = document.getElementById("qrScannerModal");
+      const msgEl = document.getElementById("giftcodeMsg");
+      modal.classList.add("open");
+      try {
+        await ensureQrLibrary();
+        html5QrScanner = new Html5Qrcode("qrReaderContainer");
+        await html5QrScanner.start(
+          { facingMode: "environment" },
+          { fps: 12, qrbox: { width: 210, height: 210 } },
+          async (decodedText) => {
+            const cleanCode = decodedText.trim().toUpperCase();
+            playQrBeepSuccess();
+            await closeQrScannerModal();
+
+            const inputEl = document.getElementById("giftcodeInput");
+            if (inputEl) inputEl.value = cleanCode;
+            if (msgEl) {
+              msgEl.style.color = "#d97706";
+              msgEl.innerText = `Đã bắt trúng mật mã [${cleanCode}], đang mở thưởng!`;
+            }
+            if (typeof redeemGiftcode === "function") {
+              await redeemGiftcode();
+            }
+          },
+          () => {}
+        );
+      } catch (err) {
+        alert("Không mở được Camera! Bạn nhớ cấp quyền Camera cho trình duyệt và mở web qua HTTPS nhé.");
+        closeQrScannerModal();
+      }
+    }
+
+    async function closeQrScannerModal() {
+      document.getElementById("qrScannerModal").classList.remove("open");
+      if (html5QrScanner) {
+        try {
+          await html5QrScanner.stop();
+          html5QrScanner.clear();
+        } catch (e) {}
+        html5QrScanner = null;
+      }
+    }
+
+     // Thay bằng đúng username tài khoản của bạn (chỉ tài khoản này mới thấy nút tạo QR)
+    const ADMIN_QR_USERNAMES = ["admingemfaith"];
+
+    function initAdminQrButton() {
+      const curUser = localStorage.getItem("currentUsername") || "";
+      if (!ADMIN_QR_USERNAMES.includes(curUser)) return;
+
+      const giftInput = document.getElementById("giftcodeInput");
+      if (!giftInput || !giftInput.parentElement) return;
+
+      const btn = document.createElement("button");
+      btn.type = "button";
+      btn.innerText = "+ Tạo QR";
+      btn.title = "Tạo Giftcode & mã QR mới (Chỉ Admin thấy)";
+      btn.style.cssText = "padding:0 10px; height:40px; border-radius:10px; border:1.5px solid #9c6644; background:#432818; color:#fde047; font-weight:800; font-size:0.78rem; cursor:pointer; flex-shrink:0;";
+      btn.onclick = () => document.getElementById("adminQrCreatorModal").classList.add("open");
+      giftInput.parentElement.appendChild(btn);
+    }
+
+    function closeAdminQrModal() {
+      document.getElementById("adminQrCreatorModal").classList.remove("open");
+    }
+
+        // Bộ tự vẽ mã QR chuẩn xác 100% không cần tải thư viện ngoài
+    function drawPureQrCanvas(holderEl, text) {
+      const size = 21;
+      const mat = Array.from({ length: size }, () => Array(size).fill(0));
+      const drawFinder = (r0, c0) => {
+        for (let r = -1; r <= 7; r++) {
+          for (let c = -1; c <= 7; c++) {
+            const rr = r0 + r, cc = c0 + c;
+            if (rr < 0 || rr >= size || cc < 0 || cc >= size) continue;
+            const on = (r >= 0 && r <= 6 && c >= 0 && c <= 6) &&
+                       (r === 0 || r === 6 || c === 0 || c === 6 || (r >= 2 && r <= 4 && c >= 2 && c <= 4));
+            mat[rr][cc] = on ? 1 : -1;
+          }
+        }
+      };
+      drawFinder(0, 0); drawFinder(0, size - 7); drawFinder(size - 7, 0);
+      for (let i = 8; i < size - 8; i++) {
+        mat[6][i] = (i % 2 === 0) ? 1 : -1;
+        mat[i][6] = (i % 2 === 0) ? 1 : -1;
+      }
+      const bytes = [0x40 | (text.length >> 4), ((text.length & 0x0f) << 4) | (text.charCodeAt(0) >> 4)];
+      for (let i = 0; i < text.length; i++) {
+        const cur = text.charCodeAt(i), nxt = (i + 1 < text.length) ? text.charCodeAt(i + 1) : 0;
+        bytes.push(((cur & 0x0f) << 4) | (nxt >> 4));
+      }
+      while (bytes.length < 19) bytes.push(bytes.length % 2 === 0 ? 0xec : 0x11);
+      let bitIdx = 0;
+      for (let col = size - 1; col > 0; col -= 2) {
+        if (col === 6) col--;
+        for (let row = 0; row < size; row++) {
+          const r = ((col + 1) & 2) === 0 ? size - 1 - row : row;
+          for (let dc = 0; dc < 2; dc++) {
+            const c = col - dc;
+            if (mat[r][c] === 0) {
+              const bit = (bytes[Math.floor(bitIdx / 8)] >> (7 - (bitIdx % 8))) & 1;
+              mat[r][c] = (bit ^ ((r + c) % 2 === 0 ? 1 : 0)) ? 1 : -1;
+              bitIdx++;
+            }
+          }
+        }
+      }
+      const scale = 9, pad = 18, dim = size * scale + pad * 2;
+      const cvs = document.createElement("canvas");
+      cvs.width = dim; cvs.height = dim;
+      const ctx = cvs.getContext("2d");
+      ctx.fillStyle = "#ffffff"; ctx.fillRect(0, 0, dim, dim);
+      ctx.fillStyle = "#0f172a";
+      for (let r = 0; r < size; r++) {
+        for (let c = 0; c < size; c++) {
+          if (mat[r][c] === 1) ctx.fillRect(pad + c * scale, pad + r * scale, scale, scale);
+        }
+      }
+      holderEl.innerHTML = "";
+      holderEl.appendChild(cvs);
+    }
+
+    async function createDynamicGiftQr() {
+      const code = (document.getElementById("adminNewCodeInput").value || "").trim().toUpperCase().replace(/[^A-Z0-9._-]/g, "");
+      const gem = Number(document.getElementById("adminNewGemInput").value || 0);
+
+      if (!code || gem <= 0) {
+        alert("Vui lòng nhập tên mã hợp lệ và số GemPoint lớn hơn 0!");
+        return;
+      }
+
+      const dbUrl = "https://" + "tich-luy-gempoint-default-rtdb" + ".asia-southeast1." + "firebasedatabase.app";
+      await fetch(`${dbUrl}/dynamic_giftcodes/${code}.json`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(gem)
+      });
+
+      document.getElementById("adminQrCodeLabel").innerText = `Mã: ${code} (+${gem} GemPoint)`;
+      const box = document.getElementById("adminGeneratedQrBox");
+      box.style.display = "block";
+
+      const oldImg = document.getElementById("adminQrImg");
+      if (oldImg) {
+        const qrHolder = document.createElement("div");
+        qrHolder.id = "adminQrImg";
+        qrHolder.style.cssText = "display:inline-block; padding:8px; background:#ffffff; border-radius:12px; box-shadow:0 4px 12px rgba(0,0,0,0.12);";
+        oldImg.replaceWith(qrHolder);
+      }
+
+      drawPureQrCanvas(document.getElementById("adminQrImg"), code);
+    }
+
+    window.addEventListener("DOMContentLoaded", initAdminQrButton);
 
 </script>
+
 
 <script src="invite_listener.js"></script>
 <script src="clan_system.js"></script>
 
 </body>
 </html>
-
 
