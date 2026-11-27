@@ -7,23 +7,23 @@
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, sans-serif; }
     body { background: #eef2f6; min-height: 100vh; display: flex; justify-content: center; align-items: center; padding: 16px; }
-    
-    .lb-box { 
-      background: #ffffff; 
-      width: 100%; 
-      max-width: 550px; 
-      border-radius: 16px; 
-      box-shadow: 0 10px 25px rgba(15, 23, 42, 0.1); 
-      overflow: hidden; 
-      border: 1px solid #cbd5e1; 
+
+    .lb-box {
+      background: #ffffff;
+      width: 100%;
+      max-width: 550px;
+      border-radius: 18px;
+      box-shadow: 0 12px 30px rgba(15, 23, 42, 0.12);
+      overflow: hidden;
+      border: 1px solid #cbd5e1;
     }
 
     /* Phần đầu trang chứa Logo lớn nổi bật ở giữa */
-    .lb-header { 
-      background: linear-gradient(135deg, #fef3c7 0%, #fcd34d 50%, #f59e0b 100%); 
-      color: #0f172a; 
-      padding: 22px 20px 20px 20px; 
-      text-align: center; 
+    .lb-header {
+      background: linear-gradient(135deg, #fef3c7 0%, #fcd34d 50%, #f59e0b 100%);
+      color: #0f172a;
+      padding: 22px 20px 18px 20px;
+      text-align: center;
     }
     .lb-logo-wrap {
       width: 82px;
@@ -46,176 +46,164 @@
     .lb-header h2 { font-size: 1.3rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px; }
     .lb-header p { font-size: 0.85rem; color: #451a03; margin-top: 4px; font-weight: 500; }
 
-    /* Danh sách xếp hạng */
-    .lb-list { padding: 18px 20px; display: flex; flex-direction: column; gap: 11px; max-height: 450px; overflow-y: auto; }
-    
-    .lb-item { 
-      display: flex; 
-      align-items: center; 
-      justify-content: space-between; 
-      padding: 12px 16px; 
-      background: #f8fafc; 
-      border: 1.5px solid #e2e8f0; 
-      border-radius: 12px; 
+    /* Thanh 2 Tab chuyển đổi gọn gàng nằm liền mạch dưới Header */
+    .lb-tabs {
+      display: flex;
+      gap: 6px;
+      padding: 6px;
+      margin: 14px 20px 0 20px;
+      background: #f1f5f9;
+      border-radius: 12px;
+      border: 1px solid #e2e8f0;
+    }
+    .lb-tab-btn {
+      flex: 1;
+      padding: 9px 12px;
+      border: none;
+      border-radius: 9px;
+      background: transparent;
+      color: #475569;
+      font-weight: 700;
+      font-size: 0.9rem;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    .lb-tab-btn:hover { color: #0f172a; }
+    .lb-tab-btn.active {
+      background: #ffffff;
+      color: #b45309;
+      font-weight: 800;
+      box-shadow: 0 2px 8px rgba(15, 23, 42, 0.08);
+    }
+    /* Danh sách xếp hạng dùng chung cho cả Học viên & GemClan */
+    .lb-list { padding: 14px 20px 18px 20px; display: flex; flex-direction: column; gap: 10px; max-height: 440px; overflow-y: auto; }
+
+    .lb-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      padding: 12px 15px;
+      background: #f8fafc;
+      border: 1.5px solid #e2e8f0;
+      border-radius: 12px;
       transition: transform 0.2s ease, box-shadow 0.2s ease;
     }
-    .lb-item:hover {
-      transform: translateY(-1px);
-    }
-
-    /* Highlight tài khoản của bạn */
+    .lb-item:hover { transform: translateY(-1px); }
     .lb-item.me { border-color: #3b82f6; box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2); }
 
     /* Trang trí đặc biệt cho TOP 1, 2, 3 */
-    .lb-item.top-1 { 
-      background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%); 
-      border: 2px solid #f59e0b; 
-      box-shadow: 0 6px 16px rgba(245, 158, 11, 0.22);
-      padding: 14px 16px;
+    .lb-item.top-1 {
+      background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%);
+      border: 2px solid #f59e0b;
+      box-shadow: 0 6px 16px rgba(245, 158, 11, 0.2);
+      padding: 14px 15px;
     }
-    .lb-item.top-2 { 
-      background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%); 
-      border: 1.5px solid #94a3b8; 
-      box-shadow: 0 4px 12px rgba(148, 163, 184, 0.2);
+    .lb-item.top-2 {
+      background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+      border: 1.5px solid #94a3b8;
+      box-shadow: 0 4px 12px rgba(148, 163, 184, 0.18);
     }
-    .lb-item.top-3 { 
-      background: linear-gradient(135deg, #fff7ed 0%, #ffedd5 100%); 
-      border: 1.5px solid #d97706; 
-      box-shadow: 0 4px 12px rgba(217, 119, 6, 0.16);
+    .lb-item.top-3 {
+      background: linear-gradient(135deg, #fff7ed 0%, #ffedd5 100%);
+      border: 1.5px solid #d97706;
+      box-shadow: 0 4px 12px rgba(217, 119, 6, 0.15);
     }
 
-    .lb-left { display: flex; align-items: center; gap: 12px; }
-    
-    .rank-badge { 
-      width: 32px; 
-      height: 32px; 
-      border-radius: 50%; 
-      background: #e2e8f0; 
-      color: #334155; 
-      font-weight: 800; 
-      font-size: 0.92rem; 
-      display: flex; 
-      justify-content: center; 
-      align-items: center; 
+    .lb-left { display: flex; align-items: center; gap: 11px; min-width: 0; }
+    .rank-badge {
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      background: #e2e8f0;
+      color: #334155;
+      font-weight: 800;
+      font-size: 0.9rem;
+      display: flex;
+      justify-content: center;
+      align-items: center;
       flex-shrink: 0;
     }
-    .top-1 .rank-badge { 
-      background: linear-gradient(135deg, #fbbf24 0%, #d97706 100%); 
-      color: #ffffff; 
-      box-shadow: 0 0 10px rgba(245, 158, 11, 0.6);
-      font-size: 1.05rem;
-    }
-    .top-2 .rank-badge { 
-      background: linear-gradient(135deg, #94a3b8 0%, #475569 100%); 
-      color: #ffffff; 
-      box-shadow: 0 2px 6px rgba(100, 116, 139, 0.4);
-    }
-    .top-3 .rank-badge { 
-      background: linear-gradient(135deg, #d97706 0%, #92400e 100%); 
-      color: #ffffff; 
-      box-shadow: 0 2px 6px rgba(180, 83, 9, 0.4);
-    }
+    .top-1 .rank-badge { background: linear-gradient(135deg, #fbbf24 0%, #d97706 100%); color: #ffffff; box-shadow: 0 0 10px rgba(245, 158, 11, 0.55); font-size: 1rem; }
+    .top-2 .rank-badge { background: linear-gradient(135deg, #94a3b8 0%, #475569 100%); color: #ffffff; }
+    .top-3 .rank-badge { background: linear-gradient(135deg, #d97706 0%, #92400e 100%); color: #ffffff; }
 
-    .student-name { font-weight: 600; color: #0f172a; font-size: 0.98rem; display: flex; align-items: center; flex-wrap: wrap; gap: 4px; }
-    .top-1 .student-name { font-weight: 800; color: #78350f; font-size: 1.03rem; }
-    .top-2 .student-name { font-weight: 700; color: #1e293b; }
-    .top-3 .student-name { font-weight: 700; color: #7c2d12; }
+    .student-name { font-weight: 700; color: #0f172a; font-size: 0.96rem; display: flex; align-items: center; flex-wrap: wrap; gap: 4px; }
+    .top-1 .student-name { font-weight: 800; color: #78350f; font-size: 1.02rem; }
+    .top-2 .student-name { color: #1e293b; }
+    .top-3 .student-name { color: #7c2d12; }
+    .clan-sub-info { font-size: 0.76rem; color: #64748b; font-weight: 600; }
 
-    .me-tag { font-size: 0.72rem; background: #3b82f6; color: white; padding: 2px 7px; border-radius: 6px; font-weight: 700; margin-left: 4px; }
-    
-    .lb-score { 
-      display: flex; 
-      align-items: center; 
-      gap: 6px; 
-      font-weight: 800; 
-      font-size: 1.05rem; 
-      color: #d97706; 
-      background: #fef3c7; 
-      padding: 5px 12px; 
-      border-radius: 20px; 
+    .me-tag { font-size: 0.7rem; background: #3b82f6; color: white; padding: 2px 7px; border-radius: 6px; font-weight: 700; margin-left: 3px; }
+
+    /* Nhãn 6 bậc Rank Clan tinh tế */
+    .clb-rank-pill { display: inline-block; padding: 2px 8px; border-radius: 6px; font-size: 0.7rem; font-weight: 800; }
+    .clan-rank-0 { background: #f1f5f9; color: #475569; border: 1px solid #cbd5e1; }
+    .clan-rank-1 { background: #ecfdf5; color: #065f46; border: 1px solid #34d399; }
+    .clan-rank-2 { background: #eff6ff; color: #1d4ed8; border: 1px solid #60a5fa; }
+    .clan-rank-3 { background: #fef3c7; color: #92400e; border: 1px solid #f59e0b; }
+    .clan-rank-4 { background: #fdf2f8; color: #9d174d; border: 1px solid #f472b6; }
+    .clan-rank-5 { background: #1e1b4b; color: #fde047; border: 1px solid #facc15; box-shadow: 0 0 8px rgba(250, 204, 21, 0.35); }
+
+    .lb-score {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-weight: 800;
+      font-size: 1rem;
+      color: #d97706;
+      background: #fef3c7;
+      padding: 5px 11px;
+      border-radius: 20px;
       flex-shrink: 0;
     }
-    .top-1 .lb-score { background: #ffffff; border: 1.5px solid #f59e0b; color: #b45309; box-shadow: 0 2px 6px rgba(245, 158, 11, 0.2); }
-    .lb-score img { width: 20px; height: 20px; border-radius: 50%; object-fit: cover; }
-    
+    .top-1 .lb-score { background: #ffffff; border: 1.5px solid #f59e0b; color: #b45309; }
+    .lb-score img { width: 19px; height: 19px; border-radius: 50%; object-fit: cover; }
+
     /* Khu vực 2 nút bấm ở đáy khung */
-    .lb-footer { padding: 0 20px 22px 20px; display: flex; justify-content: space-between; align-items: center; gap: 10px; }
-    
-    .back-btn { 
-      background: linear-gradient(135deg, #f59e0b 0%, #EEAD0E 100%); 
-      color: #ffffff; 
-      border: none; 
-      border-radius: 10px; 
-      padding: 10px 16px; 
-      font-size: 0.95rem; 
-      font-weight: 600; 
-      text-decoration: none; 
-      display: inline-flex; 
-      align-items: center; 
-      box-shadow: 0 4px 10px rgba(245, 158, 11, 0.25);
-      transition: all 0.2s ease;
+    .lb-footer { padding: 4px 20px 20px 20px; display: flex; justify-content: space-between; align-items: center; gap: 10px; }
+    .back-btn {
+      background: linear-gradient(135deg, #f59e0b 0%, #EEAD0E 100%);
+      color: #ffffff; border: none; border-radius: 10px; padding: 10px 16px;
+      font-size: 0.94rem; font-weight: 600; text-decoration: none; display: inline-flex; align-items: center;
+      box-shadow: 0 4px 10px rgba(245, 158, 11, 0.25); transition: all 0.2s ease;
     }
     .back-btn:hover { background: #d97706; transform: translateY(-1px); }
 
-    /* Nút Làm tiếp Quiz đồng bộ hiệu ứng vệt sáng như nút BXH */
-    .quiz-btn { 
-      position: relative;
-      overflow: hidden;
-      background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%); 
-      color: #0f172a; 
-      border: 1.5px solid #f59e0b; 
-      border-radius: 12px; 
-      padding: 10px 18px; 
-      font-size: 0.95rem; 
-      font-weight: 700; 
-      letter-spacing: 0.2px;
-      text-decoration: none; 
-      display: inline-flex; 
-      align-items: center; 
-      box-shadow: 0 4px 12px rgba(245, 158, 11, 0.18), 0 1px 3px rgba(15, 23, 42, 0.08);
-      transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+    .quiz-btn {
+      position: relative; overflow: hidden;
+      background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+      color: #0f172a; border: 1.5px solid #f59e0b; border-radius: 12px; padding: 10px 18px;
+      font-size: 0.94rem; font-weight: 700; text-decoration: none; display: inline-flex; align-items: center;
+      box-shadow: 0 4px 12px rgba(245, 158, 11, 0.18); transition: all 0.25s ease;
     }
-    .quiz-btn::after {
-      content: "";
-      position: absolute;
-      top: 0;
-      left: -120%;
-      width: 60%;
-      height: 100%;
-      background: linear-gradient(90deg, transparent, rgba(251, 191, 36, 0.28), transparent);
-      transform: skewX(-25deg);
-      transition: left 0.55s ease;
-    }
-    .quiz-btn:hover {
-      background: #fffbeb;
-      color: #b45309;
-      border-color: #d97706;
-      transform: translateY(-2px) scale(1.02);
-      box-shadow: 0 6px 18px rgba(245, 158, 11, 0.28);
-    }
-    .quiz-btn:hover::after {
-      left: 140%;
-    }
-    .quiz-btn:active {
-      transform: translateY(0) scale(0.98);
-    }
-
-    .loading { text-align: center; color: #64748b; padding: 20px; font-size: 0.95rem; }
+    .quiz-btn:hover { background: #fffbeb; color: #b45309; border-color: #d97706; transform: translateY(-1px); }
+    .loading { text-align: center; color: #64748b; padding: 24px; font-size: 0.94rem; }
   </style>
 </head>
 <body>
-
   <div class="lb-box">
     <div class="lb-header">
       <div class="lb-logo-wrap">
         <img src="logobxh.png" alt="Logo Bảng Xếp Hạng">
       </div>
-      <h2>Bảng Xếp Hạng GemPoint</h2>
-      <p>Nơi vinh danh những Học viên xuất sắc nhất của GemFaith</p>
+      <h2 id="lbHeaderTitle">Bảng Xếp Hạng GemPoint</h2>
+      <p id="lbHeaderDesc">Nơi vinh danh những Học viên xuất sắc nhất của GemFaith</p>
     </div>
 
+    <div class="lb-tabs">
+      <button id="tabBtnStudent" class="lb-tab-btn active" onclick="switchLeaderboardTab('student')">Học viên</button>
+      <button id="tabBtnClan" class="lb-tab-btn" onclick="switchLeaderboardTab('clan')">GemClan</button>
+    </div>
+
+    <!-- Danh sách BXH Học viên -->
     <div class="lb-list" id="leaderboardList">
       <div class="loading">Đang tải bảng xếp hạng...</div>
+    </div>
+
+    <!-- Danh sách BXH GemClan (ẩn mặc định) -->
+    <div class="lb-list" id="clanLeaderboardList" style="display:none;">
+      <div class="loading">Đang tải bảng xếp hạng Clan...</div>
     </div>
 
     <div class="lb-footer">
@@ -225,13 +213,13 @@
   </div>
 
   <script>
-        const DB_URL = "https://" + "tich-luy-gempoint-default-rtdb" + ".asia-southeast1." + "firebasedatabase.app/students.json";
+    const DB_ROOT = "https://" + "tich-luy-gempoint-default-rtdb" + ".asia-southeast1." + "firebasedatabase.app";
+    const DB_URL = DB_ROOT + "/students.json";
     const currentUsername = localStorage.getItem("currentUsername");
 
     async function loadLeaderboard() {
       const listEl = document.getElementById("leaderboardList");
       try {
-        // Đồng bộ dữ liệu Clan và Rank Clan trước khi vẽ BXH
         if (typeof syncClanSystemData === "function") {
           await syncClanSystemData();
         }
@@ -258,7 +246,7 @@
         students.forEach((st, index) => {
           const rank = index + 1;
           const isMe = (st.username === currentUsername);
-          
+
           let topClass = "";
           let rankIcon = rank;
           let crownIcon = "";
@@ -277,17 +265,14 @@
             crownIcon = "(Wingman)";
           }
 
-          // Tạo Avatar (có hiệu ứng lấp lánh nếu thuộc nhóm VIP/Mốc điểm)
           const avatarHTML = (typeof buildAvatarHTML === "function")
             ? buildAvatarHTML(st.avatar, 42, isMe ? 'onclick="openAvatarPicker()" title="Bấm để đổi Avatar" style="cursor:pointer;"' : '')
             : `<img src="${st.avatar}" style="width:42px; height:42px; border-radius:50%; object-fit:cover; border:1.5px solid #cbd5e1;">`;
 
-          // Lấy huy hiệu [Logo Clan + Tên Clan hiệu ứng Rank]
           const clanBadgeHTML = (typeof window.getClanBadgeHTML === "function")
             ? window.getClanBadgeHTML(st.username)
             : "";
-
-          listEl.innerHTML += `
+			          listEl.innerHTML += `
             <div class="lb-item ${topClass} ${isMe ? 'me' : ''}">
               <div class="lb-left">
                 <div class="rank-badge">${rankIcon}</div>
@@ -312,14 +297,105 @@
         listEl.innerHTML = '<div class="loading">Không thể tải dữ liệu bảng xếp hạng!</div>';
       }
     }
+	    const CLB_RANKS = [
+      { minGem: 0,      name: "Tân Binh",           mult: 1.0, cssClass: "clan-rank-0" },
+      { minGem: 10000,  name: "Chiến Binh",         mult: 1.1, cssClass: "clan-rank-1" },
+      { minGem: 30000,  name: "Chỉ Huy",            mult: 1.2, cssClass: "clan-rank-2" },
+      { minGem: 50000,  name: "Hiệp Sĩ",            mult: 1.3, cssClass: "clan-rank-3" },
+      { minGem: 100000, name: "Hiệp Sĩ Đại Thập Tự", mult: 1.4, cssClass: "clan-rank-4" },
+      { minGem: 200000, name: "Thượng Sĩ Tối Cao",  mult: 1.5, cssClass: "clan-rank-5" }
+    ];
 
-    window.onload = loadLeaderboard;
+    function getClanLeaderboardRank(accGem) {
+      let r = CLB_RANKS.at(0);
+      for (let i = CLB_RANKS.length - 1; i >= 0; i--) {
+        if (accGem >= CLB_RANKS[i].minGem) { r = CLB_RANKS[i]; break; }
+      }
+      return r;
+    }
 
-  </script>
-  
-   <script src="avatar_system.js"></script>
-   <script src="invite_listener.js"></script>
-<script src="clan_system.js"></script>
+    async function loadClanLeaderboard() {
+      const box = document.getElementById("clanLeaderboardList");
+      if (!box) return;
+      try {
+        const res = await fetch(`${DB_ROOT}/clans.json?t=${Date.now()}`);
+        const clansData = (await res.json()) || {};
 
+        const list = Object.entries(clansData)
+          .filter(([, c]) => c && c.name)
+          .map(([id, c]) => {
+            const accGem = Math.round(Number(c.accumulatedGem || 0) * 100) / 100;
+            const memberCount = c.members ? Object.keys(c.members).length : 0;
+            return {
+              id,
+              name: c.name,
+              avatar: c.avatar || "hiepsibinhminhgemland.png",
+              accGem,
+              memberCount,
+              rank: getClanLeaderboardRank(accGem)
+            };
+          })
+          .sort((a, b) => b.accGem - a.accGem);
+
+        if (list.length === 0) {
+          box.innerHTML = '<div class="loading">Chưa có Clan nào được thành lập.</div>';
+          return;
+        }
+
+        box.innerHTML = "";
+        list.forEach((c, idx) => {
+          const pos = idx + 1;
+          const topCls = pos === 1 ? "top-1" : (pos === 2 ? "top-2" : (pos === 3 ? "top-3" : ""));
+          const rankIcon = pos === 1 ? "🥇" : (pos === 2 ? "🥈" : (pos === 3 ? "🥉" : pos));
+
+          box.innerHTML += `
+            <div class="lb-item ${topCls}">
+              <div class="lb-left">
+                <div class="rank-badge">${rankIcon}</div>
+                <img src="${c.avatar}" alt="${c.name}" style="width:42px; height:42px; border-radius:50%; object-fit:cover; border:1.5px solid #cbd5e1; background:#fff; flex-shrink:0;" onerror="this.src='hiepsibinhminhgemland.png'">
+                <div style="display:flex; flex-direction:column; gap:4px; min-width:0;">
+                  <div class="student-name">${c.name}</div>
+                  <div style="display:flex; align-items:center; flex-wrap:wrap; gap:6px;">
+                    <span class="clb-rank-pill ${c.rank.cssClass}">Rank ${c.rank.name}</span>
+                    <span class="clan-sub-info">${c.memberCount} thành viên • x${c.rank.mult} GP</span>
+                  </div>
+                </div>
+              </div>
+              <div class="lb-score">
+                <span>${c.accGem.toLocaleString("vi-VN")}</span>
+                <img src="logogempoint.png" alt="Gem">
+              </div>
+            </div>
+          `;
+        });
+      } catch (e) {
+        box.innerHTML = '<div class="loading">Không thể tải dữ liệu Clan!</div>';
+      }
+    }
+
+    function switchLeaderboardTab(tab) {
+      const isStudent = (tab === "student");
+      document.getElementById("leaderboardList").style.display = isStudent ? "flex" : "none";
+      document.getElementById("clanLeaderboardList").style.display = isStudent ? "none" : "flex";
+
+      document.getElementById("tabBtnStudent").classList.toggle("active", isStudent);
+      document.getElementById("tabBtnClan").classList.toggle("active", !isStudent);
+
+      document.getElementById("lbHeaderTitle").innerText = isStudent ? "Bảng Xếp Hạng GemPoint" : "Bảng Xếp Hạng Quân Đoàn GemClan";
+      document.getElementById("lbHeaderDesc").innerText = isStudent ? "Nơi vinh danh những Học viên xuất sắc nhất của GemFaith" : "Những quân đoàn thống trị GemFaith";
+
+      if (!isStudent) loadClanLeaderboard();
+    }
+
+    window.addEventListener("DOMContentLoaded", () => {
+      loadLeaderboard();
+      loadClanLeaderboard();
+    });
+
+</script>
+
+  <script src="avatar_system.js"></script>
+  <script src="invite_listener.js"></script>
+  <script src="clan_system.js"></script>
 </body>
 </html>
