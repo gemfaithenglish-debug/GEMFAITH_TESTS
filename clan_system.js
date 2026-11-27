@@ -14,8 +14,8 @@ const CLAN_RANKS = [
   { minGem: 10000, maxGem: 30000, name: "Chiến Binh",   mult: 1.1, cssClass: "clan-rank-1", nextName: "Chỉ Huy" },
   { minGem: 30000, maxGem: 50000, name: "Chỉ Huy",     mult: 1.2, cssClass: "clan-rank-2", nextName: "Hiệp Sĩ" },
   { minGem: 50000, maxGem: 100000, name: "Hiệp Sĩ",  mult: 1.3, cssClass: "clan-rank-3", nextName: "Hiệp Sĩ Đại Thập Tự" },
-  { minGem: 100000, maxGem: 200000, name: "Hiệp Sĩ Đại Thập Tự",  mult: 1.4, cssClass: "clan-rank-3", nextName: "Thượng Sĩ Tối Cao" },
-  { minGem: 200000, maxGem: 500000, name: "Thượng Sĩ Tối Cao",  mult: 1.5, cssClass: "clan-rank-3", nextName: "Max" },
+  { minGem: 100000, maxGem: 200000, name: "Hiệp Sĩ Đại Thập Tự",  mult: 1.4, cssClass: "clan-rank-4", nextName: "Thượng Sĩ Tối Cao" },
+  { minGem: 200000, maxGem: 500000, name: "Thượng Sĩ Tối Cao",  mult: 1.5, cssClass: "clan-rank-5", nextName: "Max" },
 ];
 
 const CLAN_CREATE_COST = 500;
@@ -174,56 +174,73 @@ async function syncClanSystemData() {
     window.allStudentsCache = (await resSt.json()) || {};
     window.allClansCache = (await resClans.json()) || {};
 
-    if (clanUser && window.allStudentsCache[clanUser]) {
-      const myClanId = window.allStudentsCache[clanUser].clanId;
-      if (myClanId && window.allClansCache[myClanId]) {
-        const clan = window.allClansCache[myClanId];
-        const snapshots = clan.memberSnapshots || {};
-        let accGem = Number(clan.accumulatedGem || 0);
-        let changed = false;
-        const nextSnapshots = { ...snapshots };
+    if (!clanUser) return;
 
-        // Cộng dồn mọi phần GemPoint kiếm thêm của từng thành viên từ lúc thành lập Clan
-        Object.keys(clan.members || {}).forEach(u => {
-          const st = window.allStudentsCache[u];
-          if (!st) return;
-          const curGP = Number(st.gempoint || 0);
-          if (nextSnapshots[u] === undefined) {
-            nextSnapshots[u] = curGP;
-            changed = true;
-          } else {
-            const earnedDelta = curGP - Number(nextSnapshots[u]);
-            if (earnedDelta > 0) {
-              accGem = Math.round((accGem + earnedDelta) * 100) / 100;
-              nextSnapshots[u] = curGP;
-              changed = true;
-            } else if (earnedDelta < 0) {
-              nextSnapshots[u] = curGP;
-              changed = true;
-            }
-          }
-        });
-
-        if (changed) {
-          clan.accumulatedGem = accGem;
-          clan.memberSnapshots = nextSnapshots;
-          await fetch(`${CLAN_DB_ROOT}/clans/${myClanId}.json`, {
+    // 1. Tự động dò ngược trong danh sách clans nếu students[clanUser].clanId vô tình bị ghi đè mất
+    let myClanId = window.allStudentsCache[clanUser]?.clanId || null;
+    if (!myClanId || !window.allClansCache[myClanId]) {
+      for (const [cid, cObj] of Object.entries(window.allClansCache)) {
+        if (cObj && cObj.members && cObj.members[clanUser]) {
+          myClanId = cid;
+          // Tự động vá lại clanId vào hồ sơ học viên
+          fetch(`${CLAN_DB_ROOT}/students/${clanUser}.json`, {
             method: "PATCH",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ accumulatedGem: accGem, memberSnapshots: nextSnapshots })
+            body: JSON.stringify({ clanId: cid })
           }).catch(() => {});
+          break;
         }
-
-        const stats = calculateClanStats(clan, window.allStudentsCache);
-        window.currentClanMultiplier = stats.rank.mult;
-      } else {
-        window.currentClanMultiplier = 1.0;
       }
+    }
+
+    // 2. Đồng bộ điểm tích lũy và cập nhật hệ số nhân Clan
+    if (myClanId && window.allClansCache[myClanId]) {
+      const clan = window.allClansCache[myClanId];
+      const snapshots = clan.memberSnapshots || {};
+      let accGem = Number(clan.accumulatedGem || 0);
+      let changed = false;
+      const nextSnapshots = { ...snapshots };
+
+      Object.keys(clan.members || {}).forEach(u => {
+        const st = window.allStudentsCache[u];
+        if (!st) return;
+        const curGP = Number(st.gempoint || 0);
+        if (nextSnapshots[u] === undefined) {
+          nextSnapshots[u] = curGP;
+          changed = true;
+        } else {
+          const earnedDelta = curGP - Number(nextSnapshots[u]);
+          if (earnedDelta > 0) {
+            accGem = Math.round((accGem + earnedDelta) * 100) / 100;
+            nextSnapshots[u] = curGP;
+            changed = true;
+          } else if (earnedDelta < 0) {
+            nextSnapshots[u] = curGP;
+            changed = true;
+          }
+        }
+      });
+
+      if (changed) {
+        clan.accumulatedGem = accGem;
+        clan.memberSnapshots = nextSnapshots;
+        await fetch(`${CLAN_DB_ROOT}/clans/${myClanId}.json`, {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ accumulatedGem: accGem, memberSnapshots: nextSnapshots })
+        }).catch(() => {});
+      }
+
+      const stats = calculateClanStats(clan, window.allStudentsCache);
+      window.currentClanMultiplier = stats.rank.mult;
+    } else {
+      window.currentClanMultiplier = 1.0;
     }
   } catch (e) {
     console.error("Lỗi đồng bộ dữ liệu Clan:", e);
   }
 }
+
 
 let selectedNewClanAvatar = CLAN_AVATARS.at(0).url;
 
@@ -244,7 +261,16 @@ function renderClanModalBody() {
   const body = document.getElementById("clanModalBodyContent");
   const me = window.allStudentsCache[clanUser] || {};
   const myGem = Number(me.gempoint || 0);
-  const myClanId = me.clanId;
+    let myClanId = me.clanId;
+  if (!myClanId || !window.allClansCache[myClanId]) {
+    for (const [cid, cObj] of Object.entries(window.allClansCache)) {
+      if (cObj && cObj.members && cObj.members[clanUser]) {
+        myClanId = cid;
+        break;
+      }
+    }
+  }
+
 
   // TRƯỜNG HỢP 1: ĐÃ GIA NHẬP CLAN -> Hiện thẻ Clan + Thanh tích lũy GemPoint từ lúc thành lập + Rank Clan
   if (myClanId && window.allClansCache[myClanId]) {
