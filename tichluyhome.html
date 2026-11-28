@@ -680,7 +680,76 @@
     }
     @keyframes qrLaserSweep { from { top: 14%; } to { top: 84%; } }
 	
-	
+/* KHUNG GEMDIMSUM - MÀU NÂU VIỀN BANNER & HIỆU ỨNG SÁNG BÓNG TRẮNG GIỐNG GEMSPHERE */
+.dimsum-card {
+  position: relative;
+  overflow: hidden;
+  background: linear-gradient(145deg, #74472b 0%, #5c3720 55%, #472916 100%) !important;
+  border: 2px solid #d4a373 !important;
+  color: #fff8eb !important;
+  box-shadow: 0 8px 22px rgba(71, 41, 22, 0.38);
+}
+
+.dimsum-card:hover {
+  box-shadow: 0 12px 28px rgba(71, 41, 22, 0.52), 0 0 18px rgba(255, 255, 255, 0.35);
+}
+
+.dimsum-card::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: -130%;
+  width: 60%;
+  height: 100%;
+  background: linear-gradient(
+    120deg,
+    rgba(255, 255, 255, 0) 0%,
+    rgba(255, 255, 255, 0.45) 50%,
+    rgba(255, 255, 255, 0) 100%
+  );
+  transform: skewX(-25deg);
+  animation: dimsumShine 3.2s infinite ease-in-out;
+  z-index: 3;
+  pointer-events: none;
+}
+
+@keyframes dimsumShine {
+  0% { left: -130%; }
+  45%, 100% { left: 165%; }
+}
+
+.dimsum-card h3 {
+  color: #fff8eb !important;
+}
+
+.dimsum-card p {
+  color: #f3d5b5 !important;
+}
+
+.dimsum-card .card-badge {
+  background: #fef3c7 !important;
+  color: #5c3720 !important;
+  font-weight: 800;
+}
+
+.dimsum-card .card-action {
+  background: #ffffff !important;
+  color: #5c3720 !important;
+  font-weight: 800;
+  border: none !important;
+  transition: transform 0.18s ease !important;
+}
+
+.dimsum-card:hover .card-action,
+.dimsum-card:active .card-action,
+.dimsum-card .card-action:hover,
+.dimsum-card .card-action:active {
+  background: #ffffff !important;
+  color: #5c3720 !important;
+  transform: scale(1.04);
+}
+
+
 
   </style>
   <script>
@@ -759,7 +828,7 @@
         <a href="sapxepcau.html" class="activity-card">
           <div class="card-thumb">
             <img src="bannergemscramble.jpg" alt="GemScramble">
-            <span class="card-badge">NEW</span>
+            <span class="card-badge">BASIC</span>
           </div>
           <div class="card-info">
             <div>
@@ -802,6 +871,22 @@
             <div class="card-action">Vào đấu trường →</div>
           </div>
         </a>
+		
+	        <!-- KHUNG GEMDIMSUM NÂU ẤM -->
+        <a href="gempick.html" class="activity-card dimsum-card">
+          <div class="card-thumb">
+            <img src="bannergemdimsum.png" alt="GemDimSum">
+            <span class="card-badge">COOKING</span>
+          </div>
+          <div class="card-info">
+            <div>
+              <h3>GemDimSum</h3>
+              <p>Hóa thân thành chủ tiệm DimSum Trung Hoa vỉa hè để nhận đơn, gói bánh, canh xửng hấp và phục vụ thực khách bằng Tiếng Anh!</p>
+            </div>
+            <div class="card-action">Vào trò chơi →</div>
+          </div>
+        </a>
+
 
         <!-- KHUNG 4: TOSHI DENSETSU NÂU ĐẬM KINH DỊ -->
         <a href="gemisland.html" class="activity-card mansion-card">
