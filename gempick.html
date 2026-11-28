@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>GemDimSum</title>
+  <title>GemDimSum - Street DimSum Stall</title>
   <link rel="preconnect" href="https://googleapis.com">
   <link rel="preconnect" href="https://gstatic.com" crossorigin>
   <link href="https://googleapis.com/css2?family=Cinzel:wght@700;900&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap" rel="stylesheet">
@@ -20,9 +20,10 @@
       display: none; flex-direction: column; justify-content: center; align-items: center;
       padding: 24px; text-align: center; color: #fef3c7;
     }
-    @media screen and (orientation: portrait) and (max-width: 900px) {
-      .rotate-overlay:not(.dismissed) { display: flex; }
-    }
+    @media screen and (orientation: portrait) {
+  .rotate-overlay { display: flex !important; }
+}
+
     .rotate-box {
       background: linear-gradient(180deg, #fffdf8 0%, #f6e7c8 100%);
       border: 2.5px solid #b45309; outline: 1.5px solid #fbbf24; outline-offset: -5px;
@@ -198,13 +199,14 @@
 </head>
 <body>
   <!-- Rotate Screen Prompt for Mobile Portrait -->
-  <div class="rotate-overlay" id="rotateOverlay">
+    <div class="rotate-overlay" id="rotateOverlay">
     <div class="rotate-box">
       <div class="rotate-title">Rotate Device to Landscape</div>
-      <div class="rotate-desc">Please turn your phone sideways (landscape mode) for the clearest view of your DimSum stall and customers!</div>
-      <button type="button" class="rotate-skip-btn" id="btnDismissRotate">Continue Anyway</button>
+      <div class="rotate-desc">Please turn your phone sideways (landscape mode) to start playing. <br>
+	  Xoay ngang màn hình để vào trò chơi.</div>
     </div>
   </div>
+
 
   <div class="top-hud">
     <div class="hud-group">
@@ -307,12 +309,123 @@
     const DIMSUM_MENU = [
       {
         id: "hacao", name: "Har Gow (Shrimp)", price: 3,
-        wrapper: "Translucent Wheat Skin", filling: "Fresh Whole Shrimp",
-        desc: "Delicate crystal-clear dumpling wrapper folded around juicy, sweet whole shrimp.",
+        wrapper: "Wheat Skin", filling: "Fresh Shrimp",
+        desc: "Delicate crystal-clear dumpling wrapper folded around juicy, sweet whole shrimp",
         spriteSrc: "dish_hacao.png", color: "#fbcfe8", accent: "#ec4899"
       },
+	  { 
+  id: "hacaochay",                       // Mã định danh viết liền không dấu (không trùng các món trên)
+  name: "Vegan Har Gow",               // Tên món bằng tiếng Anh hiển thị cho khách & Recipe Book
+  price: 2,                          // Số GemPoint thưởng khi phục vụ xong
+  wrapper: "Wheat Skin",  // Tên Vỏ bánh / Đế hấp (nên đặt khác các món cũ để tránh trùng công thức)
+  filling: "Mushroom, Tofu & Aromatics ",    // Tên Nhân bánh (nên đặt khác các món cũ)
+  desc: "Steamed soft dough filled with mushrooms and vegetables", // Mô tả ngắn trong Recipe Book
+  spriteSrc: "hacaochay.png",       // Tên file ảnh bạn vừa lưu ở Bước 1
+  color: "#fde68a",                   // Màu dự phòng nếu chưa có ảnh
+  accent: "#b45309"                   // Màu điểm nhấn dự phòng
+},
+
+ { 
+  id: "hacaosodiep",                       // Mã định danh viết liền không dấu (không trùng các món trên)
+  name: "Scallop Har Gow",               // Tên món bằng tiếng Anh hiển thị cho khách & Recipe Book
+  price: 3,                          // Số GemPoint thưởng khi phục vụ xong
+  wrapper: "Wheat Skin",  // Tên Vỏ bánh / Đế hấp (nên đặt khác các món cũ để tránh trùng công thức)
+  filling: "Fresh Scallops ",    // Tên Nhân bánh (nên đặt khác các món cũ)
+  desc: "Steamed egg dough filled with sweet scallops", // Mô tả ngắn trong Recipe Book
+  spriteSrc: "hacaosodiep.png",       // Tên file ảnh bạn vừa lưu ở Bước 1
+  color: "#fde68a",                   // Màu dự phòng nếu chưa có ảnh
+  accent: "#b45309"                   // Màu điểm nhấn dự phòng
+},
+
+
+  { 
+  id: "hoanhthanhchien",                       // Mã định danh viết liền không dấu (không trùng các món trên)
+  name: "Crispy Fried Wontons",               // Tên món bằng tiếng Anh hiển thị cho khách & Recipe Book
+  price: 3,                          // Số GemPoint thưởng khi phục vụ xong
+  wrapper: "Wheat Skin",  // Tên Vỏ bánh / Đế hấp (nên đặt khác các món cũ để tránh trùng công thức)
+  filling: "Mung Bean & Flavored Pork",    // Tên Nhân bánh (nên đặt khác các món cũ)
+  desc: "Crispy wrappers filled with pork and shrimp, deep-fried until golden", // Mô tả ngắn trong Recipe Book
+  spriteSrc: "hoanhthanhchien.png",       // Tên file ảnh bạn vừa lưu ở Bước 1
+  color: "#fde68a",                   // Màu dự phòng nếu chưa có ảnh
+  accent: "#b45309"                   // Màu điểm nhấn dự phòng
+},
+
+	{ 
+  id: "suicaohap",                       // Mã định danh viết liền không dấu (không trùng các món trên)
+  name: "Jiaozi",               // Tên món bằng tiếng Anh hiển thị cho khách & Recipe Book
+  price: 4,                          // Số GemPoint thưởng khi phục vụ xong
+  wrapper: "Wheat Skin",  // Tên Vỏ bánh / Đế hấp (nên đặt khác các món cũ để tránh trùng công thức)
+  filling: "Pork & Veggies",    // Tên Nhân bánh (nên đặt khác các món cũ)
+  desc: "Thick dough filled with pork and veggies, boiled until tender", // Mô tả ngắn trong Recipe Book
+  spriteSrc: "suicao.png",       // Tên file ảnh bạn vừa lưu ở Bước 1
+  color: "#fde68a",                   // Màu dự phòng nếu chưa có ảnh
+  accent: "#b45309"                   // Màu điểm nhấn dự phòng
+},
+
+
+	{ 
+  id: "gyoza",                       // Mã định danh viết liền không dấu (không trùng các món trên)
+  name: "Japanese Gyoza",               // Tên món bằng tiếng Anh hiển thị cho khách & Recipe Book
+  price: 4,                          // Số GemPoint thưởng khi phục vụ xong
+  wrapper: "Wheat Skin",  // Tên Vỏ bánh / Đế hấp (nên đặt khác các món cũ để tránh trùng công thức)
+  filling: "Pork & Nira, Ginger",    // Tên Nhân bánh (nên đặt khác các món cũ)
+  desc: "Thin dough filled with pork, ginger, and Japanese flavor, pan-fried until crispy", // Mô tả ngắn trong Recipe Book
+  spriteSrc: "gyoza.png",       // Tên file ảnh bạn vừa lưu ở Bước 1
+  color: "#fde68a",                   // Màu dự phòng nếu chưa có ảnh
+  accent: "#b45309"                   // Màu điểm nhấn dự phòng
+},
+
+
+{ 
+  id: "mandu",                       // Mã định danh viết liền không dấu (không trùng các món trên)
+  name: "Korean Mandu",               // Tên món bằng tiếng Anh hiển thị cho khách & Recipe Book
+  price: 4,                          // Số GemPoint thưởng khi phục vụ xong
+  wrapper: "Wheat Skin",  // Tên Vỏ bánh / Đế hấp (nên đặt khác các món cũ để tránh trùng công thức)
+  filling: "Beef & Glass Noodles",    // Tên Nhân bánh (nên đặt khác các món cũ)
+  desc: "Thin dough filled with beef and glass noodles, steamed or fried", // Mô tả ngắn trong Recipe Book
+  spriteSrc: "mandu.png",       // Tên file ảnh bạn vừa lưu ở Bước 1
+  color: "#fde68a",                   // Màu dự phòng nếu chưa có ảnh
+  accent: "#b45309"                   // Màu điểm nhấn dự phòng
+},
+
+{ 
+  id: "suicaogiamden",                       // Mã định danh viết liền không dấu (không trùng các món trên)
+  name: "Black Vinegar Jiaozi",               // Tên món bằng tiếng Anh hiển thị cho khách & Recipe Book
+  price: 5,                          // Số GemPoint thưởng khi phục vụ xong
+  wrapper: "Wheat Skin",  // Tên Vỏ bánh / Đế hấp (nên đặt khác các món cũ để tránh trùng công thức)
+  filling: "Pork & Black Vinegar Sauce",    // Tên Nhân bánh (nên đặt khác các món cũ)
+  desc: "Boiled pork dumplings served in tangy sweet black vinegar sauce", // Mô tả ngắn trong Recipe Book
+  spriteSrc: "suicaogiamden.png",       // Tên file ảnh bạn vừa lưu ở Bước 1
+  color: "#fde68a",                   // Màu dự phòng nếu chưa có ảnh
+  accent: "#b45309"                   // Màu điểm nhấn dự phòng
+},
+
+{ 
+  id: "suicaoxaxiu",                       // Mã định danh viết liền không dấu (không trùng các món trên)
+  name: "Char Siu Jiaozi Soup",               // Tên món bằng tiếng Anh hiển thị cho khách & Recipe Book
+  price: 5,                          // Số GemPoint thưởng khi phục vụ xong
+  wrapper: "Wheat Skin",  // Tên Vỏ bánh / Đế hấp (nên đặt khác các món cũ để tránh trùng công thức)
+  filling: "Char Siu Pork & Sweet Veggie Soup",    // Tên Nhân bánh (nên đặt khác các món cũ)
+  desc: "Boiled dumplings served in rich, sweet-savory char siu pork broth", // Mô tả ngắn trong Recipe Book
+  spriteSrc: "suicaoxaxiu.png",       // Tên file ảnh bạn vừa lưu ở Bước 1
+  color: "#fde68a",                   // Màu dự phòng nếu chưa có ảnh
+  accent: "#b45309"                   // Màu điểm nhấn dự phòng
+},
+
+{ 
+  id: "suicaomixaxiu",                       // Mã định danh viết liền không dấu (không trùng các món trên)
+  name: "Char Siu Jiaozi Noodle Soup",               // Tên món bằng tiếng Anh hiển thị cho khách & Recipe Book
+  price: 6,                          // Số GemPoint thưởng khi phục vụ xong
+  wrapper: "Wheat Skin",  // Tên Vỏ bánh / Đế hấp (nên đặt khác các món cũ để tránh trùng công thức)
+  filling: "Noodles, Char Siu Pork & Sweet Veggie Soup",    // Tên Nhân bánh (nên đặt khác các món cũ)
+  desc: "Noodles with pork dumplings and sweet char siu in broth", // Mô tả ngắn trong Recipe Book
+  spriteSrc: "suicaomixaxiu.png",       // Tên file ảnh bạn vừa lưu ở Bước 1
+  color: "#fde68a",                   // Màu dự phòng nếu chưa có ảnh
+  accent: "#b45309"                   // Màu điểm nhấn dự phòng
+},
+
 	  {
-        id: "banhtrung", name: "Dan Tat (Egg Tart)", price: 3,
+        id: "banhtrung", name: "Egg Tart", price: 3,
         wrapper: "Flaky Puff Pastry", filling: "Sweet Egg Custard",
         desc: "Crisp golden pastry shell cradling a warm, silky-smooth baked egg custard center.",
         spriteSrc: "dish_banhtrung.png", color: "#fde047", accent: "#b45309"
@@ -324,27 +437,22 @@
         spriteSrc: "dish_suicao.png", color: "#fef08a", accent: "#eab308"
       },
       {
-        id: "banhbao", name: "Char Siu Bao", price: 6,
-        wrapper: "Fluffy White Dough", filling: "Honey BBQ Pork",
+        id: "banhbao", name: "Char Siu Bao", price: 5,
+        wrapper: "Fluffy Dough", filling: "Honey BBQ Pork",
         desc: "Soft steamed white bun bursting with sweet and savory Cantonese barbecue pork.",
         spriteSrc: "dish_banhbao.png", color: "#ffffff", accent: "#dc2626"
       },
       {
-        id: "banhcuon", name: "Cheung Fun (Roll)", price: 6,
+        id: "banhcuon", name: "Cheung Fun (Roll)", price: 5,
         wrapper: "Silky Rice Noodle Sheet", filling: "Shrimp & Scallion",
         desc: "Smooth steamed rice noodle rolls wrapped around tender shrimp and sweet soy glaze.",
         spriteSrc: "dish_banhcuon.png", color: "#f8fafc", accent: "#d97706"
-      },
-      {
-        id: "changa", name: "Phoenix Claws", price: 7,
-        wrapper: "Deep Porcelain Dish", filling: "Black Bean Chicken Feet",
-        desc: "Braised and steamed until fall-off-the-bone tender in rich fermented black bean sauce.",
-        spriteSrc: "dish_changa.png", color: "#fed7aa", accent: "#9a3412"
       }
     ];
 
-    const WRAPPERS = DIMSUM_MENU.map(m => m.wrapper);
-    const FILLINGS = DIMSUM_MENU.map(m => m.filling);
+        const WRAPPERS = [...new Set(DIMSUM_MENU.map(m => m.wrapper))];
+    const FILLINGS = [...new Set(DIMSUM_MENU.map(m => m.filling))];
+
 
     const DIMSUM_TRIVIA = [
      "Har Gow also means Dumpling in English.",
@@ -487,7 +595,7 @@
           osc.type = "triangle";
           osc.frequency.setValueAtTime(165 + Math.random() * 30, now);
           osc.frequency.exponentialRampToValueAtTime(52, now + 0.065);
-          g.gain.setValueAtTime(0.16, now);
+          g.gain.setValueAtTime(0.28, now);
           g.gain.exponentialRampToValueAtTime(0.001, now + 0.07);
           osc.connect(g); g.connect(ctxA.destination); osc.start(now); osc.stop(now + 0.075);
         } else if (type === "sizzle") {
@@ -501,19 +609,19 @@
           noise.connect(filter); filter.connect(g); g.connect(ctxA.destination); noise.start(now);
         } else if (type === "bell") {
           osc.type = "sine"; osc.frequency.setValueAtTime(987.77, now);
-          g.gain.setValueAtTime(0.055, now); g.gain.exponentialRampToValueAtTime(0.001, now + 0.36);
+          g.gain.setValueAtTime(0.022, now); g.gain.exponentialRampToValueAtTime(0.001, now + 0.36);
           osc.connect(g); g.connect(ctxA.destination); osc.start(now); osc.stop(now + 0.37);
         } else if (type === "coin") {
           osc.type = "triangle"; osc.frequency.setValueAtTime(987.77, now); osc.frequency.setValueAtTime(1318.5, now + 0.08);
-          g.gain.setValueAtTime(0.11, now); g.gain.exponentialRampToValueAtTime(0.001, now + 0.32);
+          g.gain.setValueAtTime(0.085, now); g.gain.exponentialRampToValueAtTime(0.001, now + 0.32);
           osc.connect(g); g.connect(ctxA.destination); osc.start(now); osc.stop(now + 0.33);
         } else if (type === "cook") {
           osc.type = "triangle"; osc.frequency.setValueAtTime(360, now); osc.frequency.exponentialRampToValueAtTime(540, now + 0.12);
-          g.gain.setValueAtTime(0.12, now); g.gain.exponentialRampToValueAtTime(0.001, now + 0.13);
+          g.gain.setValueAtTime(0.085, now); g.gain.exponentialRampToValueAtTime(0.001, now + 0.13);
           osc.connect(g); g.connect(ctxA.destination); osc.start(now); osc.stop(now + 0.14);
         } else if (type === "burn") {
           osc.type = "sawtooth"; osc.frequency.setValueAtTime(155, now); osc.frequency.exponentialRampToValueAtTime(75, now + 0.28);
-          g.gain.setValueAtTime(0.14, now); g.gain.exponentialRampToValueAtTime(0.001, now + 0.3);
+          g.gain.setValueAtTime(0.085, now); g.gain.exponentialRampToValueAtTime(0.001, now + 0.3);
           osc.connect(g); g.connect(ctxA.destination); osc.start(now); osc.stop(now + 0.31);
         }
       } catch (e) {}
@@ -898,6 +1006,13 @@
       const dt = Math.min(0.1, (now - lastFrameTime) / 1000);
       lastFrameTime = now;
       const vw = window.innerWidth, vh = window.innerHeight;
+	  
+	  if (window.innerHeight > window.innerWidth) {
+  lastFrameTime = now;
+  requestAnimationFrame(gameLoop);
+  return;
+}
+
 
       let vx = joy.dx, vy = joy.dy;
       if (keys.w || keys.arrowup) vy -= 1;
