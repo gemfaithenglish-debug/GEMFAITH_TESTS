@@ -8,247 +8,256 @@
   <link rel="preconnect" href="https://gstatic.com" crossorigin>
   <link href="https://googleapis.com/css2?family=Cinzel:wght@700;900&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap" rel="stylesheet">
   <style>
-    * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; -webkit-user-select: none; font-family: 'Plus Jakarta Sans', 'Segoe UI', sans-serif; }
-    body, html { width: 100%; height: 100%; overflow: hidden; background: #191210; color: #3b1e08; }
-    canvas { display: block; width: 100%; height: 100%; image-rendering: pixelated; touch-action: none; }
+    * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; -webkit-user-select: none; -webkit-tap-highlight-color: transparent; font-family: 'Plus Jakarta Sans', 'Segoe UI', sans-serif; }
+    body, html { width: 100%; height: 100%; overflow: hidden; background: #191210; color: #3b1e08; touch-action: manipulation; }
+    canvas { display: block; width: 100%; height: 100%; touch-action: none; }
+    button, a { touch-action: manipulation; cursor: pointer; }
 
-    /* Top HUD - Warm Silk & Gold Rim */
-    .top-hud {
-      position: fixed; top: 12px; left: 14px; right: 14px; z-index: 20;
-      display: flex; justify-content: space-between; align-items: center; gap: 10px; pointer-events: none;
+    /* Landscape Orientation Prompt Overlay for Mobile */
+    .rotate-overlay {
+      position: fixed; inset: 0; z-index: 999;
+      background: radial-gradient(circle at center, #3b1908 0%, #160c07 100%);
+      display: none; flex-direction: column; justify-content: center; align-items: center;
+      padding: 24px; text-align: center; color: #fef3c7;
     }
-    .hud-group { display: flex; gap: 8px; flex-wrap: wrap; pointer-events: auto; }
-    .hud-card {
+    @media screen and (orientation: portrait) and (max-width: 900px) {
+      .rotate-overlay:not(.dismissed) { display: flex; }
+    }
+    .rotate-box {
       background: linear-gradient(180deg, #fffdf8 0%, #f6e7c8 100%);
-      border: 1.5px solid #b45309; outline: 1px solid rgba(245, 158, 11, 0.55); outline-offset: -4px;
-      border-radius: 11px; padding: 7px 14px; font-size: 0.78rem; font-weight: 700; color: #451a03;
-      box-shadow: 0 6px 18px rgba(0, 0, 0, 0.42); display: flex; align-items: center; gap: 6px;
+      border: 2.5px solid #b45309; outline: 1.5px solid #fbbf24; outline-offset: -5px;
+      border-radius: 18px; padding: 24px 22px; max-width: 340px; color: #451a03;
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.75);
     }
-    .hud-label { color: #92400e; font-weight: 700; font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.6px; }
-    .hud-val { color: #991b1b; font-weight: 800; font-size: 0.85rem; }
+    .rotate-title { font-family: 'Cinzel', serif; font-size: 1.15rem; font-weight: 900; color: #991b1b; margin-bottom: 8px; }
+    .rotate-desc { font-size: 0.82rem; font-weight: 600; color: #78350f; line-height: 1.45; margin-bottom: 16px; }
+    .rotate-skip-btn {
+      background: linear-gradient(180deg, #991b1b 0%, #7f1d1d 100%);
+      border: 1.5px solid #fbbf24; border-radius: 10px; padding: 9px 18px;
+      color: #fef3c7; font-size: 0.78rem; font-weight: 800;
+    }
+
+    /* Compact Top HUD */
+    .top-hud {
+      position: fixed; top: 8px; left: 10px; right: 10px; z-index: 20;
+      display: flex; justify-content: space-between; align-items: center; gap: 6px; pointer-events: none;
+    }
+    .hud-group { display: flex; gap: 5px; flex-wrap: wrap; pointer-events: auto; }
+    .hud-card {
+      background: linear-gradient(180deg, rgba(255, 253, 248, 0.95) 0%, rgba(246, 231, 200, 0.95) 100%);
+      border: 1.5px solid #b45309; border-radius: 8px; padding: 4px 9px;
+      font-size: 0.7rem; font-weight: 700; color: #451a03;
+      box-shadow: 0 3px 10px rgba(0, 0, 0, 0.35); display: flex; align-items: center; gap: 4px;
+    }
+    .hud-label { color: #92400e; font-weight: 700; font-size: 0.62rem; text-transform: uppercase; }
+    .hud-val { color: #991b1b; font-weight: 800; font-size: 0.74rem; }
 
     .btn-nav {
-      pointer-events: auto; background: linear-gradient(180deg, #fffdf8 0%, #f6e7c8 100%);
-      border: 1.5px solid #b45309; outline: 1px solid rgba(245, 158, 11, 0.55); outline-offset: -4px;
-      border-radius: 11px; padding: 7px 14px; font-size: 0.76rem; font-weight: 800; color: #991b1b;
-      letter-spacing: 0.3px; text-decoration: none; cursor: pointer;
-      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.4); transition: transform 0.14s ease, filter 0.14s ease;
+      pointer-events: auto; background: linear-gradient(180deg, rgba(255, 253, 248, 0.95) 0%, rgba(246, 231, 200, 0.95) 100%);
+      border: 1.5px solid #b45309; border-radius: 8px; padding: 5px 11px;
+      font-size: 0.68rem; font-weight: 800; color: #991b1b;
+      text-decoration: none; box-shadow: 0 3px 10px rgba(0, 0, 0, 0.35);
+      transition: transform 0.06s ease;
     }
-    .btn-nav:hover { filter: brightness(1.04); }
-    .btn-nav:active { transform: scale(0.95); }
-    .btn-nav.exit { background: linear-gradient(180deg, #3b1908 0%, #240e04 100%); border-color: #d97706; color: #fde68a; outline-color: rgba(251, 191, 36, 0.3); }
+    .btn-nav:active, .btn-nav.is-down { transform: scale(0.92); filter: brightness(0.94); }
+    .btn-nav.exit { background: linear-gradient(180deg, #3b1908 0%, #240e04 100%); border-color: #d97706; color: #fde68a; }
 
-    /* Active Orders Dock */
+    /* Compact Active Orders Dock */
     .orders-dock {
-      position: fixed; top: 58px; left: 14px; z-index: 18;
-      display: flex; flex-direction: column; gap: 6px; pointer-events: none; max-width: 245px;
+      position: fixed; top: 40px; left: 10px; z-index: 18;
+      display: flex; flex-direction: column; gap: 4px; pointer-events: none; max-width: 195px;
     }
     .order-ticket {
-      background: linear-gradient(180deg, #fffdf8 0%, #fef3c7 100%);
-      border: 1.5px solid #b45309; border-left: 5px solid #991b1b;
-      border-radius: 9px; padding: 7px 12px; box-shadow: 0 6px 16px rgba(0, 0, 0, 0.38);
+      background: linear-gradient(180deg, rgba(255, 253, 248, 0.94) 0%, rgba(254, 243, 199, 0.94) 100%);
+      border: 1px solid #b45309; border-left: 4px solid #991b1b;
+      border-radius: 7px; padding: 4px 8px; box-shadow: 0 3px 10px rgba(0, 0, 0, 0.32);
     }
-    .order-ticket-title { font-size: 0.78rem; font-weight: 800; color: #7f1d1d; }
-    .order-ticket-sub { font-size: 0.69rem; font-weight: 600; color: #78350f; margin-top: 2px; }
+    .order-ticket-title { font-size: 0.68rem; font-weight: 800; color: #7f1d1d; }
+    .order-ticket-sub { font-size: 0.6rem; font-weight: 600; color: #78350f; }
 
     /* Notification Toast */
     .toast-bar {
-      position: fixed; top: 58px; left: 50%; transform: translateX(-50%); z-index: 25;
+      position: fixed; top: 40px; left: 50%; transform: translateX(-50%); z-index: 25;
       background: linear-gradient(180deg, #fffdf8 0%, #f6e7c8 100%);
-      border: 1.5px solid #b45309; outline: 1px solid rgba(245, 158, 11, 0.5); outline-offset: -3px;
-      color: #7f1d1d; padding: 7px 20px; border-radius: 99px;
-      font-size: 0.79rem; font-weight: 800; opacity: 0; transition: opacity 0.22s; pointer-events: none;
-      box-shadow: 0 8px 22px rgba(0, 0, 0, 0.45); white-space: nowrap;
+      border: 1.5px solid #b45309; color: #7f1d1d; padding: 4px 14px; border-radius: 99px;
+      font-size: 0.7rem; font-weight: 800; opacity: 0; transition: opacity 0.16s; pointer-events: none;
+      box-shadow: 0 4px 14px rgba(0, 0, 0, 0.4); white-space: nowrap;
     }
     .toast-bar.show { opacity: 1; }
-
-    /* Bottom Center Har Gow / DimSum Trivia Bar */
+    /* Slim Bottom Center Trivia Bar */
     .trivia-banner {
-      position: fixed; bottom: 12px; left: 50%; transform: translateX(-50%); z-index: 19;
-      background: linear-gradient(180deg, rgba(255, 253, 248, 0.95) 0%, rgba(246, 231, 200, 0.95) 100%);
-      border: 1.5px solid #b45309; outline: 1px solid rgba(217, 119, 6, 0.4); outline-offset: -3px;
-      border-radius: 99px; padding: 6px 20px; max-width: min(540px, 56vw);
-      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.45); text-align: center; pointer-events: none;
+      position: fixed; bottom: 8px; left: 50%; transform: translateX(-50%); z-index: 19;
+      background: linear-gradient(180deg, rgba(255, 253, 248, 0.92) 0%, rgba(246, 231, 200, 0.92) 100%);
+      border: 1px solid #b45309; border-radius: 12px; padding: 4px 12px;
+      width: min(350px, 42vw); box-shadow: 0 4px 12px rgba(0, 0, 0, 0.35);
+      text-align: center; pointer-events: none;
     }
     .trivia-tag {
-      font-family: 'Cinzel', serif; font-size: 0.66rem; font-weight: 900; color: #991b1b;
-      text-transform: uppercase; letter-spacing: 0.9px; display: block; margin-bottom: 1px;
+      font-family: 'Cinzel', serif; font-size: 0.56rem; font-weight: 900; color: #991b1b;
+      text-transform: uppercase; letter-spacing: 0.7px; display: block;
     }
-    .trivia-text { font-size: 0.73rem; font-weight: 600; color: #451a03; line-height: 1.3; }
+    .trivia-text { font-size: 0.63rem; font-weight: 600; color: #451a03; line-height: 1.25; }
 
-    /* Harmonized Silk & Gold Imperial Seal Buttons (Interact & Cook) */
+    /* Ultra-Responsive Action Cluster (0ms Instant Tap) */
     .action-cluster {
-      position: fixed; right: 18px; bottom: 20px; z-index: 22;
-      display: flex; align-items: center; gap: 9px;
+      position: fixed; right: 12px; bottom: 10px; z-index: 30;
+      display: flex; align-items: center; gap: 6px; pointer-events: auto;
     }
     .seal-btn {
-      position: relative; border-radius: 12px; cursor: pointer;
-      font-family: 'Cinzel', serif; font-weight: 900; letter-spacing: 0.7px; text-transform: uppercase;
-      transition: transform 0.14s ease, box-shadow 0.14s ease, filter 0.14s ease;
+      position: relative; border-radius: 10px;
+      font-family: 'Cinzel', serif; font-weight: 900; letter-spacing: 0.5px; text-transform: uppercase;
+      transition: transform 0.05s cubic-bezier(0.2, 0, 0, 1), filter 0.05s ease;
+      will-change: transform;
     }
-    .seal-btn:hover { filter: brightness(1.04); }
-    .seal-btn:active { transform: scale(0.94); }
+    .seal-btn:active, .seal-btn.is-down {
+      transform: scale(0.89) translateY(1px);
+      filter: brightness(0.92);
+    }
 
-    /* Interact Button - Matching Warm Silk & Crimson/Gold Frame */
     .seal-btn.interact {
-      height: 50px; padding: 0 20px; font-size: 0.8rem;
+      height: 40px; padding: 0 14px; font-size: 0.7rem;
       background: linear-gradient(180deg, #fffdf8 0%, #f6e7c8 100%);
-      border: 2px solid #b45309; outline: 1.5px solid rgba(217, 119, 6, 0.55); outline-offset: -5px;
-      color: #991b1b;
-      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.45), inset 0 1px 0 #ffffff;
+      border: 1.5px solid #b45309; outline: 1px solid rgba(217, 119, 6, 0.45); outline-offset: -3px;
+      color: #991b1b; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
     }
-
-    /* Cook Button - Harmonized Imperial Gold & Warm Amber Silk */
     .seal-btn.cook {
-      display: none; height: 50px; padding: 0 20px; font-size: 0.8rem;
+      display: none; height: 40px; padding: 0 14px; font-size: 0.7rem;
       background: linear-gradient(180deg, #fef3c7 0%, #f59e0b 100%);
-      border: 2px solid #991b1b; outline: 1.5px solid rgba(255, 253, 248, 0.75); outline-offset: -5px;
-      color: #451a03;
-      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.6);
+      border: 1.5px solid #991b1b; outline: 1px solid rgba(255, 253, 248, 0.7); outline-offset: -3px;
+      color: #451a03; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
       animation: goldAura 1.8s infinite;
     }
     .seal-btn.cook.visible { display: inline-flex; align-items: center; justify-content: center; }
-
-    /* Discard Button */
     .seal-btn.discard {
-      height: 40px; padding: 0 13px; font-size: 0.68rem;
+      height: 34px; padding: 0 10px; font-size: 0.6rem;
       background: linear-gradient(180deg, #fffdf8 0%, #efe0c4 100%);
-      border: 1.5px solid #b45309; color: #78350f;
-      box-shadow: 0 5px 14px rgba(0, 0, 0, 0.38);
+      border: 1px solid #b45309; color: #78350f;
+      box-shadow: 0 3px 10px rgba(0, 0, 0, 0.35);
     }
     @keyframes goldAura {
-      0%, 100% { box-shadow: 0 8px 20px rgba(0, 0, 0, 0.45), 0 0 0 0 rgba(245, 158, 11, 0.55); }
-      50% { box-shadow: 0 8px 20px rgba(0, 0, 0, 0.45), 0 0 0 8px rgba(245, 158, 11, 0); }
+      0%, 100% { box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4), 0 0 0 0 rgba(245, 158, 11, 0.55); }
+      50% { box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4), 0 0 0 6px rgba(245, 158, 11, 0); }
     }
+
     /* Kitchen & Recipe Book Modals */
     .modal-overlay {
       position: fixed; inset: 0; background: rgba(20, 13, 10, 0.72); backdrop-filter: blur(5px);
-      display: none; justify-content: center; align-items: center; padding: 16px; z-index: 40;
+      display: none; justify-content: center; align-items: center; padding: 12px; z-index: 40;
     }
     .modal-overlay.open { display: flex; }
     .panel-box {
       background: linear-gradient(180deg, #fffdf8 0%, #f8edd6 100%);
-      color: #3b1e08; width: 100%; max-width: 550px; max-height: 88vh;
-      border-radius: 16px; border: 3px solid #991b1b;
-      outline: 1.5px solid #d97706; outline-offset: -6px;
-      padding: 22px; overflow-y: auto; box-shadow: 0 24px 60px rgba(0, 0, 0, 0.6);
+      color: #3b1e08; width: 100%; max-width: 520px; max-height: 88vh;
+      border-radius: 14px; border: 2.5px solid #991b1b;
+      outline: 1.5px solid #d97706; outline-offset: -5px;
+      padding: 16px; overflow-y: auto; box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6);
     }
     .panel-header {
-      border-bottom: 1.5px solid rgba(180, 83, 9, 0.3); padding-bottom: 12px; margin-bottom: 14px; text-align: center;
+      border-bottom: 1.5px solid rgba(180, 83, 9, 0.3); padding-bottom: 9px; margin-bottom: 10px; text-align: center;
     }
-    .panel-title { font-family: 'Cinzel', serif; font-size: 1.15rem; font-weight: 900; color: #991b1b; letter-spacing: 0.8px; text-transform: uppercase; }
-    .panel-sub { font-size: 0.78rem; font-weight: 600; color: #78350f; margin-top: 3px; }
+    .panel-title { font-family: 'Cinzel', serif; font-size: 1rem; font-weight: 900; color: #991b1b; text-transform: uppercase; }
+    .panel-sub { font-size: 0.72rem; font-weight: 600; color: #78350f; margin-top: 2px; }
 
-    .section-tag { font-size: 0.75rem; font-weight: 800; color: #991b1b; text-transform: uppercase; letter-spacing: 0.5px; margin: 12px 0 7px; }
-    .ing-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+    .section-tag { font-size: 0.7rem; font-weight: 800; color: #991b1b; text-transform: uppercase; margin: 10px 0 5px; }
+    .ing-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }
     .ing-btn {
-      background: #ffffff; border: 1.5px solid #d97706; border-radius: 10px;
-      padding: 9px 7px; font-size: 0.75rem; font-weight: 700; color: #451a03;
-      cursor: pointer; text-align: center; transition: all 0.14s;
+      background: #ffffff; border: 1.5px solid #d97706; border-radius: 8px;
+      padding: 8px 5px; font-size: 0.7rem; font-weight: 700; color: #451a03; text-align: center;
+      transition: transform 0.05s ease;
     }
-    .ing-btn:hover { background: #fef3c7; }
+    .ing-btn:active { transform: scale(0.94); }
     .ing-btn.selected {
       background: linear-gradient(180deg, #991b1b 0%, #7f1d1d 100%);
-      border-color: #fbbf24; color: #fef3c7; box-shadow: 0 4px 10px rgba(153, 27, 27, 0.25);
+      border-color: #fbbf24; color: #fef3c7;
     }
-
     .active-orders-note {
       background: #fffbeb; border: 1.5px dashed #b45309;
-      border-radius: 10px; padding: 10px 12px; font-size: 0.76rem; color: #451a03; margin-top: 14px; line-height: 1.55;
+      border-radius: 8px; padding: 8px 10px; font-size: 0.72rem; color: #451a03; margin-top: 10px; line-height: 1.45;
     }
-
-    /* Recipe Book Cards - Flexible Width/Height Thumbnail */
-    .recipe-list { display: flex; flex-direction: column; gap: 10px; }
+    .recipe-list { display: flex; flex-direction: column; gap: 8px; }
     .recipe-item {
-      background: #ffffff; border: 1.5px solid #d97706; border-radius: 12px;
-      padding: 11px 14px; display: flex; align-items: center; gap: 14px;
-      box-shadow: 0 3px 10px rgba(120, 53, 15, 0.08);
+      background: #ffffff; border: 1.5px solid #d97706; border-radius: 10px;
+      padding: 9px 11px; display: flex; align-items: center; gap: 11px;
     }
     .recipe-thumb {
-      min-width: 72px; min-height: 54px; padding: 4px; border-radius: 10px;
+      min-width: 68px; min-height: 48px; padding: 3px; border-radius: 8px;
       background: linear-gradient(180deg, #fef3c7 0%, #fde68a 100%);
-      border: 1.5px solid #b45309; flex-shrink: 0;
-      display: flex; align-items: center; justify-content: center; overflow: hidden;
+      border: 1.5px solid #b45309; flex-shrink: 0; display: flex; align-items: center; justify-content: center;
     }
-    .recipe-thumb canvas, .recipe-thumb img { image-rendering: pixelated; object-fit: contain; }
     .recipe-info { flex: 1; }
-    .recipe-name-row { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
-    .recipe-name { font-size: 0.92rem; font-weight: 800; color: #7f1d1d; }
-    .recipe-price {
-      font-size: 0.75rem; font-weight: 800; color: #fef3c7;
-      background: #991b1b; border: 1px solid #fbbf24; padding: 2px 9px; border-radius: 6px;
-    }
-    .recipe-desc { font-size: 0.75rem; color: #573318; margin-top: 3px; line-height: 1.4; }
-    .recipe-formula { font-size: 0.72rem; font-weight: 800; color: #b45309; margin-top: 4px; }
-
-    .modal-footer { display: flex; gap: 10px; margin-top: 16px; }
-    .btn-modal {
-      flex: 1; padding: 11px; border-radius: 11px; border: 1.5px solid #b45309;
-      background: #fef3c7; color: #451a03; font-size: 0.82rem; font-weight: 800; cursor: pointer;
-    }
-    .btn-modal.confirm {
-      flex: 2; background: linear-gradient(180deg, #991b1b 0%, #7f1d1d 100%);
-      border-color: #fbbf24; color: #fef3c7; font-weight: 800;
-    }
+    .recipe-name-row { display: flex; justify-content: space-between; align-items: center; gap: 6px; }
+    .recipe-name { font-size: 0.85rem; font-weight: 800; color: #7f1d1d; }
+    .recipe-price { font-size: 0.7rem; font-weight: 800; color: #fef3c7; background: #991b1b; border: 1px solid #fbbf24; padding: 1px 7px; border-radius: 5px; }
+    .recipe-desc { font-size: 0.7rem; color: #573318; margin-top: 2px; line-height: 1.35; }
+    .recipe-formula { font-size: 0.68rem; font-weight: 800; color: #b45309; margin-top: 3px; }
+    .modal-footer { display: flex; gap: 8px; margin-top: 12px; }
+    .btn-modal { flex: 1; padding: 10px; border-radius: 9px; border: 1.5px solid #b45309; background: #fef3c7; color: #451a03; font-size: 0.76rem; font-weight: 800; transition: transform 0.05s ease; }
+    .btn-modal:active { transform: scale(0.95); }
+    .btn-modal.confirm { flex: 2; background: linear-gradient(180deg, #991b1b 0%, #7f1d1d 100%); border-color: #fbbf24; color: #fef3c7; }
   </style>
 </head>
 <body>
+  <!-- Rotate Screen Prompt for Mobile Portrait -->
+  <div class="rotate-overlay" id="rotateOverlay">
+    <div class="rotate-box">
+      <div class="rotate-title">Rotate Device to Landscape</div>
+      <div class="rotate-desc">Please turn your phone sideways (landscape mode) for the clearest view of your DimSum stall and customers!</div>
+      <button type="button" class="rotate-skip-btn" id="btnDismissRotate">Continue Anyway</button>
+    </div>
+  </div>
+
   <div class="top-hud">
     <div class="hud-group">
       <div class="hud-card"><span class="hud-label">Chef</span> <span class="hud-val" id="hudPlayerName">Master Chef</span></div>
-      <div class="hud-card"><span class="hud-label">GemPoint</span> <span class="hud-val" id="hudGemDisplay">0</span></div>
+      <div class="hud-card"><span class="hud-label">GP</span> <span class="hud-val" id="hudGemDisplay">0</span></div>
       <div class="hud-card"><span class="hud-label">Served</span> <span class="hud-val" id="hudServedCount">0</span></div>
     </div>
     <div class="hud-group">
-      <button type="button" class="btn-nav" id="btnBgmToggle" onclick="toggleBGM()">Music: On</button>
-      <button type="button" class="btn-nav" onclick="openRecipeBook()">Recipe Book</button>
-      <a href="tichluyhome.html" class="btn-nav exit">Leave Stall</a>
+      <button type="button" class="btn-nav" id="btnBgmToggle">Music: On</button>
+      <button type="button" class="btn-nav" id="btnOpenRecipes">Recipes</button>
+      <a href="tichluyhome.html" class="btn-nav exit">Exit</a>
     </div>
   </div>
 
   <div class="orders-dock" id="ordersDock"></div>
   <div class="toast-bar" id="toastBar"></div>
 
-  <!-- Bottom Center Har Gow / DimSum Fact Bar -->
+  <!-- Slim Bottom Center Trivia Bar -->
   <div class="trivia-banner">
     <span class="trivia-tag">DimSum & Har Gow Trivia</span>
-    <div class="trivia-text" id="triviaText">Har Gow (Crystal Shrimp Dumpling) is the true test of a dim sum chef—traditionally pleated with 7 to 13 delicate folds!</div>
+    <div class="trivia-text" id="triviaText">Har Gow (Crystal Shrimp Dumpling) is traditionally pleated with 7 to 13 delicate folds!</div>
   </div>
 
-  <!-- Harmonized Imperial Seal Action Cluster -->
+  <!-- Ultra-Responsive Action Cluster -->
   <div class="action-cluster">
-    <button type="button" class="seal-btn discard" onclick="discardHoldingItem()">Discard</button>
-    <button type="button" class="seal-btn cook" id="btnCookAction" onclick="openKitchenModal()">Cook</button>
-    <button type="button" class="seal-btn interact" id="btnMainAction" onclick="handleInteract()">Interact</button>
+    <button type="button" class="seal-btn discard" id="btnDiscardAction">Discard</button>
+    <button type="button" class="seal-btn cook" id="btnCookAction">Cook</button>
+    <button type="button" class="seal-btn interact" id="btnMainAction">Interact</button>
   </div>
 
   <canvas id="gameCanvas"></canvas>
 
   <!-- KITCHEN PREP MODAL -->
-  <div class="modal-overlay" id="kitchenModal" onclick="if(event.target.id==='kitchenModal') closeKitchenModal()">
+  <div class="modal-overlay" id="kitchenModal">
     <div class="panel-box">
       <div class="panel-header">
-        <div class="panel-title">DimSum Preparation</div>
-        <div class="panel-sub">Select the right wrapper and filling, then place on a bamboo steamer</div>
+        <div class="panel-title">DimSum Prep Counter</div>
+        <div class="panel-sub">Choose wrapper and filling, then place on a bamboo steamer</div>
       </div>
-
       <div class="section-tag">1. Choose Wrapper / Base (Chọn Vỏ Bánh)</div>
       <div class="ing-grid" id="wrapperGrid"></div>
-
-      <div class="section-tag">2. Choose Filling (Chọn Nhân)</div>
+      <div class="section-tag">2. Choose Filling (Chọn Nhân Bánh)</div>
       <div class="ing-grid" id="fillingGrid"></div>
-
       <div class="active-orders-note" id="kitchenRecipeHint"></div>
-
       <div class="modal-footer">
-        <button type="button" class="btn-modal" onclick="closeKitchenModal()">Close</button>
-        <button type="button" class="btn-modal confirm" onclick="confirmWrapAndSteam()">Steam DimSum</button>
+        <button type="button" class="btn-modal" id="btnCloseKitchen">Close</button>
+        <button type="button" class="btn-modal confirm" id="btnConfirmSteam">Steam DimSum</button>
       </div>
     </div>
   </div>
 
   <!-- RECIPE BOOK MODAL -->
-  <div class="modal-overlay" id="recipeModal" onclick="if(event.target.id==='recipeModal') closeRecipeBook()">
+  <div class="modal-overlay" id="recipeModal">
     <div class="panel-box">
       <div class="panel-header">
         <div class="panel-title">Traditional Dimsum Recipe</div>
@@ -256,26 +265,45 @@
       </div>
       <div class="recipe-list" id="fullRecipeList"></div>
       <div class="modal-footer">
-        <button type="button" class="btn-modal confirm" onclick="closeRecipeBook()">Close Book</button>
+        <button type="button" class="btn-modal confirm" id="btnCloseRecipe">Close Book</button>
       </div>
     </div>
   </div>
+
   <script>
     const DB_ROOT = "https://" + "tich-luy-gempoint-default-rtdb" + ".asia-southeast1." + "firebasedatabase.app";
     const myUser = localStorage.getItem("currentUsername") || "";
     const myName = localStorage.getItem("currentStudentName") || myUser || "Master Chef";
-    let myGem = 0, servedTotal = 0;
+    const SERVED_STORAGE_KEY = "gemdimsum_served_" + (myUser || "guest");
+    let myGem = 0;
+    let servedTotal = Number(localStorage.getItem(SERVED_STORAGE_KEY) || 0);
+    document.getElementById("hudServedCount").innerText = servedTotal;
 
-    // =========================================================================
-    // [CHỈNH SIZE HÌNH MÓN ĂN TẠI ĐÂY] - Điều chỉnh Width (w) & Height (h) theo px
-    // =========================================================================
+    // Zero-Latency Instant Tap Helper (0ms response on mobile & desktop, prevents double-trigger)
+    function bindFastTap(elOrId, handler) {
+      const el = typeof elOrId === "string" ? document.getElementById(elOrId) : elOrId;
+      if (!el) return;
+      let lastFire = 0;
+      const fire = (e) => {
+        if (e) { e.preventDefault(); e.stopPropagation(); }
+        const now = performance.now();
+        if (now - lastFire < 140) return;
+        lastFire = now;
+        el.classList.add("is-down");
+        setTimeout(() => el.classList.remove("is-down"), 90);
+        handler(e);
+      };
+      el.addEventListener("pointerdown", fire);
+      el.addEventListener("click", (e) => { e.preventDefault(); e.stopPropagation(); });
+    }
+
+    // [CHỈNH SIZE HÌNH MÓN ĂN TẠI ĐÂY] - Width (w) & Height (h)
     const DISH_SIZE_CONFIG = {
       recipeBook: { w: 200, h: 120 }, // Kích thước hiển thị trong Sổ Công Thức (Recipe Book)
       inHand:     { w: 80, h: 45 }, // Kích thước khi đầu bếp cầm dĩa bánh trên tay
       onTable:    { w: 80, h: 45 }, // Kích thước khi đặt dĩa bánh lên bàn cho khách ăn
       inBubble:   { w: 80, h: 45 }  // Kích thước trong bong bóng gọi món trên đầu khách
     };
-
     const DIMSUM_MENU = [
       {
         id: "hacao", name: "Har Gow (Shrimp)", price: 3,
@@ -319,7 +347,7 @@
     const FILLINGS = DIMSUM_MENU.map(m => m.filling);
 
     const DIMSUM_TRIVIA = [
-      "Har Gow also means Dumpling in English.",
+     "Har Gow also means Dumpling in English.",
       "The word 'Dim Sum' translates to 'Touch the Heart', originating as small snacks served to travelers along the Silk Road",
       "Har Gow wrappers are made with wheat starch and tapioca flour, giving them their signature glass-like glow",
       "In Vietnamese, Har Gow (Dumpling) is called Há Cảo",
@@ -350,7 +378,6 @@
             octx.drawImage(img, 0, 0);
             const imgData = octx.getImageData(0, 0, off.width, off.height);
             const d = imgData.data;
-            // Flood-fill từ 4 góc để xóa nền trắng ngoài dĩa nhưng vẫn giữ nguyên màu trắng của bánh bên trong
             const visited = new Uint8Array(off.width * off.height);
             const stack = [0, off.width - 1, (off.height - 1) * off.width, off.width * off.height - 1];
             while (stack.length > 0) {
@@ -379,7 +406,6 @@
 
     const MAP_IMG = loadOptionalImg("mapdimsum.png", false);
     const CHEF_IMG = loadOptionalImg("chef.png", true);
-
     const CUSTOMER_VARIANTS = [
       { id: 1, img: loadOptionalImg("cust1.png", true), shirt: "#2563eb", pants: "#1e293b", hair: "#0f172a", hat: false },
       { id: 2, img: loadOptionalImg("cust2.png", true), shirt: "#dc2626", pants: "#292524", hair: "#451a03", hat: true  },
@@ -390,12 +416,11 @@
       { id: 7, img: loadOptionalImg("cust7.png", true), shirt: "#be185d", pants: "#1f2937", hair: "#1e1b4b", hat: true  },
       { id: 8, img: loadOptionalImg("cust8.png", true), shirt: "#4f46e5", pants: "#18181b", hair: "#27272a", hat: false }
     ];
-
     const DISH_IMAGES = {};
     DIMSUM_MENU.forEach(m => { DISH_IMAGES[m.id] = loadOptionalImg(m.spriteSrc, true); });
 
     let toastTimer = null;
-    function showToast(text, ms = 2400) {
+    function showToast(text, ms = 2200) {
       const el = document.getElementById("toastBar");
       el.innerText = text;
       el.classList.add("show");
@@ -420,14 +445,13 @@
     function playPeacefulNote(freq) {
       if (!bgmEnabled) return;
       try {
-        const ctxA = getAudioCtx();
-        const now = ctxA.currentTime;
+        const ctxA = getAudioCtx(), now = ctxA.currentTime;
         const osc = ctxA.createOscillator(), subOsc = ctxA.createOscillator(), gain = ctxA.createGain();
         osc.type = "sine"; osc.frequency.setValueAtTime(freq, now);
         subOsc.type = "triangle"; subOsc.frequency.setValueAtTime(freq * 0.5, now);
         gain.gain.setValueAtTime(0.0001, now);
-        gain.gain.linearRampToValueAtTime(0.036, now + 0.08);
-        gain.gain.exponentialRampToValueAtTime(0.0008, now + 1.45);
+        gain.gain.linearRampToValueAtTime(0.085, now + 0.08);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 1.45);
         osc.connect(gain); subOsc.connect(gain); gain.connect(ctxA.destination);
         osc.start(now); subOsc.start(now); osc.stop(now + 1.5); subOsc.stop(now + 1.5);
       } catch (e) {}
@@ -442,7 +466,7 @@
         if (!bgmEnabled) return;
         playPeacefulNote(BGM_MELODY.at(bgmStep));
         bgmStep = (bgmStep + 1) % BGM_MELODY.length;
-      }, 960);
+      }, 940);
     }
 
     function toggleBGM() {
@@ -453,19 +477,19 @@
         else playPeacefulNote(392.00);
       }
     }
-
     window.addEventListener("pointerdown", () => startPeacefulBGM(), { once: true });
     window.addEventListener("keydown", () => startPeacefulBGM(), { once: true });
     function playSFX(type) {
       try {
-        const ctxA = getAudioCtx();
-        const now = ctxA.currentTime;
+        const ctxA = getAudioCtx(), now = ctxA.currentTime;
         const osc = ctxA.createOscillator(), g = ctxA.createGain();
         if (type === "step") {
-          osc.type = "triangle"; osc.frequency.setValueAtTime(135 + Math.random() * 25, now);
-          osc.frequency.exponentialRampToValueAtTime(55, now + 0.055);
-          g.gain.setValueAtTime(0.055, now); g.gain.exponentialRampToValueAtTime(0.001, now + 0.06);
-          osc.connect(g); g.connect(ctxA.destination); osc.start(now); osc.stop(now + 0.065);
+          osc.type = "triangle";
+          osc.frequency.setValueAtTime(165 + Math.random() * 30, now);
+          osc.frequency.exponentialRampToValueAtTime(52, now + 0.065);
+          g.gain.setValueAtTime(0.16, now);
+          g.gain.exponentialRampToValueAtTime(0.001, now + 0.07);
+          osc.connect(g); g.connect(ctxA.destination); osc.start(now); osc.stop(now + 0.075);
         } else if (type === "sizzle") {
           const bufSize = Math.floor(ctxA.sampleRate * 0.28);
           const buffer = ctxA.createBuffer(1, bufSize, ctxA.sampleRate);
@@ -473,30 +497,35 @@
           for (let i = 0; i < bufSize; i++) data[i] = (Math.random() * 2 - 1) * Math.exp(-i / (bufSize * 0.45));
           const noise = ctxA.createBufferSource(); noise.buffer = buffer;
           const filter = ctxA.createBiquadFilter(); filter.type = "bandpass"; filter.frequency.value = 2600;
-          g.gain.setValueAtTime(0.085, now); g.gain.exponentialRampToValueAtTime(0.001, now + 0.28);
+          g.gain.setValueAtTime(0.095, now); g.gain.exponentialRampToValueAtTime(0.001, now + 0.28);
           noise.connect(filter); filter.connect(g); g.connect(ctxA.destination); noise.start(now);
         } else if (type === "bell") {
-          osc.type = "sine"; osc.frequency.setValueAtTime(1046.5, now);
-          g.gain.setValueAtTime(0.15, now); g.gain.exponentialRampToValueAtTime(0.001, now + 0.42);
-          osc.connect(g); g.connect(ctxA.destination); osc.start(now); osc.stop(now + 0.43);
+          osc.type = "sine"; osc.frequency.setValueAtTime(987.77, now);
+          g.gain.setValueAtTime(0.055, now); g.gain.exponentialRampToValueAtTime(0.001, now + 0.36);
+          osc.connect(g); g.connect(ctxA.destination); osc.start(now); osc.stop(now + 0.37);
         } else if (type === "coin") {
           osc.type = "triangle"; osc.frequency.setValueAtTime(987.77, now); osc.frequency.setValueAtTime(1318.5, now + 0.08);
-          g.gain.setValueAtTime(0.2, now); g.gain.exponentialRampToValueAtTime(0.001, now + 0.34);
-          osc.connect(g); g.connect(ctxA.destination); osc.start(now); osc.stop(now + 0.35);
+          g.gain.setValueAtTime(0.11, now); g.gain.exponentialRampToValueAtTime(0.001, now + 0.32);
+          osc.connect(g); g.connect(ctxA.destination); osc.start(now); osc.stop(now + 0.33);
         } else if (type === "cook") {
-          osc.type = "triangle"; osc.frequency.setValueAtTime(360, now); osc.frequency.exponentialRampToValueAtTime(540, now + 0.13);
-          g.gain.setValueAtTime(0.14, now); g.gain.exponentialRampToValueAtTime(0.001, now + 0.14);
-          osc.connect(g); g.connect(ctxA.destination); osc.start(now); osc.stop(now + 0.15);
+          osc.type = "triangle"; osc.frequency.setValueAtTime(360, now); osc.frequency.exponentialRampToValueAtTime(540, now + 0.12);
+          g.gain.setValueAtTime(0.12, now); g.gain.exponentialRampToValueAtTime(0.001, now + 0.13);
+          osc.connect(g); g.connect(ctxA.destination); osc.start(now); osc.stop(now + 0.14);
         } else if (type === "burn") {
           osc.type = "sawtooth"; osc.frequency.setValueAtTime(155, now); osc.frequency.exponentialRampToValueAtTime(75, now + 0.28);
-          g.gain.setValueAtTime(0.17, now); g.gain.exponentialRampToValueAtTime(0.001, now + 0.3);
+          g.gain.setValueAtTime(0.14, now); g.gain.exponentialRampToValueAtTime(0.001, now + 0.3);
           osc.connect(g); g.connect(ctxA.destination); osc.start(now); osc.stop(now + 0.31);
         }
       } catch (e) {}
     }
 
-    async function syncGemReward(addGem) {
+    async function syncGemReward(addGem, addServed = 0) {
       document.getElementById("hudPlayerName").innerText = myName;
+      if (addServed > 0) {
+        servedTotal += addServed;
+        localStorage.setItem(SERVED_STORAGE_KEY, String(servedTotal));
+        document.getElementById("hudServedCount").innerText = servedTotal;
+      }
       if (!myUser) {
         myGem += addGem;
         document.getElementById("hudGemDisplay").innerText = myGem;
@@ -506,11 +535,18 @@
         const res = await fetch(`${DB_ROOT}/students/${myUser}.json?t=${Date.now()}`);
         const data = (await res.json()) || {};
         myGem = Math.round((Number(data.gempoint || 0) + addGem) * 100) / 100;
+        const dbServed = Number(data.dimsumServed || 0);
+        if (dbServed > servedTotal) {
+          servedTotal = dbServed;
+          localStorage.setItem(SERVED_STORAGE_KEY, String(servedTotal));
+        }
         document.getElementById("hudGemDisplay").innerText = myGem;
-        if (addGem > 0) {
+        document.getElementById("hudServedCount").innerText = servedTotal;
+
+        if (addGem > 0 || addServed > 0) {
           await fetch(`${DB_ROOT}/students/${myUser}.json`, {
             method: "PATCH", headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ gempoint: myGem, name: data.name || myName })
+            body: JSON.stringify({ gempoint: myGem, dimsumServed: servedTotal, name: data.name || myName })
           });
           let clanId = data.clanId;
           if (!clanId) {
@@ -519,7 +555,7 @@
               if (c && c.members && c.members[myUser]) { clanId = cid; break; }
             }
           }
-          if (clanId) {
+          if (clanId && addGem > 0) {
             const cObj = await (await fetch(`${DB_ROOT}/clans/${clanId}.json?t=${Date.now()}`)).json();
             if (cObj) {
               const nextAcc = Math.round((Number(cObj.accumulatedGem || 0) + addGem) * 100) / 100;
@@ -538,33 +574,32 @@
 
     const canvas = document.getElementById("gameCanvas");
     const ctx = canvas.getContext("2d");
-    const resizeCanvas = () => { canvas.width = window.innerWidth; canvas.height = window.innerHeight; };
+    const resizeCanvas = () => {
+      const dpr = Math.min(window.devicePixelRatio || 1, 2);
+      canvas.width = Math.floor(window.innerWidth * dpr);
+      canvas.height = Math.floor(window.innerHeight * dpr);
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      ctx.imageSmoothingEnabled = false;
+    };
     window.addEventListener("resize", resizeCanvas); resizeCanvas();
 
     const WORLD_W = 1000, WORLD_H = 585;
-
     const STEAMERS = [
       { id: 0, x: 526, y: 205, dish: null, progress: 0, burnTimer: 0, sizzleCd: 0, state: "empty" },
       { id: 1, x: 571, y: 199, dish: null, progress: 0, burnTimer: 0, sizzleCd: 0, state: "empty" },
       { id: 2, x: 616, y: 205, dish: null, progress: 0, burnTimer: 0, sizzleCd: 0, state: "empty" }
     ];
-
     const TABLES = [
       { id: 1, x: 356, y: 318, seats: [{ x: 294, y: 325, side: "left" }, { x: 418, y: 325, side: "right" }], customers: [], dirty: false },
       { id: 2, x: 643, y: 318, seats: [{ x: 581, y: 325, side: "left" }, { x: 705, y: 325, side: "right" }], customers: [], dirty: false },
       { id: 3, x: 356, y: 416, seats: [{ x: 294, y: 423, side: "left" }, { x: 418, y: 423, side: "right" }], customers: [], dirty: false },
       { id: 4, x: 643, y: 416, seats: [{ x: 581, y: 423, side: "left" }, { x: 705, y: 423, side: "right" }], customers: [], dirty: false }
     ];
-
     const SOLID_BOXES = [
-      { x: 322, y: 150, w: 355, h: 105 },
-      { x: 14,  y: 165, w: 222, h: 80  },
-      { x: 760, y: 165, w: 225, h: 80  },
-      { x: 14,  y: 410, w: 185, h: 65  },
-      { x: 800, y: 355, w: 85,  h: 110 },
-      ...TABLES.map(t => ({ x: t.x - 32, y: t.y - 22, w: 64, h: 42 }))
+      { x: 322, y: 150, w: 355, h: 105 }, { x: 14, y: 165, w: 222, h: 80 },
+      { x: 760, y: 165, w: 225, h: 80 },  { x: 14, y: 410, w: 185, h: 65 },
+      { x: 800, y: 355, w: 85,  h: 110 }, ...TABLES.map(t => ({ x: t.x - 32, y: t.y - 22, w: 64, h: 42 }))
     ];
-
     function canMoveTo(nx, ny, r = 13) {
       if (nx - r < 18 || nx + r > WORLD_W - 18 || ny - r < 245 || ny + r > 475) return false;
       for (const b of SOLID_BOXES) {
@@ -574,7 +609,8 @@
     }
 
     const player = { x: 500, y: 278, speed: 3.1, flipX: false, moving: false, holding: null, stepTimer: 0 };
-    let customers = [], acceptedOrders = [], floatingCoins = [], steamParticles = [], dustParticles = [];
+    const cam = { x: 500, y: 315 };
+    let customers = [], acceptedOrders = [], floatingCoins = [], steamParticles = [], dustParticles = [], sparkleParticles = [];
     let selectedWrapper = WRAPPERS.at(0), selectedFilling = FILLINGS.at(0);
 
     const windPetals = Array.from({ length: 20 }, () => ({
@@ -584,94 +620,68 @@
     }));
 
     const keys = {};
-    window.addEventListener("keydown", e => {
-      const k = e.key.toLowerCase();
-      keys[k] = true;
-      if (k === " " || k === "e") handleInteract();
-    });
+    window.addEventListener("keydown", e => { const k = e.key.toLowerCase(); keys[k] = true; if (k === " " || k === "e") handleInteract(); });
     window.addEventListener("keyup", e => { keys[e.key.toLowerCase()] = false; });
 
-    const joy = { active: false, id: null, ox: 0, oy: 0, cx: 0, cy: 0, dx: 0, dy: 0 };
-    const JOY_MAX_R = 46;
+    // Dedicated Pointer-Tracked 360 Joystick (Never conflicts with right-hand buttons)
+    const joy = { active: false, pointerId: null, ox: 0, oy: 0, cx: 0, cy: 0, dx: 0, dy: 0 };
+    const JOY_MAX_R = 42;
 
-    function startJoy(id, clientX, clientY) {
+    canvas.addEventListener("pointerdown", e => {
       if (document.querySelector(".modal-overlay.open")) return;
-      if (clientX > window.innerWidth * 0.62) return;
-      joy.active = true; joy.id = id;
-      joy.ox = joy.cx = clientX; joy.oy = joy.cy = clientY;
+      if (joy.active || e.clientX > window.innerWidth * 0.62) return;
+      joy.active = true;
+      joy.pointerId = e.pointerId;
+      joy.ox = joy.cx = e.clientX;
+      joy.oy = joy.cy = e.clientY;
       joy.dx = 0; joy.dy = 0;
-    }
-    function moveJoy(clientX, clientY) {
-      if (!joy.active) return;
-      joy.cx = clientX; joy.cy = clientY;
-      const vx = clientX - joy.ox, vy = clientY - joy.oy;
-      const dist = Math.hypot(vx, vy);
-      if (dist > 4) {
-        const clamped = Math.min(JOY_MAX_R, dist);
-        const ratio = clamped / JOY_MAX_R;
-        joy.dx = (vx / dist) * ratio;
-        joy.dy = (vy / dist) * ratio;
-        joy.cx = joy.ox + (vx / dist) * clamped;
-        joy.cy = joy.oy + (vy / dist) * clamped;
-      } else {
-        joy.dx = 0; joy.dy = 0;
-      }
-    }
-    function stopJoy() { joy.active = false; joy.id = null; joy.dx = 0; joy.dy = 0; }
-
-    canvas.addEventListener("touchstart", e => {
-      if (joy.active) return;
-      const t = e.changedTouches.item(0);
-      if (t) startJoy(t.identifier, t.clientX, t.clientY);
-    }, { passive: true });
-    canvas.addEventListener("touchmove", e => {
-      if (!joy.active) return;
-      for (const t of e.changedTouches) { if (t.identifier === joy.id) moveJoy(t.clientX, t.clientY); }
-    }, { passive: true });
-    canvas.addEventListener("touchend", e => {
-      for (const t of e.changedTouches) { if (t.identifier === joy.id) stopJoy(); }
+      try { canvas.setPointerCapture(e.pointerId); } catch (err) {}
     });
-    canvas.addEventListener("touchcancel", stopJoy);
 
-    canvas.addEventListener("mousedown", e => { if (e.button === 0) startJoy("mouse", e.clientX, e.clientY); });
-    window.addEventListener("mousemove", e => { if (joy.active && joy.id === "mouse") moveJoy(e.clientX, e.clientY); });
-    window.addEventListener("mouseup", () => { if (joy.id === "mouse") stopJoy(); });
+    canvas.addEventListener("pointermove", e => {
+      if (!joy.active || e.pointerId !== joy.pointerId) return;
+      joy.cx = e.clientX; joy.cy = e.clientY;
+      const vx = e.clientX - joy.ox, vy = e.clientY - joy.oy, dist = Math.hypot(vx, vy);
+      if (dist > 3) {
+        const clamped = Math.min(JOY_MAX_R, dist), ratio = clamped / JOY_MAX_R;
+        joy.dx = (vx / dist) * ratio; joy.dy = (vy / dist) * ratio;
+        joy.cx = joy.ox + (vx / dist) * clamped; joy.cy = joy.oy + (vy / dist) * clamped;
+      } else { joy.dx = 0; joy.dy = 0; }
+    });
+
+    const releaseJoy = e => {
+      if (joy.active && (!e || e.pointerId === joy.pointerId)) {
+        joy.active = false; joy.pointerId = null; joy.dx = 0; joy.dy = 0;
+      }
+    };
+    canvas.addEventListener("pointerup", releaseJoy);
+    canvas.addEventListener("pointercancel", releaseJoy);
 
     function spawnCustomerGroup() {
       const emptyTables = TABLES.filter(t => t.customers.length === 0 && !t.dirty);
       if (emptyTables.length === 0) return;
-
       const tbl = emptyTables[Math.floor(Math.random() * emptyTables.length)];
-      const isPair = Math.random() < 0.45;
-      const groupSize = isPair ? 2 : 1;
-      const fromLeft = tbl.x < WORLD_W / 2;
-      const laneY = tbl.id <= 2 ? 276 : 374;
-
+      const isPair = Math.random() < 0.45, groupSize = isPair ? 2 : 1;
+      const fromLeft = tbl.x < WORLD_W / 2, laneY = tbl.id <= 2 ? 276 : 374;
       const chosenSeats = isPair ? [tbl.seats.at(0), tbl.seats.at(1)] : [fromLeft ? tbl.seats.at(0) : tbl.seats.at(1)];
 
       chosenSeats.forEach((seat, idx) => {
         const dish = DIMSUM_MENU[Math.floor(Math.random() * DIMSUM_MENU.length)];
         const variant = CUSTOMER_VARIANTS[Math.floor(Math.random() * CUSTOMER_VARIANTS.length)];
         const startX = fromLeft ? (-24 - idx * 34) : (WORLD_W + 24 + idx * 34);
-
         const cust = {
-          id: "C_" + Date.now() + "_" + idx + "_" + Math.random(),
-          x: startX, y: laneY, laneY: laneY,
-          seatX: seat.x, seatY: seat.y, seatSide: seat.side,
-          faceRight: seat.side === "left",
-          tableId: tbl.id, groupSize: groupSize,
-          dish: dish, variant: variant,
+          id: "C_" + Date.now() + "_" + idx + "_" + Math.random(), x: startX, y: laneY, laneY: laneY,
+          seatX: seat.x, seatY: seat.y, seatSide: seat.side, faceRight: seat.side === "left",
+          tableId: tbl.id, groupSize: groupSize, dish: dish, variant: variant,
           state: "entering_x", patience: 100, eatTimer: 0, walkPhase: idx * 1.4
         };
-        tbl.customers.push(cust);
-        customers.push(cust);
+        tbl.customers.push(cust); customers.push(cust);
       });
       playSFX("bell");
     }
 
     function updateOrdersDockUI() {
-      const dock = document.getElementById("ordersDock");
-      dock.innerHTML = acceptedOrders.map(o => `
+      document.getElementById("ordersDock").innerHTML = acceptedOrders.map(o => `
         <div class="order-ticket">
           <div class="order-ticket-title">Table ${o.tableId} — ${o.dish.name}</div>
           <div class="order-ticket-sub">${o.dish.wrapper} + ${o.dish.filling}</div>
@@ -683,630 +693,342 @@
       customers.forEach(c => {
         const tbl = TABLES.find(t => t.id === c.tableId);
         if (!tbl) return;
-
         if (c.state === "entering_x") {
-          const dx = c.seatX - c.x;
-          c.faceRight = dx > 0;
-          if (Math.abs(dx) > 3) {
-            c.x += Math.sign(dx) * 1.85;
-            c.walkPhase += 0.22;
-          } else {
-            c.x = c.seatX;
-            c.state = "entering_seat";
-          }
+          const dx = c.seatX - c.x; c.faceRight = dx > 0;
+          if (Math.abs(dx) > 3) { c.x += Math.sign(dx) * 1.85; c.walkPhase += 0.22; }
+          else { c.x = c.seatX; c.state = "entering_seat"; }
         } else if (c.state === "entering_seat") {
           const dy = c.seatY - c.y;
-          if (Math.abs(dy) > 2) {
-            c.y += Math.sign(dy) * 1.55;
-            c.walkPhase += 0.2;
-          } else {
-            c.y = c.seatY;
-            c.faceRight = c.seatX < tbl.x;
-            c.state = "ordering";
-            showToast(c.groupSize === 2 ? `2 guests at Table ${tbl.id} are ready to order` : `Guest at Table ${tbl.id} is ready to order`, 2000);
+          if (Math.abs(dy) > 2) { c.y += Math.sign(dy) * 1.55; c.walkPhase += 0.2; }
+          else {
+            c.y = c.seatY; c.faceRight = c.seatX < tbl.x; c.state = "ordering";
+            showToast(c.groupSize === 2 ? `2 guests at Table ${tbl.id} are ready to order` : `Guest at Table ${tbl.id} is ready to order`, 1800);
           }
         } else if (c.state === "ordering" || c.state === "waiting") {
-          c.patience -= dt * (c.state === "ordering" ? 1.45 : 1.1);
+          c.patience -= dt * (c.state === "ordering" ? 0.85 : 0.65);
           if (c.patience <= 0) {
             showToast(`Guests at Table ${tbl.id} left due to long wait`);
             acceptedOrders = acceptedOrders.filter(o => o.tableId !== tbl.id);
             updateOrdersDockUI();
-            tbl.customers.forEach(member => { member.state = "leaving_lane"; });
+            tbl.customers.forEach(m => { m.state = "leaving_lane"; });
             tbl.customers = [];
           }
         } else if (c.state === "eating") {
           c.eatTimer -= dt;
           if (c.eatTimer <= 0) {
-            const tip = c.patience >= 55 ? 4 : 0;
+            const tip = c.patience >= 45 ? 4 : 0;
             const totalGain = c.dish.price + tip;
-            servedTotal++;
-            document.getElementById("hudServedCount").innerText = servedTotal;
             playSFX("coin");
-            syncGemReward(totalGain);
-
-            floatingCoins.push({
-              x: c.seatX, y: c.seatY - 34,
-              text: tip > 0 ? `+${totalGain} GP (+${tip} Tip)` : `+${totalGain} GP`,
-              life: 82
-            });
-            showToast(`Table ${tbl.id} paid +${totalGain} GemPoint`, 2300);
-
+            syncGemReward(totalGain, 1);
+            floatingCoins.push({ x: c.seatX, y: c.seatY - 34, text: tip > 0 ? `+${totalGain} GP (+${tip} Tip)` : `+${totalGain} GP`, life: 85 });
+            showToast(`Table ${tbl.id} paid +${totalGain} GemPoint`, 2200);
             c.state = "leaving_lane";
             tbl.customers = tbl.customers.filter(m => m.id !== c.id);
             if (tbl.customers.length === 0) tbl.dirty = true;
           }
         } else if (c.state === "leaving_lane") {
           const dy = c.laneY - c.y;
-          if (Math.abs(dy) > 2) {
-            c.y += Math.sign(dy) * 1.55;
-            c.walkPhase += 0.2;
-          } else {
-            c.y = c.laneY;
-            c.state = "leaving_x";
-          }
+          if (Math.abs(dy) > 2) { c.y += Math.sign(dy) * 1.55; c.walkPhase += 0.2; }
+          else { c.y = c.laneY; c.state = "leaving_x"; }
         } else if (c.state === "leaving_x") {
-          const exitX = c.x < WORLD_W / 2 ? -35 : WORLD_W + 35;
-          const dx = exitX - c.x;
+          const exitX = c.x < WORLD_W / 2 ? -35 : WORLD_W + 35, dx = exitX - c.x;
           c.faceRight = dx > 0;
-          if (Math.abs(dx) > 4) {
-            c.x += Math.sign(dx) * 2.05;
-            c.walkPhase += 0.22;
-          } else {
-            c.removed = true;
-          }
+          if (Math.abs(dx) > 4) { c.x += Math.sign(dx) * 2.05; c.walkPhase += 0.22; }
+          else { c.removed = true; }
         }
       });
       customers = customers.filter(c => !c.removed);
     }
-    function isNearSteamers() {
-      return Math.hypot(player.x - 565, player.y - 252) < 98;
-    }
 
+    function isNearSteamers() { return Math.hypot(player.x - 565, player.y - 252) < 105; }
     function openKitchenModal() {
       const wGrid = document.getElementById("wrapperGrid");
       const fGrid = document.getElementById("fillingGrid");
-      wGrid.innerHTML = WRAPPERS.map(w => `
-        <button type="button" class="ing-btn ${w === selectedWrapper ? 'selected' : ''}" onclick="pickWrapper('${w}')">${w}</button>
-      `).join("");
-      fGrid.innerHTML = FILLINGS.map(f => `
-        <button type="button" class="ing-btn ${f === selectedFilling ? 'selected' : ''}" onclick="pickFilling('${f}')">${f}</button>
-      `).join("");
-
+      wGrid.innerHTML = WRAPPERS.map(w => `<button type="button" class="ing-btn ${w === selectedWrapper ? 'selected' : ''}" data-wrap="${w}">${w}</button>`).join("");
+      fGrid.innerHTML = FILLINGS.map(f => `<button type="button" class="ing-btn ${f === selectedFilling ? 'selected' : ''}" data-fill="${f}">${f}</button>`).join("");
+      wGrid.querySelectorAll(".ing-btn").forEach(btn => bindFastTap(btn, () => { selectedWrapper = btn.dataset.wrap; openKitchenModal(); }));
+      fGrid.querySelectorAll(".ing-btn").forEach(btn => bindFastTap(btn, () => { selectedFilling = btn.dataset.fill; openKitchenModal(); }));
       const activeHints = acceptedOrders.length > 0
         ? acceptedOrders.map(o => `Table ${o.tableId} (${o.dish.name}): ${o.dish.wrapper} + ${o.dish.filling}`).join("<br>")
         : "No active orders yet. Walk up to a guest's table to take their order first.";
       document.getElementById("kitchenRecipeHint").innerHTML = `<strong style="color:#991b1b;">Active Orders:</strong><br>${activeHints}`;
       document.getElementById("kitchenModal").classList.add("open");
     }
-
     function closeKitchenModal() { document.getElementById("kitchenModal").classList.remove("open"); }
-    function pickWrapper(w) { selectedWrapper = w; openKitchenModal(); }
-    function pickFilling(f) { selectedFilling = f; openKitchenModal(); }
 
     function confirmWrapAndSteam() {
       const freeSteamer = STEAMERS.find(s => s.state === "empty");
-      if (!freeSteamer) {
-        showToast("All 3 bamboo steamers are full! Take cooked dishes out first.");
-        return;
-      }
+      if (!freeSteamer) { showToast("All 3 bamboo steamers are full!"); return; }
       const matchedDish = DIMSUM_MENU.find(m => m.wrapper === selectedWrapper && m.filling === selectedFilling);
-      if (!matchedDish) {
-        showToast("Wrapper and filling do not match any recipe. Check Recipe Book!");
-        return;
-      }
-      freeSteamer.dish = matchedDish;
-      freeSteamer.progress = 0;
-      freeSteamer.burnTimer = 0;
-      freeSteamer.sizzleCd = 0.2;
-      freeSteamer.state = "cooking";
-      playSFX("sizzle");
-      closeKitchenModal();
-      showToast(`Wrapped ${matchedDish.name} and placed on Steamer #${freeSteamer.id + 1}`);
+      if (!matchedDish) { showToast("Wrapper and filling do not match! Check Recipes."); return; }
+      freeSteamer.dish = matchedDish; freeSteamer.progress = 0; freeSteamer.burnTimer = 0; freeSteamer.sizzleCd = 0.2; freeSteamer.state = "cooking";
+      playSFX("sizzle"); closeKitchenModal();
+      showToast(`Steaming ${matchedDish.name} on Steamer #${freeSteamer.id + 1}`);
     }
 
     function openRecipeBook() {
-      const listEl = document.getElementById("fullRecipeList");
       const rbSize = DISH_SIZE_CONFIG.recipeBook;
-
-      listEl.innerHTML = DIMSUM_MENU.map(m => `
+      document.getElementById("fullRecipeList").innerHTML = DIMSUM_MENU.map(m => `
         <div class="recipe-item">
           <div class="recipe-thumb" id="thumb_${m.id}"></div>
           <div class="recipe-info">
-            <div class="recipe-name-row">
-              <span class="recipe-name">${m.name}</span>
-              <span class="recipe-price">+${m.price} GP</span>
-            </div>
+            <div class="recipe-name-row"><span class="recipe-name">${m.name}</span><span class="recipe-price">+${m.price} GP</span></div>
             <div class="recipe-desc">${m.desc}</div>
             <div class="recipe-formula">Recipe: ${m.wrapper} + ${m.filling}</div>
           </div>
         </div>
       `).join("");
-
       DIMSUM_MENU.forEach(m => {
-        const box = document.getElementById(`thumb_${m.id}`);
-        const miniC = document.createElement("canvas");
-        miniC.width = rbSize.w + 8;
-        miniC.height = rbSize.h + 8;
-        const mctx = miniC.getContext("2d");
-        drawPixelDishCustomSize(mctx, m, miniC.width / 2, miniC.height / 2, rbSize.w, rbSize.h, false);
+        const box = document.getElementById(`thumb_${m.id}`), miniC = document.createElement("canvas");
+        miniC.width = rbSize.w + 8; miniC.height = rbSize.h + 8;
+        drawPixelDishCustomSize(miniC.getContext("2d"), m, miniC.width / 2, miniC.height / 2, rbSize.w, rbSize.h, false);
         box.appendChild(miniC);
       });
-
       document.getElementById("recipeModal").classList.add("open");
     }
     function closeRecipeBook() { document.getElementById("recipeModal").classList.remove("open"); }
-
-    function discardHoldingItem() {
-      if (!player.holding) { showToast("Your hands are empty"); return; }
-      player.holding = null;
-      showToast("Discarded held dish");
-    }
+    function discardHoldingItem() { if (!player.holding) { showToast("Your hands are empty"); return; } player.holding = null; showToast("Discarded held dish"); }
 
     function handleInteract() {
       if (document.querySelector(".modal-overlay.open")) return;
-
       for (const tbl of TABLES) {
-        if (Math.hypot(player.x - tbl.x, player.y - tbl.y) < 82) {
-          if (tbl.dirty) {
-            tbl.dirty = false;
-            playSFX("cook");
-            showToast(`Cleaned Table ${tbl.id}! Ready for new guests.`);
-            return;
-          }
-
+        if (Math.hypot(player.x - tbl.x, player.y - tbl.y) < 88) {
+          if (tbl.dirty) { tbl.dirty = false; playSFX("cook"); showToast(`Cleaned Table ${tbl.id}!`); return; }
           const orderingGuests = tbl.customers.filter(c => c.state === "ordering");
           if (orderingGuests.length > 0) {
-            orderingGuests.forEach(c => {
-              c.state = "waiting";
-              c.patience = 100;
-              acceptedOrders.push({ custId: c.id, tableId: tbl.id, dish: c.dish });
-            });
-            updateOrdersDockUI();
-            playSFX("bell");
-            const names = orderingGuests.map(c => c.dish.name).join(" & ");
-            showToast(`Order confirmed for Table ${tbl.id}: ${names}`);
+            orderingGuests.forEach(c => { c.state = "waiting"; c.patience = 100; acceptedOrders.push({ custId: c.id, tableId: tbl.id, dish: c.dish }); });
+            updateOrdersDockUI(); playSFX("bell");
+            showToast(`Order taken for Table ${tbl.id}: ${orderingGuests.map(c => c.dish.name).join(" & ")}`);
             return;
           }
-
           const waitingGuests = tbl.customers.filter(c => c.state === "waiting");
           if (waitingGuests.length > 0) {
-            if (!player.holding) {
-              const needed = waitingGuests.map(c => c.dish.name).join(" & ");
-              showToast(`Table ${tbl.id} is waiting for: ${needed}`);
-              return;
-            }
-            if (player.holding.burned) {
-              showToast("This dish is burned! Tap Discard and cook a fresh one.");
-              return;
-            }
+            if (!player.holding) { showToast(`Table ${tbl.id} wants: ${waitingGuests.map(c => c.dish.name).join(" & ")}`); return; }
+            if (player.holding.burned) { showToast("Dish is burned! Tap Discard."); return; }
             const targetGuest = waitingGuests.find(c => c.dish.id === player.holding.dish.id);
-            if (!targetGuest) {
-              const needed = waitingGuests.map(c => c.dish.name).join(" & ");
-              showToast(`Wrong dish! Table ${tbl.id} ordered: ${needed}`);
-              return;
-            }
-
+            if (!targetGuest) { showToast(`Wrong dish! Table ${tbl.id} wants: ${waitingGuests.map(c => c.dish.name).join(" & ")}`); return; }
             player.holding = null;
             targetGuest.state = "eating";
-            targetGuest.eatTimer = 4.4;
+            targetGuest.eatTimer = 15.0;
             acceptedOrders = acceptedOrders.filter(o => o.custId !== targetGuest.id);
-            updateOrdersDockUI();
-            playSFX("cook");
+            updateOrdersDockUI(); playSFX("cook");
+            for (let i = 0; i < 8; i++) sparkleParticles.push({ x: tbl.x + (Math.random() - 0.5) * 30, y: tbl.y - 10, vx: (Math.random() - 0.5) * 1.4, vy: -0.8 - Math.random() * 0.8, life: 28 });
             showToast(`Served ${targetGuest.dish.name} to Table ${tbl.id}!`);
             return;
           }
         }
       }
-
       for (const st of STEAMERS) {
-        if (Math.hypot(player.x - st.x, player.y - (st.y + 42)) < 78) {
+        if (Math.hypot(player.x - st.x, player.y - (st.y + 42)) < 85) {
           if (st.state === "ready" || st.state === "burned") {
-            if (player.holding) {
-              showToast("Your hands are already full!");
-              return;
-            }
+            if (player.holding) { showToast("Hands are already full!"); return; }
             player.holding = { dish: st.dish, burned: (st.state === "burned") };
-            st.dish = null; st.progress = 0; st.burnTimer = 0; st.state = "empty";
-            playSFX("cook");
-            showToast(player.holding.burned ? "Overcooked! Tap Discard to throw away." : `Picked up hot ${player.holding.dish.name}!`);
+            st.dish = null; st.progress = 0; st.burnTimer = 0; st.state = "empty"; playSFX("cook");
+            showToast(player.holding.burned ? "Overcooked! Tap Discard." : `Picked up ${player.holding.dish.name}!`);
             return;
           }
-          if (st.state === "cooking") {
-            showToast(`Steamer #${st.id + 1} is steaming (${Math.floor(st.progress * 20)}%)...`);
-            return;
-          }
+          if (st.state === "cooking") { showToast(`Steamer #${st.id + 1}: ${Math.floor(st.progress * 20)}% steamed...`); return; }
         }
       }
-
-      if (isNearSteamers()) {
-        openKitchenModal();
-      }
+      if (isNearSteamers()) openKitchenModal();
     }
-    function drawPixelDishCustomSize(c, dish, x, y, width, height, burned = false) {
-      c.save();
-      c.translate(x, y);
 
+    bindFastTap("btnDismissRotate", () => {
+      document.getElementById("rotateOverlay").classList.add("dismissed");
+      try { if (screen.orientation && screen.orientation.lock) screen.orientation.lock("landscape").catch(() => {}); } catch (e) {}
+    });
+    bindFastTap("btnBgmToggle", toggleBGM);
+    bindFastTap("btnOpenRecipes", openRecipeBook);
+    bindFastTap("btnDiscardAction", discardHoldingItem);
+    bindFastTap("btnCookAction", openKitchenModal);
+    bindFastTap("btnMainAction", handleInteract);
+    bindFastTap("btnCloseKitchen", closeKitchenModal);
+    bindFastTap("btnConfirmSteam", confirmWrapAndSteam);
+    bindFastTap("btnCloseRecipe", closeRecipeBook);
+    document.getElementById("kitchenModal").addEventListener("pointerdown", e => { if (e.target.id === "kitchenModal") closeKitchenModal(); });
+    document.getElementById("recipeModal").addEventListener("pointerdown", e => { if (e.target.id === "recipeModal") closeRecipeBook(); });
+    function drawPixelDishCustomSize(c, dish, x, y, width, height, burned = false) {
+      c.save(); c.translate(x, y);
       const imgObj = DISH_IMAGES[dish.id];
       if (!burned && imgObj && imgObj.isReady) {
-        const source = imgObj.cleanCanvas || imgObj;
-        c.drawImage(source, -width / 2, -height / 2, width, height);
-        c.restore();
-        return;
+        c.drawImage(imgObj.cleanCanvas || imgObj, -width / 2, -height / 2, width, height);
+        c.restore(); return;
       }
-
-      const rx = width * 0.44;
-      const ry = height * 0.42;
-
-      c.fillStyle = "rgba(0, 0, 0, 0.25)";
-      c.beginPath(); c.ellipse(0, ry * 0.35, rx, ry * 0.85, 0, 0, Math.PI * 2); c.fill();
-
-      c.fillStyle = "#ffffff";
-      c.strokeStyle = "#b91c1c";
-      c.lineWidth = 1.6;
+      const rx = width * 0.44, ry = height * 0.42;
+      c.fillStyle = "rgba(0, 0, 0, 0.25)"; c.beginPath(); c.ellipse(0, ry * 0.35, rx, ry * 0.85, 0, 0, Math.PI * 2); c.fill();
+      c.fillStyle = "#ffffff"; c.strokeStyle = "#b91c1c"; c.lineWidth = 1.6;
       c.beginPath(); c.ellipse(0, 0, rx, ry, 0, 0, Math.PI * 2); c.fill(); c.stroke();
-
-      c.fillStyle = "#f1f5f9";
-      c.beginPath(); c.ellipse(0, 0, rx * 0.72, ry * 0.68, 0, 0, Math.PI * 2); c.fill();
-
+      c.fillStyle = "#f1f5f9"; c.beginPath(); c.ellipse(0, 0, rx * 0.72, ry * 0.68, 0, 0, Math.PI * 2); c.fill();
       if (burned) {
-        c.fillStyle = "#1c1917";
-        c.fillRect(-rx * 0.35, -ry * 0.3, rx * 0.3, ry * 0.35);
-        c.fillRect(rx * 0.1, -ry * 0.2, rx * 0.3, ry * 0.35);
-        c.restore();
-        return;
+        c.fillStyle = "#1c1917"; c.fillRect(-rx * 0.35, -ry * 0.3, rx * 0.3, ry * 0.35); c.fillRect(rx * 0.1, -ry * 0.2, rx * 0.3, ry * 0.35);
+        c.restore(); return;
       }
-
       const rBun = Math.min(rx, ry) * 0.38;
       [[-rx * 0.26, -ry * 0.12], [rx * 0.26, -ry * 0.12], [0, ry * 0.16]].forEach(([ox, oy]) => {
-        c.fillStyle = dish.color;
-        c.beginPath(); c.arc(ox, oy, rBun, 0, Math.PI * 2); c.fill();
-        c.fillStyle = dish.accent;
-        c.fillRect(ox - rBun * 0.35, oy - rBun * 0.35, rBun * 0.7, rBun * 0.7);
+        c.fillStyle = dish.color; c.beginPath(); c.arc(ox, oy, rBun, 0, Math.PI * 2); c.fill();
+        c.fillStyle = dish.accent; c.fillRect(ox - rBun * 0.35, oy - rBun * 0.35, rBun * 0.7, rBun * 0.7);
       });
       c.restore();
     }
 
     function drawPixelPerson(x, y, spriteImg, shirt, pants, hair, hasHat, flipX, walkPhase, isChef = false) {
-      const bob = Math.sin(walkPhase) * 2.0;
-      const legSwing = Math.sin(walkPhase) * 3.5;
-
-      ctx.save();
-      ctx.translate(Math.round(x), Math.round(y));
-
-      ctx.fillStyle = "rgba(0, 0, 0, 0.36)";
-      ctx.beginPath(); ctx.ellipse(0, 22, 13, 5.5, 0, 0, Math.PI * 2); ctx.fill();
-
+      const bob = Math.sin(walkPhase) * 2.0, legSwing = Math.sin(walkPhase) * 3.5;
+      ctx.save(); ctx.translate(Math.round(x), Math.round(y));
+      ctx.fillStyle = "rgba(0, 0, 0, 0.36)"; ctx.beginPath(); ctx.ellipse(0, 22, 13, 5.5, 0, 0, Math.PI * 2); ctx.fill();
       ctx.translate(0, Math.round(bob));
       if (flipX) ctx.scale(-1, 1);
-
-      if (spriteImg && spriteImg.isReady) {
-        const src = spriteImg.cleanCanvas || spriteImg;
-        ctx.drawImage(src, -23, -46, 46, 68);
-        ctx.restore();
-        return;
-      }
-
-      ctx.fillStyle = pants;
-      ctx.fillRect(-7, 7 + legSwing * 0.4, 6, 13);
-      ctx.fillRect(1, 7 - legSwing * 0.4, 6, 13);
-      ctx.fillStyle = "#1c1917";
-      ctx.fillRect(-7, 19 + legSwing * 0.4, 7, 3);
-      ctx.fillRect(1, 19 - legSwing * 0.4, 7, 3);
-
-      ctx.fillStyle = shirt;
-      ctx.fillRect(-10, -13, 20, 21);
-      ctx.fillStyle = "rgba(0, 0, 0, 0.16)";
-      ctx.fillRect(-10, -13, 4, 21);
-
-      if (isChef) {
-        ctx.fillStyle = "#fffdf8";
-        ctx.fillRect(-8, -11, 16, 19);
-        ctx.fillStyle = "#991b1b";
-        ctx.fillRect(-9, 1, 18, 3);
-      }
-
-      ctx.fillStyle = isChef ? "#fffdf8" : shirt;
-      ctx.fillRect(-13, -10 - legSwing * 0.3, 4, 13);
-      ctx.fillRect(9, -10 + legSwing * 0.3, 4, 13);
-      ctx.fillStyle = "#fed7aa";
-      ctx.fillRect(-13, 2 - legSwing * 0.3, 4, 3);
-      ctx.fillRect(9, 2 + legSwing * 0.3, 4, 3);
-
-      ctx.fillStyle = "#fdba74";
-      ctx.fillRect(-3, -16, 6, 4);
-      ctx.fillStyle = "#fed7aa";
-      ctx.fillRect(-9, -32, 18, 17);
-
-      ctx.fillStyle = hair;
-      ctx.fillRect(-10, -35, 20, 6);
-      ctx.fillRect(-10, -30, 3, 9);
-      ctx.fillStyle = "#0f172a";
-      ctx.fillRect(3, -25, 2.5, 3);
-      ctx.fillStyle = "#f43f5e";
-      ctx.fillRect(4, -20, 3, 1.5);
-
-      if (isChef) {
-        ctx.fillStyle = "#ffffff";
-        ctx.fillRect(-9, -43, 18, 9);
-        ctx.fillRect(-7, -47, 14, 5);
-        ctx.fillStyle = "#d97706";
-        ctx.fillRect(-9, -35, 18, 2);
-      } else if (hasHat) {
-        ctx.fillStyle = "#b45309";
-        ctx.fillRect(-14, -36, 28, 3.5);
-        ctx.fillRect(-8, -40, 16, 4);
-      }
+      if (spriteImg && spriteImg.isReady) { ctx.drawImage(spriteImg.cleanCanvas || spriteImg, -23, -46, 46, 68); ctx.restore(); return; }
+      ctx.fillStyle = pants; ctx.fillRect(-7, 7 + legSwing * 0.4, 6, 13); ctx.fillRect(1, 7 - legSwing * 0.4, 6, 13);
+      ctx.fillStyle = "#1c1917"; ctx.fillRect(-7, 19 + legSwing * 0.4, 7, 3); ctx.fillRect(1, 19 - legSwing * 0.4, 7, 3);
+      ctx.fillStyle = shirt; ctx.fillRect(-10, -13, 20, 21);
+      ctx.fillStyle = "rgba(0, 0, 0, 0.16)"; ctx.fillRect(-10, -13, 4, 21);
+      if (isChef) { ctx.fillStyle = "#fffdf8"; ctx.fillRect(-8, -11, 16, 19); ctx.fillStyle = "#991b1b"; ctx.fillRect(-9, 1, 18, 3); }
+      ctx.fillStyle = isChef ? "#fffdf8" : shirt; ctx.fillRect(-13, -10 - legSwing * 0.3, 4, 13); ctx.fillRect(9, -10 + legSwing * 0.3, 4, 13);
+      ctx.fillStyle = "#fed7aa"; ctx.fillRect(-13, 2 - legSwing * 0.3, 4, 3); ctx.fillRect(9, 2 + legSwing * 0.3, 4, 3);
+      ctx.fillStyle = "#fdba74"; ctx.fillRect(-3, -16, 6, 4); ctx.fillStyle = "#fed7aa"; ctx.fillRect(-9, -32, 18, 17);
+      ctx.fillStyle = hair; ctx.fillRect(-10, -35, 20, 6); ctx.fillRect(-10, -30, 3, 9);
+      ctx.fillStyle = "#0f172a"; ctx.fillRect(3, -25, 2.5, 3); ctx.fillStyle = "#f43f5e"; ctx.fillRect(4, -20, 3, 1.5);
+      if (isChef) { ctx.fillStyle = "#ffffff"; ctx.fillRect(-9, -43, 18, 9); ctx.fillRect(-7, -47, 14, 5); ctx.fillStyle = "#d97706"; ctx.fillRect(-9, -35, 18, 2); }
+      else if (hasHat) { ctx.fillStyle = "#b45309"; ctx.fillRect(-14, -36, 28, 3.5); ctx.fillRect(-8, -40, 16, 4); }
       ctx.restore();
     }
-    let lastFrameTime = performance.now();
-    let spawnTimer = 1.4;
 
+    let lastFrameTime = performance.now(), spawnTimer = 1.4;
     function gameLoop(now) {
       const dt = Math.min(0.1, (now - lastFrameTime) / 1000);
       lastFrameTime = now;
+      const vw = window.innerWidth, vh = window.innerHeight;
 
       let vx = joy.dx, vy = joy.dy;
       if (keys.w || keys.arrowup) vy -= 1;
       if (keys.s || keys.arrowdown) vy += 1;
       if (keys.a || keys.arrowleft) vx -= 1;
       if (keys.d || keys.arrowright) vx += 1;
-
       const mag = Math.hypot(vx, vy);
       player.moving = mag > 0.05;
       if (player.moving) {
         const norm = mag > 1 ? 1 / mag : 1;
-        vx *= norm * player.speed;
-        vy *= norm * player.speed;
-        if (vx < -0.1) player.flipX = true;
-        else if (vx > 0.1) player.flipX = false;
+        vx *= norm * player.speed; vy *= norm * player.speed;
+        if (vx < -0.1) player.flipX = true; else if (vx > 0.1) player.flipX = false;
         if (canMoveTo(player.x + vx, player.y)) player.x += vx;
         if (canMoveTo(player.x, player.y + vy)) player.y += vy;
-
         player.stepTimer -= dt;
         if (player.stepTimer <= 0) {
-          player.stepTimer = 0.27;
-          playSFX("step");
-          dustParticles.push({
-            x: player.x + (Math.random() - 0.5) * 10, y: player.y + 20,
-            vx: -vx * 0.25 + (Math.random() - 0.5) * 0.4, vy: -0.3 - Math.random() * 0.3,
-            life: 18, maxLife: 18
-          });
+          player.stepTimer = 0.26; playSFX("step");
+          dustParticles.push({ x: player.x + (Math.random() - 0.5) * 10, y: player.y + 20, vx: -vx * 0.25, vy: -0.35, life: 18, maxLife: 18 });
         }
-      } else {
-        player.stepTimer = 0;
-      }
+      } else { player.stepTimer = 0; }
 
+      const baseScale = Math.min(vw / WORLD_W, vh / WORLD_H);
+      const zoomScale = Math.max(baseScale * 1.45, Math.min(vw / 640, vh / 380));
+      cam.x += (player.x - cam.x) * 0.1;
+      cam.y += ((player.y - 12) - cam.y) * 0.1;
+      const halfVisW = (vw / 2) / zoomScale, halfVisH = (vh / 2) / zoomScale;
+      const clampedCamX = WORLD_W * zoomScale <= vw ? WORLD_W / 2 : Math.max(halfVisW, Math.min(WORLD_W - halfVisW, cam.x));
+      const clampedCamY = WORLD_H * zoomScale <= vh ? WORLD_H / 2 : Math.max(halfVisH, Math.min(WORLD_H - halfVisH, cam.y));
       document.getElementById("btnCookAction").classList.toggle("visible", isNearSteamers());
 
       STEAMERS.forEach(st => {
         if (st.state === "cooking") {
-          st.progress += dt;
-          st.sizzleCd -= dt;
-          if (st.sizzleCd <= 0) {
-            st.sizzleCd = 1.45 + Math.random() * 0.6;
-            playSFX("sizzle");
-          }
-          if (Math.random() < 0.46) {
-            steamParticles.push({
-              x: st.x + (Math.random() - 0.5) * 20, y: st.y - 8,
-              vy: -0.68 - Math.random() * 0.45, size: 3.5 + Math.random() * 3, life: 42, maxLife: 42
-            });
-          }
-          if (st.progress >= 5.0) {
-            st.state = "ready";
-            st.burnTimer = 0;
-            playSFX("bell");
-            showToast(`Steamer #${st.id + 1} (${st.dish.name}) is ready!`);
-          }
+          st.progress += dt; st.sizzleCd -= dt;
+          if (st.sizzleCd <= 0) { st.sizzleCd = 1.45 + Math.random() * 0.6; playSFX("sizzle"); }
+          if (Math.random() < 0.46) steamParticles.push({ x: st.x + (Math.random() - 0.5) * 20, y: st.y - 8, vy: -0.68, size: 4, life: 42, maxLife: 42 });
+          if (st.progress >= 5.0) { st.state = "ready"; st.burnTimer = 0; playSFX("bell"); showToast(`Steamer #${st.id + 1} (${st.dish.name}) is ready!`); }
         } else if (st.state === "ready") {
           st.burnTimer += dt;
-          if (Math.random() < 0.68) {
-            steamParticles.push({
-              x: st.x + (Math.random() - 0.5) * 24, y: st.y - 10,
-              vy: -0.95 - Math.random() * 0.4, size: 4 + Math.random() * 3.5, life: 48, maxLife: 48
-            });
-          }
-          if (st.burnTimer >= 14.0) {
-            st.state = "burned";
-            playSFX("burn");
-            showToast(`Steamer #${st.id + 1} overcooked and burned!`);
-          }
+          if (Math.random() < 0.68) steamParticles.push({ x: st.x + (Math.random() - 0.5) * 24, y: st.y - 10, vy: -0.95, size: 4.5, life: 48, maxLife: 48 });
+          if (st.burnTimer >= 16.0) { st.state = "burned"; playSFX("burn"); showToast(`Steamer #${st.id + 1} burned!`); }
         }
       });
 
       spawnTimer -= dt;
-      if (spawnTimer <= 0) {
-        spawnCustomerGroup();
-        spawnTimer = 6.2 + Math.random() * 4.5;
-      }
+      if (spawnTimer <= 0) { spawnCustomerGroup(); spawnTimer = 6.5 + Math.random() * 4.5; }
       updateCustomersAI(dt);
 
-      windPetals.forEach(wp => {
-        wp.phase += dt * 2.2;
-        wp.x += wp.vx;
-        wp.y += wp.vy + Math.sin(wp.phase) * 0.28;
-        if (wp.x > WORLD_W + 20) { wp.x = -20; wp.y = Math.random() * WORLD_H; }
-        if (wp.y > WORLD_H + 20) wp.y = -20;
-      });
+      windPetals.forEach(wp => { wp.phase += dt * 2.2; wp.x += wp.vx; wp.y += wp.vy + Math.sin(wp.phase) * 0.28; if (wp.x > WORLD_W + 20) wp.x = -20; if (wp.y > WORLD_H + 20) wp.y = -20; });
+      dustParticles.forEach(d => { d.x += d.vx; d.y += d.vy; d.life--; }); dustParticles = dustParticles.filter(d => d.life > 0);
+      steamParticles.forEach(p => { p.y += p.vy; p.x += Math.sin(p.life * 0.2) * 0.25; p.life--; }); steamParticles = steamParticles.filter(p => p.life > 0);
+      sparkleParticles.forEach(sp => { sp.x += sp.vx; sp.y += sp.vy; sp.life--; }); sparkleParticles = sparkleParticles.filter(sp => sp.life > 0);
+      floatingCoins.forEach(fc => { fc.y -= 0.5; fc.life--; }); floatingCoins = floatingCoins.filter(fc => fc.life > 0);
 
-      dustParticles.forEach(d => { d.x += d.vx; d.y += d.vy; d.life--; });
-      dustParticles = dustParticles.filter(d => d.life > 0);
-      steamParticles.forEach(p => { p.y += p.vy; p.x += Math.sin(p.life * 0.2) * 0.25; p.life--; });
-      steamParticles = steamParticles.filter(p => p.life > 0);
-      floatingCoins.forEach(fc => { fc.y -= 0.5; fc.life--; });
-      floatingCoins = floatingCoins.filter(fc => fc.life > 0);
-
-      const bgGrad = ctx.createRadialGradient(
-        canvas.width / 2, canvas.height / 2, 120,
-        canvas.width / 2, canvas.height / 2, Math.max(canvas.width, canvas.height) * 0.72
-      );
-      bgGrad.addColorStop(0, "#522f1e");
-      bgGrad.addColorStop(0.55, "#2b1c18");
-      bgGrad.addColorStop(1, "#161012");
-      ctx.fillStyle = bgGrad;
-      ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-      const scale = Math.min(canvas.width / WORLD_W, canvas.height / WORLD_H) * 0.94;
-      const drawW = WORLD_W * scale, drawH = WORLD_H * scale;
-      const offsetX = (canvas.width - drawW) / 2;
-      const offsetY = (canvas.height - drawH) / 2;
+      const bgGrad = ctx.createRadialGradient(vw / 2, vh / 2, 100, vw / 2, vh / 2, Math.max(vw, vh) * 0.72);
+      bgGrad.addColorStop(0, "#522f1e"); bgGrad.addColorStop(0.55, "#2b1c18"); bgGrad.addColorStop(1, "#161012");
+      ctx.fillStyle = bgGrad; ctx.fillRect(0, 0, vw, vh);
 
       ctx.save();
-      ctx.translate(offsetX, offsetY);
-      ctx.scale(scale, scale);
+      ctx.translate(vw / 2, vh / 2);
+      ctx.scale(zoomScale, zoomScale);
+      ctx.translate(-clampedCamX, -clampedCamY);
 
-      if (MAP_IMG.isReady) {
-        ctx.drawImage(MAP_IMG, 0, 0, WORLD_W, WORLD_H);
-      } else {
-        ctx.fillStyle = "#4a3b32";
-        ctx.fillRect(0, 0, WORLD_W, WORLD_H);
-        ctx.fillStyle = "#fde68a";
-        ctx.font = "bold 14px sans-serif";
-        ctx.textAlign = "center";
-        ctx.fillText("Waiting for mapdimsum.png in the same folder...", WORLD_W / 2, WORLD_H / 2);
-      }
-
-      const glowPulse = 0.16 + Math.sin(now * 0.003) * 0.04;
-      [[340, 145], [500, 130], [660, 145]].forEach(([lx, ly]) => {
-        const lg = ctx.createRadialGradient(lx, ly, 8, lx, ly, 135);
-        lg.addColorStop(0, `rgba(251, 191, 36, ${glowPulse.toFixed(2)})`);
-        lg.addColorStop(1, "rgba(251, 191, 36, 0)");
-        ctx.fillStyle = lg;
-        ctx.beginPath(); ctx.arc(lx, ly, 135, 0, Math.PI * 2); ctx.fill();
-      });
+      if (MAP_IMG.isReady) ctx.drawImage(MAP_IMG, 0, 0, WORLD_W, WORLD_H);
+      else { ctx.fillStyle = "#4a3b32"; ctx.fillRect(0, 0, WORLD_W, WORLD_H); }
 
       STEAMERS.forEach(st => {
         if (st.state !== "empty") {
-          ctx.fillStyle = "rgba(69, 26, 3, 0.92)";
-          ctx.strokeStyle = "#fbbf24"; ctx.lineWidth = 1;
-          ctx.beginPath(); ctx.roundRect(st.x - 25, st.y - 36, 50, 16, 4); ctx.fill(); ctx.stroke();
+          ctx.fillStyle = "rgba(69, 26, 3, 0.94)"; ctx.strokeStyle = "#fbbf24"; ctx.lineWidth = 1.2;
+          ctx.beginPath(); ctx.roundRect(st.x - 26, st.y - 38, 52, 17, 4); ctx.fill(); ctx.stroke();
           ctx.fillStyle = st.state === "ready" ? "#86efac" : (st.state === "burned" ? "#fca5a5" : "#fef08a");
-          ctx.font = "bold 9px sans-serif"; ctx.textAlign = "center";
-          const txt = st.state === "cooking" ? `${Math.floor(st.progress * 20)}%` : (st.state === "ready" ? "READY" : "BURNED");
-          ctx.fillText(txt, st.x, st.y - 25);
+          ctx.font = "bold 9.5px sans-serif"; ctx.textAlign = "center";
+          ctx.fillText(st.state === "cooking" ? `${Math.floor(st.progress * 20)}%` : (st.state === "ready" ? "READY" : "BURNED"), st.x, st.y - 26);
         }
       });
 
-      dustParticles.forEach(d => {
-        const a = (d.life / d.maxLife) * 0.55;
-        ctx.fillStyle = `rgba(254, 243, 199, ${a.toFixed(2)})`;
-        ctx.fillRect(Math.round(d.x - 2), Math.round(d.y - 2), 4, 4);
-      });
-
-      steamParticles.forEach(p => {
-        const alpha = (p.life / p.maxLife) * 0.65;
-        ctx.fillStyle = `rgba(255, 255, 255, ${alpha.toFixed(2)})`;
-        ctx.fillRect(Math.round(p.x - p.size / 2), Math.round(p.y - p.size / 2), Math.round(p.size), Math.round(p.size));
-      });
+      dustParticles.forEach(d => { ctx.fillStyle = `rgba(254, 243, 199, ${(d.life / d.maxLife) * 0.6})`; ctx.fillRect(Math.round(d.x - 2), Math.round(d.y - 2), 4, 4); });
+      steamParticles.forEach(p => { ctx.fillStyle = `rgba(255, 255, 255, ${(p.life / p.maxLife) * 0.68})`; ctx.fillRect(Math.round(p.x - p.size / 2), Math.round(p.y - p.size / 2), Math.round(p.size), Math.round(p.size)); });
+      sparkleParticles.forEach(sp => { ctx.fillStyle = "#fde047"; ctx.fillRect(Math.round(sp.x), Math.round(sp.y), 3, 3); });
 
       TABLES.forEach(tbl => {
         if (tbl.dirty) {
-          ctx.fillStyle = "rgba(127, 29, 29, 0.92)";
-          ctx.strokeStyle = "#fbbf24"; ctx.lineWidth = 1;
-          ctx.beginPath(); ctx.roundRect(tbl.x - 32, tbl.y - 13, 64, 17, 5); ctx.fill(); ctx.stroke();
-          ctx.fillStyle = "#fef3c7"; ctx.font = "bold 9.5px sans-serif"; ctx.textAlign = "center";
-          ctx.fillText("Clean Table", tbl.x, tbl.y - 1.5);
+          ctx.fillStyle = "rgba(127, 29, 29, 0.94)"; ctx.strokeStyle = "#fbbf24"; ctx.lineWidth = 1.2;
+          ctx.beginPath(); ctx.roundRect(tbl.x - 34, tbl.y - 14, 68, 18, 5); ctx.fill(); ctx.stroke();
+          ctx.fillStyle = "#fef3c7"; ctx.font = "bold 10px sans-serif"; ctx.textAlign = "center"; ctx.fillText("Clean Table", tbl.x, tbl.y - 2);
         } else {
-          const eatingGuests = tbl.customers.filter(c => c.state === "eating");
-          eatingGuests.forEach(eg => {
+          tbl.customers.filter(c => c.state === "eating").forEach(eg => {
             const dishX = tbl.x + (eg.seatSide === "left" ? -14 : 14);
             drawPixelDishCustomSize(ctx, eg.dish, dishX, tbl.y - 6, DISH_SIZE_CONFIG.onTable.w, DISH_SIZE_CONFIG.onTable.h, false);
           });
         }
       });
 
-      const entities = [
-        { type: "player", y: player.y, obj: player },
-        ...customers.map(c => ({ type: "customer", y: c.y, obj: c }))
-      ].sort((a, b) => a.y - b.y);
-
+      const entities = [{ type: "player", y: player.y, obj: player }, ...customers.map(c => ({ type: "customer", y: c.y, obj: c }))].sort((a, b) => a.y - b.y);
       entities.forEach(ent => {
         if (ent.type === "player") {
           drawPixelPerson(player.x, player.y, CHEF_IMG, "#d97706", "#1e293b", "#0f172a", false, player.flipX, player.moving ? now * 0.016 : 0, true);
-          if (player.holding) {
-            drawPixelDishCustomSize(ctx, player.holding.dish, player.x + (player.flipX ? -20 : 20), player.y - 10, DISH_SIZE_CONFIG.inHand.w, DISH_SIZE_CONFIG.inHand.h, player.holding.burned);
-          }
+          if (player.holding) drawPixelDishCustomSize(ctx, player.holding.dish, player.x + (player.flipX ? -20 : 20), player.y - 10, DISH_SIZE_CONFIG.inHand.w, DISH_SIZE_CONFIG.inHand.h, player.holding.burned);
         } else {
           const c = ent.obj;
           drawPixelPerson(c.x, c.y, c.variant.img, c.variant.shirt, c.variant.pants, c.variant.hair, c.variant.hat, !c.faceRight, c.walkPhase, false);
-
           if (c.state === "ordering" || c.state === "waiting") {
-            const bx = c.x + (c.groupSize === 2 ? (c.seatSide === "left" ? -16 : 16) : 0);
-            const by = c.y - 68;
-            ctx.fillStyle = c.state === "ordering" ? "rgba(255, 253, 247, 0.97)" : "rgba(254, 243, 199, 0.95)";
-            ctx.strokeStyle = c.state === "ordering" ? "#991b1b" : "#b45309";
-            ctx.lineWidth = 2;
-            ctx.beginPath(); ctx.roundRect(bx - 66, by - 22, 132, 38, 8); ctx.fill(); ctx.stroke();
-
-            drawPixelDishCustomSize(ctx, c.dish, bx - 43, by - 3, DISH_SIZE_CONFIG.inBubble.w, DISH_SIZE_CONFIG.inBubble.h, false);
-
-            ctx.textAlign = "left";
-            ctx.fillStyle = "#451a03";
-            ctx.font = "bold 9.5px sans-serif";
-            ctx.fillText(c.dish.name, bx - 20, by - 6);
-
-            ctx.fillStyle = c.state === "ordering" ? "#991b1b" : "#92400e";
-            ctx.font = "bold 8.4px sans-serif";
-            ctx.fillText(c.state === "ordering" ? `Order (+${c.dish.price} GP)` : "Waiting...", bx - 20, by + 8);
+            const bx = c.x + (c.groupSize === 2 ? (c.seatSide === "left" ? -16 : 16) : 0), by = c.y - 68;
+            ctx.fillStyle = c.state === "ordering" ? "rgba(255, 253, 247, 0.98)" : "rgba(254, 243, 199, 0.96)";
+            ctx.strokeStyle = c.state === "ordering" ? "#991b1b" : "#b45309"; ctx.lineWidth = 2;
+            ctx.beginPath(); ctx.roundRect(bx - 68, by - 23, 136, 40, 8); ctx.fill(); ctx.stroke();
+            drawPixelDishCustomSize(ctx, c.dish, bx - 44, by - 3, DISH_SIZE_CONFIG.inBubble.w, DISH_SIZE_CONFIG.inBubble.h, false);
+            ctx.textAlign = "left"; ctx.fillStyle = "#451a03"; ctx.font = "bold 10px sans-serif"; ctx.fillText(c.dish.name, bx - 21, by - 6);
+            ctx.fillStyle = c.state === "ordering" ? "#991b1b" : "#92400e"; ctx.font = "bold 8.8px sans-serif";
+            ctx.fillText(c.state === "ordering" ? `Order (+${c.dish.price} GP)` : "Waiting...", bx - 21, by + 9);
             ctx.textAlign = "center";
-
-            ctx.fillStyle = "rgba(69, 26, 3, 0.75)";
-            ctx.fillRect(bx - 25, c.y - 40, 50, 4);
-            ctx.fillStyle = c.patience > 40 ? "#16a34a" : "#dc2626";
-            ctx.fillRect(bx - 25, c.y - 40, Math.max(0, (c.patience / 100) * 50), 4);
+            ctx.fillStyle = "rgba(69, 26, 3, 0.75)"; ctx.fillRect(bx - 26, c.y - 40, 52, 4.5);
+            ctx.fillStyle = c.patience > 40 ? "#16a34a" : "#dc2626"; ctx.fillRect(bx - 26, c.y - 40, Math.max(0, (c.patience / 100) * 52), 4.5);
           }
         }
       });
 
-      windPetals.forEach(wp => {
-        ctx.fillStyle = "rgba(251, 207, 232, 0.74)";
-        ctx.fillRect(Math.round(wp.x), Math.round(wp.y), Math.round(wp.size), Math.round(wp.size * 0.7));
-      });
-
+      windPetals.forEach(wp => { ctx.fillStyle = "rgba(251, 207, 232, 0.75)"; ctx.fillRect(Math.round(wp.x), Math.round(wp.y), Math.round(wp.size), Math.round(wp.size * 0.7)); });
       floatingCoins.forEach(fc => {
-        ctx.fillStyle = "#fef08a";
-        ctx.strokeStyle = "#7f1d1d";
-        ctx.lineWidth = 3;
-        ctx.font = "bold 14px sans-serif";
-        ctx.textAlign = "center";
-        ctx.strokeText(fc.text, fc.x, fc.y);
-        ctx.fillText(fc.text, fc.x, fc.y);
+        ctx.fillStyle = "#fef08a"; ctx.strokeStyle = "#7f1d1d"; ctx.lineWidth = 3; ctx.font = "bold 14px sans-serif"; ctx.textAlign = "center";
+        ctx.strokeText(fc.text, fc.x, fc.y); ctx.fillText(fc.text, fc.x, fc.y);
       });
-
-      const leftFade = ctx.createLinearGradient(0, 0, 58, 0);
-      leftFade.addColorStop(0, "rgba(22, 16, 18, 0.95)");
-      leftFade.addColorStop(1, "rgba(22, 16, 18, 0)");
-      ctx.fillStyle = leftFade;
-      ctx.fillRect(0, 0, 58, WORLD_H);
-
-      const rightFade = ctx.createLinearGradient(WORLD_W - 58, 0, WORLD_W, 0);
-      rightFade.addColorStop(0, "rgba(22, 16, 18, 0)");
-      rightFade.addColorStop(1, "rgba(22, 16, 18, 0.95)");
-      ctx.fillStyle = rightFade;
-      ctx.fillRect(WORLD_W - 58, 0, 58, WORLD_H);
-
       ctx.restore();
 
       if (joy.active) {
         ctx.save();
-        ctx.beginPath();
-        ctx.arc(joy.ox, joy.oy, JOY_MAX_R, 0, Math.PI * 2);
-        ctx.fillStyle = "rgba(254, 243, 199, 0.14)";
-        ctx.fill();
-        ctx.lineWidth = 2;
-        ctx.strokeStyle = "rgba(251, 191, 36, 0.68)";
-        ctx.stroke();
-
-        ctx.beginPath();
-        ctx.arc(joy.cx, joy.cy, 20, 0, Math.PI * 2);
-        ctx.fillStyle = "rgba(168, 28, 28, 0.82)";
-        ctx.fill();
-        ctx.lineWidth = 2;
-        ctx.strokeStyle = "#fde68a";
-        ctx.stroke();
+        ctx.beginPath(); ctx.arc(joy.ox, joy.oy, JOY_MAX_R, 0, Math.PI * 2);
+        ctx.fillStyle = "rgba(254, 243, 199, 0.14)"; ctx.fill(); ctx.lineWidth = 2; ctx.strokeStyle = "rgba(251, 191, 36, 0.68)"; ctx.stroke();
+        ctx.beginPath(); ctx.arc(joy.cx, joy.cy, 18, 0, Math.PI * 2);
+        ctx.fillStyle = "rgba(168, 28, 28, 0.82)"; ctx.fill(); ctx.lineWidth = 2; ctx.strokeStyle = "#fde68a"; ctx.stroke();
         ctx.restore();
       }
-
       requestAnimationFrame(gameLoop);
     }
 
