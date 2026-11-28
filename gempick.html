@@ -1,0 +1,1318 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>GemDimSum</title>
+  <link rel="preconnect" href="https://googleapis.com">
+  <link rel="preconnect" href="https://gstatic.com" crossorigin>
+  <link href="https://googleapis.com/css2?family=Cinzel:wght@700;900&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; -webkit-user-select: none; font-family: 'Plus Jakarta Sans', 'Segoe UI', sans-serif; }
+    body, html { width: 100%; height: 100%; overflow: hidden; background: #191210; color: #3b1e08; }
+    canvas { display: block; width: 100%; height: 100%; image-rendering: pixelated; touch-action: none; }
+
+    /* Top HUD - Warm Silk & Gold Rim */
+    .top-hud {
+      position: fixed; top: 12px; left: 14px; right: 14px; z-index: 20;
+      display: flex; justify-content: space-between; align-items: center; gap: 10px; pointer-events: none;
+    }
+    .hud-group { display: flex; gap: 8px; flex-wrap: wrap; pointer-events: auto; }
+    .hud-card {
+      background: linear-gradient(180deg, #fffdf8 0%, #f6e7c8 100%);
+      border: 1.5px solid #b45309; outline: 1px solid rgba(245, 158, 11, 0.55); outline-offset: -4px;
+      border-radius: 11px; padding: 7px 14px; font-size: 0.78rem; font-weight: 700; color: #451a03;
+      box-shadow: 0 6px 18px rgba(0, 0, 0, 0.42); display: flex; align-items: center; gap: 6px;
+    }
+    .hud-label { color: #92400e; font-weight: 700; font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.6px; }
+    .hud-val { color: #991b1b; font-weight: 800; font-size: 0.85rem; }
+
+    .btn-nav {
+      pointer-events: auto; background: linear-gradient(180deg, #fffdf8 0%, #f6e7c8 100%);
+      border: 1.5px solid #b45309; outline: 1px solid rgba(245, 158, 11, 0.55); outline-offset: -4px;
+      border-radius: 11px; padding: 7px 14px; font-size: 0.76rem; font-weight: 800; color: #991b1b;
+      letter-spacing: 0.3px; text-decoration: none; cursor: pointer;
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.4); transition: transform 0.14s ease, filter 0.14s ease;
+    }
+    .btn-nav:hover { filter: brightness(1.04); }
+    .btn-nav:active { transform: scale(0.95); }
+    .btn-nav.exit { background: linear-gradient(180deg, #3b1908 0%, #240e04 100%); border-color: #d97706; color: #fde68a; outline-color: rgba(251, 191, 36, 0.3); }
+
+    /* Active Orders Dock */
+    .orders-dock {
+      position: fixed; top: 58px; left: 14px; z-index: 18;
+      display: flex; flex-direction: column; gap: 6px; pointer-events: none; max-width: 245px;
+    }
+    .order-ticket {
+      background: linear-gradient(180deg, #fffdf8 0%, #fef3c7 100%);
+      border: 1.5px solid #b45309; border-left: 5px solid #991b1b;
+      border-radius: 9px; padding: 7px 12px; box-shadow: 0 6px 16px rgba(0, 0, 0, 0.38);
+    }
+    .order-ticket-title { font-size: 0.78rem; font-weight: 800; color: #7f1d1d; }
+    .order-ticket-sub { font-size: 0.69rem; font-weight: 600; color: #78350f; margin-top: 2px; }
+
+    /* Notification Toast */
+    .toast-bar {
+      position: fixed; top: 58px; left: 50%; transform: translateX(-50%); z-index: 25;
+      background: linear-gradient(180deg, #fffdf8 0%, #f6e7c8 100%);
+      border: 1.5px solid #b45309; outline: 1px solid rgba(245, 158, 11, 0.5); outline-offset: -3px;
+      color: #7f1d1d; padding: 7px 20px; border-radius: 99px;
+      font-size: 0.79rem; font-weight: 800; opacity: 0; transition: opacity 0.22s; pointer-events: none;
+      box-shadow: 0 8px 22px rgba(0, 0, 0, 0.45); white-space: nowrap;
+    }
+    .toast-bar.show { opacity: 1; }
+
+    /* Bottom Center Har Gow / DimSum Trivia Bar */
+    .trivia-banner {
+      position: fixed; bottom: 12px; left: 50%; transform: translateX(-50%); z-index: 19;
+      background: linear-gradient(180deg, rgba(255, 253, 248, 0.95) 0%, rgba(246, 231, 200, 0.95) 100%);
+      border: 1.5px solid #b45309; outline: 1px solid rgba(217, 119, 6, 0.4); outline-offset: -3px;
+      border-radius: 99px; padding: 6px 20px; max-width: min(540px, 56vw);
+      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.45); text-align: center; pointer-events: none;
+    }
+    .trivia-tag {
+      font-family: 'Cinzel', serif; font-size: 0.66rem; font-weight: 900; color: #991b1b;
+      text-transform: uppercase; letter-spacing: 0.9px; display: block; margin-bottom: 1px;
+    }
+    .trivia-text { font-size: 0.73rem; font-weight: 600; color: #451a03; line-height: 1.3; }
+
+    /* Harmonized Silk & Gold Imperial Seal Buttons (Interact & Cook) */
+    .action-cluster {
+      position: fixed; right: 18px; bottom: 20px; z-index: 22;
+      display: flex; align-items: center; gap: 9px;
+    }
+    .seal-btn {
+      position: relative; border-radius: 12px; cursor: pointer;
+      font-family: 'Cinzel', serif; font-weight: 900; letter-spacing: 0.7px; text-transform: uppercase;
+      transition: transform 0.14s ease, box-shadow 0.14s ease, filter 0.14s ease;
+    }
+    .seal-btn:hover { filter: brightness(1.04); }
+    .seal-btn:active { transform: scale(0.94); }
+
+    /* Interact Button - Matching Warm Silk & Crimson/Gold Frame */
+    .seal-btn.interact {
+      height: 50px; padding: 0 20px; font-size: 0.8rem;
+      background: linear-gradient(180deg, #fffdf8 0%, #f6e7c8 100%);
+      border: 2px solid #b45309; outline: 1.5px solid rgba(217, 119, 6, 0.55); outline-offset: -5px;
+      color: #991b1b;
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.45), inset 0 1px 0 #ffffff;
+    }
+
+    /* Cook Button - Harmonized Imperial Gold & Warm Amber Silk */
+    .seal-btn.cook {
+      display: none; height: 50px; padding: 0 20px; font-size: 0.8rem;
+      background: linear-gradient(180deg, #fef3c7 0%, #f59e0b 100%);
+      border: 2px solid #991b1b; outline: 1.5px solid rgba(255, 253, 248, 0.75); outline-offset: -5px;
+      color: #451a03;
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.6);
+      animation: goldAura 1.8s infinite;
+    }
+    .seal-btn.cook.visible { display: inline-flex; align-items: center; justify-content: center; }
+
+    /* Discard Button */
+    .seal-btn.discard {
+      height: 40px; padding: 0 13px; font-size: 0.68rem;
+      background: linear-gradient(180deg, #fffdf8 0%, #efe0c4 100%);
+      border: 1.5px solid #b45309; color: #78350f;
+      box-shadow: 0 5px 14px rgba(0, 0, 0, 0.38);
+    }
+    @keyframes goldAura {
+      0%, 100% { box-shadow: 0 8px 20px rgba(0, 0, 0, 0.45), 0 0 0 0 rgba(245, 158, 11, 0.55); }
+      50% { box-shadow: 0 8px 20px rgba(0, 0, 0, 0.45), 0 0 0 8px rgba(245, 158, 11, 0); }
+    }
+    /* Kitchen & Recipe Book Modals */
+    .modal-overlay {
+      position: fixed; inset: 0; background: rgba(20, 13, 10, 0.72); backdrop-filter: blur(5px);
+      display: none; justify-content: center; align-items: center; padding: 16px; z-index: 40;
+    }
+    .modal-overlay.open { display: flex; }
+    .panel-box {
+      background: linear-gradient(180deg, #fffdf8 0%, #f8edd6 100%);
+      color: #3b1e08; width: 100%; max-width: 550px; max-height: 88vh;
+      border-radius: 16px; border: 3px solid #991b1b;
+      outline: 1.5px solid #d97706; outline-offset: -6px;
+      padding: 22px; overflow-y: auto; box-shadow: 0 24px 60px rgba(0, 0, 0, 0.6);
+    }
+    .panel-header {
+      border-bottom: 1.5px solid rgba(180, 83, 9, 0.3); padding-bottom: 12px; margin-bottom: 14px; text-align: center;
+    }
+    .panel-title { font-family: 'Cinzel', serif; font-size: 1.15rem; font-weight: 900; color: #991b1b; letter-spacing: 0.8px; text-transform: uppercase; }
+    .panel-sub { font-size: 0.78rem; font-weight: 600; color: #78350f; margin-top: 3px; }
+
+    .section-tag { font-size: 0.75rem; font-weight: 800; color: #991b1b; text-transform: uppercase; letter-spacing: 0.5px; margin: 12px 0 7px; }
+    .ing-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+    .ing-btn {
+      background: #ffffff; border: 1.5px solid #d97706; border-radius: 10px;
+      padding: 9px 7px; font-size: 0.75rem; font-weight: 700; color: #451a03;
+      cursor: pointer; text-align: center; transition: all 0.14s;
+    }
+    .ing-btn:hover { background: #fef3c7; }
+    .ing-btn.selected {
+      background: linear-gradient(180deg, #991b1b 0%, #7f1d1d 100%);
+      border-color: #fbbf24; color: #fef3c7; box-shadow: 0 4px 10px rgba(153, 27, 27, 0.25);
+    }
+
+    .active-orders-note {
+      background: #fffbeb; border: 1.5px dashed #b45309;
+      border-radius: 10px; padding: 10px 12px; font-size: 0.76rem; color: #451a03; margin-top: 14px; line-height: 1.55;
+    }
+
+    /* Recipe Book Cards - Flexible Width/Height Thumbnail */
+    .recipe-list { display: flex; flex-direction: column; gap: 10px; }
+    .recipe-item {
+      background: #ffffff; border: 1.5px solid #d97706; border-radius: 12px;
+      padding: 11px 14px; display: flex; align-items: center; gap: 14px;
+      box-shadow: 0 3px 10px rgba(120, 53, 15, 0.08);
+    }
+    .recipe-thumb {
+      min-width: 72px; min-height: 54px; padding: 4px; border-radius: 10px;
+      background: linear-gradient(180deg, #fef3c7 0%, #fde68a 100%);
+      border: 1.5px solid #b45309; flex-shrink: 0;
+      display: flex; align-items: center; justify-content: center; overflow: hidden;
+    }
+    .recipe-thumb canvas, .recipe-thumb img { image-rendering: pixelated; object-fit: contain; }
+    .recipe-info { flex: 1; }
+    .recipe-name-row { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+    .recipe-name { font-size: 0.92rem; font-weight: 800; color: #7f1d1d; }
+    .recipe-price {
+      font-size: 0.75rem; font-weight: 800; color: #fef3c7;
+      background: #991b1b; border: 1px solid #fbbf24; padding: 2px 9px; border-radius: 6px;
+    }
+    .recipe-desc { font-size: 0.75rem; color: #573318; margin-top: 3px; line-height: 1.4; }
+    .recipe-formula { font-size: 0.72rem; font-weight: 800; color: #b45309; margin-top: 4px; }
+
+    .modal-footer { display: flex; gap: 10px; margin-top: 16px; }
+    .btn-modal {
+      flex: 1; padding: 11px; border-radius: 11px; border: 1.5px solid #b45309;
+      background: #fef3c7; color: #451a03; font-size: 0.82rem; font-weight: 800; cursor: pointer;
+    }
+    .btn-modal.confirm {
+      flex: 2; background: linear-gradient(180deg, #991b1b 0%, #7f1d1d 100%);
+      border-color: #fbbf24; color: #fef3c7; font-weight: 800;
+    }
+  </style>
+</head>
+<body>
+  <div class="top-hud">
+    <div class="hud-group">
+      <div class="hud-card"><span class="hud-label">Chef</span> <span class="hud-val" id="hudPlayerName">Master Chef</span></div>
+      <div class="hud-card"><span class="hud-label">GemPoint</span> <span class="hud-val" id="hudGemDisplay">0</span></div>
+      <div class="hud-card"><span class="hud-label">Served</span> <span class="hud-val" id="hudServedCount">0</span></div>
+    </div>
+    <div class="hud-group">
+      <button type="button" class="btn-nav" id="btnBgmToggle" onclick="toggleBGM()">Music: On</button>
+      <button type="button" class="btn-nav" onclick="openRecipeBook()">Recipe Book</button>
+      <a href="tichluyhome.html" class="btn-nav exit">Leave Stall</a>
+    </div>
+  </div>
+
+  <div class="orders-dock" id="ordersDock"></div>
+  <div class="toast-bar" id="toastBar"></div>
+
+  <!-- Bottom Center Har Gow / DimSum Fact Bar -->
+  <div class="trivia-banner">
+    <span class="trivia-tag">DimSum & Har Gow Trivia</span>
+    <div class="trivia-text" id="triviaText">Har Gow (Crystal Shrimp Dumpling) is the true test of a dim sum chef—traditionally pleated with 7 to 13 delicate folds!</div>
+  </div>
+
+  <!-- Harmonized Imperial Seal Action Cluster -->
+  <div class="action-cluster">
+    <button type="button" class="seal-btn discard" onclick="discardHoldingItem()">Discard</button>
+    <button type="button" class="seal-btn cook" id="btnCookAction" onclick="openKitchenModal()">Cook</button>
+    <button type="button" class="seal-btn interact" id="btnMainAction" onclick="handleInteract()">Interact</button>
+  </div>
+
+  <canvas id="gameCanvas"></canvas>
+
+  <!-- KITCHEN PREP MODAL -->
+  <div class="modal-overlay" id="kitchenModal" onclick="if(event.target.id==='kitchenModal') closeKitchenModal()">
+    <div class="panel-box">
+      <div class="panel-header">
+        <div class="panel-title">DimSum Preparation</div>
+        <div class="panel-sub">Select the right wrapper and filling, then place on a bamboo steamer</div>
+      </div>
+
+      <div class="section-tag">1. Choose Wrapper / Base (Chọn Vỏ Bánh)</div>
+      <div class="ing-grid" id="wrapperGrid"></div>
+
+      <div class="section-tag">2. Choose Filling (Chọn Nhân)</div>
+      <div class="ing-grid" id="fillingGrid"></div>
+
+      <div class="active-orders-note" id="kitchenRecipeHint"></div>
+
+      <div class="modal-footer">
+        <button type="button" class="btn-modal" onclick="closeKitchenModal()">Close</button>
+        <button type="button" class="btn-modal confirm" onclick="confirmWrapAndSteam()">Steam DimSum</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- RECIPE BOOK MODAL -->
+  <div class="modal-overlay" id="recipeModal" onclick="if(event.target.id==='recipeModal') closeRecipeBook()">
+    <div class="panel-box">
+      <div class="panel-header">
+        <div class="panel-title">Traditional Dimsum Recipe</div>
+        <div class="panel-sub">The variety of Chinese Dimsum and other Exotic Food</div>
+      </div>
+      <div class="recipe-list" id="fullRecipeList"></div>
+      <div class="modal-footer">
+        <button type="button" class="btn-modal confirm" onclick="closeRecipeBook()">Close Book</button>
+      </div>
+    </div>
+  </div>
+  <script>
+    const DB_ROOT = "https://" + "tich-luy-gempoint-default-rtdb" + ".asia-southeast1." + "firebasedatabase.app";
+    const myUser = localStorage.getItem("currentUsername") || "";
+    const myName = localStorage.getItem("currentStudentName") || myUser || "Master Chef";
+    let myGem = 0, servedTotal = 0;
+
+    // =========================================================================
+    // [CHỈNH SIZE HÌNH MÓN ĂN TẠI ĐÂY] - Điều chỉnh Width (w) & Height (h) theo px
+    // =========================================================================
+    const DISH_SIZE_CONFIG = {
+      recipeBook: { w: 200, h: 120 }, // Kích thước hiển thị trong Sổ Công Thức (Recipe Book)
+      inHand:     { w: 80, h: 45 }, // Kích thước khi đầu bếp cầm dĩa bánh trên tay
+      onTable:    { w: 80, h: 45 }, // Kích thước khi đặt dĩa bánh lên bàn cho khách ăn
+      inBubble:   { w: 80, h: 45 }  // Kích thước trong bong bóng gọi món trên đầu khách
+    };
+
+    const DIMSUM_MENU = [
+      {
+        id: "hacao", name: "Har Gow (Shrimp)", price: 3,
+        wrapper: "Translucent Wheat Skin", filling: "Fresh Whole Shrimp",
+        desc: "Delicate crystal-clear dumpling wrapper folded around juicy, sweet whole shrimp.",
+        spriteSrc: "dish_hacao.png", color: "#fbcfe8", accent: "#ec4899"
+      },
+	  {
+        id: "banhtrung", name: "Dan Tat (Egg Tart)", price: 3,
+        wrapper: "Flaky Puff Pastry", filling: "Sweet Egg Custard",
+        desc: "Crisp golden pastry shell cradling a warm, silky-smooth baked egg custard center.",
+        spriteSrc: "dish_banhtrung.png", color: "#fde047", accent: "#b45309"
+      },
+      {
+        id: "suicao", name: "Siu Mai (Pork)", price: 4,
+        wrapper: "Yellow Wonton Wrapper", filling: "Minced Pork & Mushroom",
+        desc: "Open-topped pleated dumpling filled with savory minced pork and shiitake mushroom.",
+        spriteSrc: "dish_suicao.png", color: "#fef08a", accent: "#eab308"
+      },
+      {
+        id: "banhbao", name: "Char Siu Bao", price: 6,
+        wrapper: "Fluffy White Dough", filling: "Honey BBQ Pork",
+        desc: "Soft steamed white bun bursting with sweet and savory Cantonese barbecue pork.",
+        spriteSrc: "dish_banhbao.png", color: "#ffffff", accent: "#dc2626"
+      },
+      {
+        id: "banhcuon", name: "Cheung Fun (Roll)", price: 6,
+        wrapper: "Silky Rice Noodle Sheet", filling: "Shrimp & Scallion",
+        desc: "Smooth steamed rice noodle rolls wrapped around tender shrimp and sweet soy glaze.",
+        spriteSrc: "dish_banhcuon.png", color: "#f8fafc", accent: "#d97706"
+      },
+      {
+        id: "changa", name: "Phoenix Claws", price: 7,
+        wrapper: "Deep Porcelain Dish", filling: "Black Bean Chicken Feet",
+        desc: "Braised and steamed until fall-off-the-bone tender in rich fermented black bean sauce.",
+        spriteSrc: "dish_changa.png", color: "#fed7aa", accent: "#9a3412"
+      }
+    ];
+
+    const WRAPPERS = DIMSUM_MENU.map(m => m.wrapper);
+    const FILLINGS = DIMSUM_MENU.map(m => m.filling);
+
+    const DIMSUM_TRIVIA = [
+      "Har Gow also means Dumpling in English.",
+      "The word 'Dim Sum' translates to 'Touch the Heart', originating as small snacks served to travelers along the Silk Road",
+      "Har Gow wrappers are made with wheat starch and tapioca flour, giving them their signature glass-like glow",
+      "In Vietnamese, Har Gow (Dumpling) is called Há Cảo",
+      "In traditional Cantonese tea houses, tapping two fingers on the table is a silent way to say 'Thank you' when tea is poured",
+	  "Many families prepare and eat them during the holiday, often around New Year’s Eve, as part of a shared celebratory meal",
+	  "Some families add a special surprise to their New Year dumplings like coins",
+	  "Many dumplings can be frozen before cooking and prepared directly from frozen later",
+	  "In Vietnam, dumplings are sold in restaurants or some pavement stalls",
+	  "Dumplings have been around for over 1,700 years, starting as ancient winter remedies and evolving into a symbol of prosperity"
+    ];
+    let triviaIdx = 0;
+    setInterval(() => {
+      triviaIdx = (triviaIdx + 1) % DIMSUM_TRIVIA.length;
+      const el = document.getElementById("triviaText");
+      if (el) el.innerText = DIMSUM_TRIVIA.at(triviaIdx);
+    }, 9000);
+
+    function loadOptionalImg(src, stripWhiteBg = false) {
+      const img = new Image();
+      img.isReady = false;
+      img.cleanCanvas = null;
+      img.onload = () => {
+        if (stripWhiteBg) {
+          try {
+            const off = document.createElement("canvas");
+            off.width = img.width; off.height = img.height;
+            const octx = off.getContext("2d");
+            octx.drawImage(img, 0, 0);
+            const imgData = octx.getImageData(0, 0, off.width, off.height);
+            const d = imgData.data;
+            // Flood-fill từ 4 góc để xóa nền trắng ngoài dĩa nhưng vẫn giữ nguyên màu trắng của bánh bên trong
+            const visited = new Uint8Array(off.width * off.height);
+            const stack = [0, off.width - 1, (off.height - 1) * off.width, off.width * off.height - 1];
+            while (stack.length > 0) {
+              const idx = stack.pop();
+              if (idx < 0 || idx >= visited.length || visited[idx]) continue;
+              visited[idx] = 1;
+              const p = idx * 4;
+              if (d[p] > 235 && d[p + 1] > 235 && d[p + 2] > 235) {
+                d[p + 3] = 0;
+                const x = idx % off.width, y = Math.floor(idx / off.width);
+                if (x > 0) stack.push(idx - 1);
+                if (x < off.width - 1) stack.push(idx + 1);
+                if (y > 0) stack.push(idx - off.width);
+                if (y < off.height - 1) stack.push(idx + off.width);
+              }
+            }
+            octx.putImageData(imgData, 0, 0);
+            img.cleanCanvas = off;
+          } catch (e) {}
+        }
+        img.isReady = true;
+      };
+      img.src = src;
+      return img;
+    }
+
+    const MAP_IMG = loadOptionalImg("mapdimsum.png", false);
+    const CHEF_IMG = loadOptionalImg("chef.png", true);
+
+    const CUSTOMER_VARIANTS = [
+      { id: 1, img: loadOptionalImg("cust1.png", true), shirt: "#2563eb", pants: "#1e293b", hair: "#0f172a", hat: false },
+      { id: 2, img: loadOptionalImg("cust2.png", true), shirt: "#dc2626", pants: "#292524", hair: "#451a03", hat: true  },
+      { id: 3, img: loadOptionalImg("cust3.png", true), shirt: "#059669", pants: "#1e293b", hair: "#0f172a", hat: false },
+      { id: 4, img: loadOptionalImg("cust4.png", true), shirt: "#7c3aed", pants: "#312e81", hair: "#78350f", hat: false },
+      { id: 5, img: loadOptionalImg("cust5.png", true), shirt: "#ea580c", pants: "#27272a", hair: "#1c1917", hat: true  },
+      { id: 6, img: loadOptionalImg("cust6.png", true), shirt: "#0891b2", pants: "#1e293b", hair: "#334155", hat: false },
+      { id: 7, img: loadOptionalImg("cust7.png", true), shirt: "#be185d", pants: "#1f2937", hair: "#1e1b4b", hat: true  },
+      { id: 8, img: loadOptionalImg("cust8.png", true), shirt: "#4f46e5", pants: "#18181b", hair: "#27272a", hat: false }
+    ];
+
+    const DISH_IMAGES = {};
+    DIMSUM_MENU.forEach(m => { DISH_IMAGES[m.id] = loadOptionalImg(m.spriteSrc, true); });
+
+    let toastTimer = null;
+    function showToast(text, ms = 2400) {
+      const el = document.getElementById("toastBar");
+      el.innerText = text;
+      el.classList.add("show");
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => el.classList.remove("show"), ms);
+    }
+
+    let audioCtx = null;
+    function getAudioCtx() {
+      if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      if (audioCtx.state === "suspended") audioCtx.resume();
+      return audioCtx;
+    }
+
+    let bgmEnabled = true, bgmStarted = false, bgmStep = 0;
+    const BGM_MELODY = [
+      261.63, 329.63, 392.00, 440.00, 392.00, 329.63, 293.66, 261.63,
+      329.63, 392.00, 523.25, 440.00, 392.00, 329.63, 293.66, 329.63,
+      440.00, 392.00, 329.63, 293.66, 261.63, 293.66, 329.63, 261.63
+    ];
+
+    function playPeacefulNote(freq) {
+      if (!bgmEnabled) return;
+      try {
+        const ctxA = getAudioCtx();
+        const now = ctxA.currentTime;
+        const osc = ctxA.createOscillator(), subOsc = ctxA.createOscillator(), gain = ctxA.createGain();
+        osc.type = "sine"; osc.frequency.setValueAtTime(freq, now);
+        subOsc.type = "triangle"; subOsc.frequency.setValueAtTime(freq * 0.5, now);
+        gain.gain.setValueAtTime(0.0001, now);
+        gain.gain.linearRampToValueAtTime(0.036, now + 0.08);
+        gain.gain.exponentialRampToValueAtTime(0.0008, now + 1.45);
+        osc.connect(gain); subOsc.connect(gain); gain.connect(ctxA.destination);
+        osc.start(now); subOsc.start(now); osc.stop(now + 1.5); subOsc.stop(now + 1.5);
+      } catch (e) {}
+    }
+
+    function startPeacefulBGM() {
+      if (bgmStarted || !bgmEnabled) return;
+      bgmStarted = true;
+      playPeacefulNote(BGM_MELODY.at(0));
+      bgmStep = 1;
+      setInterval(() => {
+        if (!bgmEnabled) return;
+        playPeacefulNote(BGM_MELODY.at(bgmStep));
+        bgmStep = (bgmStep + 1) % BGM_MELODY.length;
+      }, 960);
+    }
+
+    function toggleBGM() {
+      bgmEnabled = !bgmEnabled;
+      document.getElementById("btnBgmToggle").innerText = bgmEnabled ? "Music: On" : "Music: Off";
+      if (bgmEnabled) {
+        if (!bgmStarted) startPeacefulBGM();
+        else playPeacefulNote(392.00);
+      }
+    }
+
+    window.addEventListener("pointerdown", () => startPeacefulBGM(), { once: true });
+    window.addEventListener("keydown", () => startPeacefulBGM(), { once: true });
+    function playSFX(type) {
+      try {
+        const ctxA = getAudioCtx();
+        const now = ctxA.currentTime;
+        const osc = ctxA.createOscillator(), g = ctxA.createGain();
+        if (type === "step") {
+          osc.type = "triangle"; osc.frequency.setValueAtTime(135 + Math.random() * 25, now);
+          osc.frequency.exponentialRampToValueAtTime(55, now + 0.055);
+          g.gain.setValueAtTime(0.055, now); g.gain.exponentialRampToValueAtTime(0.001, now + 0.06);
+          osc.connect(g); g.connect(ctxA.destination); osc.start(now); osc.stop(now + 0.065);
+        } else if (type === "sizzle") {
+          const bufSize = Math.floor(ctxA.sampleRate * 0.28);
+          const buffer = ctxA.createBuffer(1, bufSize, ctxA.sampleRate);
+          const data = buffer.getChannelData(0);
+          for (let i = 0; i < bufSize; i++) data[i] = (Math.random() * 2 - 1) * Math.exp(-i / (bufSize * 0.45));
+          const noise = ctxA.createBufferSource(); noise.buffer = buffer;
+          const filter = ctxA.createBiquadFilter(); filter.type = "bandpass"; filter.frequency.value = 2600;
+          g.gain.setValueAtTime(0.085, now); g.gain.exponentialRampToValueAtTime(0.001, now + 0.28);
+          noise.connect(filter); filter.connect(g); g.connect(ctxA.destination); noise.start(now);
+        } else if (type === "bell") {
+          osc.type = "sine"; osc.frequency.setValueAtTime(1046.5, now);
+          g.gain.setValueAtTime(0.15, now); g.gain.exponentialRampToValueAtTime(0.001, now + 0.42);
+          osc.connect(g); g.connect(ctxA.destination); osc.start(now); osc.stop(now + 0.43);
+        } else if (type === "coin") {
+          osc.type = "triangle"; osc.frequency.setValueAtTime(987.77, now); osc.frequency.setValueAtTime(1318.5, now + 0.08);
+          g.gain.setValueAtTime(0.2, now); g.gain.exponentialRampToValueAtTime(0.001, now + 0.34);
+          osc.connect(g); g.connect(ctxA.destination); osc.start(now); osc.stop(now + 0.35);
+        } else if (type === "cook") {
+          osc.type = "triangle"; osc.frequency.setValueAtTime(360, now); osc.frequency.exponentialRampToValueAtTime(540, now + 0.13);
+          g.gain.setValueAtTime(0.14, now); g.gain.exponentialRampToValueAtTime(0.001, now + 0.14);
+          osc.connect(g); g.connect(ctxA.destination); osc.start(now); osc.stop(now + 0.15);
+        } else if (type === "burn") {
+          osc.type = "sawtooth"; osc.frequency.setValueAtTime(155, now); osc.frequency.exponentialRampToValueAtTime(75, now + 0.28);
+          g.gain.setValueAtTime(0.17, now); g.gain.exponentialRampToValueAtTime(0.001, now + 0.3);
+          osc.connect(g); g.connect(ctxA.destination); osc.start(now); osc.stop(now + 0.31);
+        }
+      } catch (e) {}
+    }
+
+    async function syncGemReward(addGem) {
+      document.getElementById("hudPlayerName").innerText = myName;
+      if (!myUser) {
+        myGem += addGem;
+        document.getElementById("hudGemDisplay").innerText = myGem;
+        return;
+      }
+      try {
+        const res = await fetch(`${DB_ROOT}/students/${myUser}.json?t=${Date.now()}`);
+        const data = (await res.json()) || {};
+        myGem = Math.round((Number(data.gempoint || 0) + addGem) * 100) / 100;
+        document.getElementById("hudGemDisplay").innerText = myGem;
+        if (addGem > 0) {
+          await fetch(`${DB_ROOT}/students/${myUser}.json`, {
+            method: "PATCH", headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ gempoint: myGem, name: data.name || myName })
+          });
+          let clanId = data.clanId;
+          if (!clanId) {
+            const clans = (await (await fetch(`${DB_ROOT}/clans.json?t=${Date.now()}`)).json()) || {};
+            for (const [cid, c] of Object.entries(clans)) {
+              if (c && c.members && c.members[myUser]) { clanId = cid; break; }
+            }
+          }
+          if (clanId) {
+            const cObj = await (await fetch(`${DB_ROOT}/clans/${clanId}.json?t=${Date.now()}`)).json();
+            if (cObj) {
+              const nextAcc = Math.round((Number(cObj.accumulatedGem || 0) + addGem) * 100) / 100;
+              await fetch(`${DB_ROOT}/clans/${clanId}.json`, {
+                method: "PATCH", headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                  accumulatedGem: nextAcc,
+                  memberSnapshots: { ...(cObj.memberSnapshots || {}), [myUser]: myGem }
+                })
+              });
+            }
+          }
+        }
+      } catch (e) {}
+    }
+
+    const canvas = document.getElementById("gameCanvas");
+    const ctx = canvas.getContext("2d");
+    const resizeCanvas = () => { canvas.width = window.innerWidth; canvas.height = window.innerHeight; };
+    window.addEventListener("resize", resizeCanvas); resizeCanvas();
+
+    const WORLD_W = 1000, WORLD_H = 585;
+
+    const STEAMERS = [
+      { id: 0, x: 526, y: 205, dish: null, progress: 0, burnTimer: 0, sizzleCd: 0, state: "empty" },
+      { id: 1, x: 571, y: 199, dish: null, progress: 0, burnTimer: 0, sizzleCd: 0, state: "empty" },
+      { id: 2, x: 616, y: 205, dish: null, progress: 0, burnTimer: 0, sizzleCd: 0, state: "empty" }
+    ];
+
+    const TABLES = [
+      { id: 1, x: 356, y: 318, seats: [{ x: 294, y: 325, side: "left" }, { x: 418, y: 325, side: "right" }], customers: [], dirty: false },
+      { id: 2, x: 643, y: 318, seats: [{ x: 581, y: 325, side: "left" }, { x: 705, y: 325, side: "right" }], customers: [], dirty: false },
+      { id: 3, x: 356, y: 416, seats: [{ x: 294, y: 423, side: "left" }, { x: 418, y: 423, side: "right" }], customers: [], dirty: false },
+      { id: 4, x: 643, y: 416, seats: [{ x: 581, y: 423, side: "left" }, { x: 705, y: 423, side: "right" }], customers: [], dirty: false }
+    ];
+
+    const SOLID_BOXES = [
+      { x: 322, y: 150, w: 355, h: 105 },
+      { x: 14,  y: 165, w: 222, h: 80  },
+      { x: 760, y: 165, w: 225, h: 80  },
+      { x: 14,  y: 410, w: 185, h: 65  },
+      { x: 800, y: 355, w: 85,  h: 110 },
+      ...TABLES.map(t => ({ x: t.x - 32, y: t.y - 22, w: 64, h: 42 }))
+    ];
+
+    function canMoveTo(nx, ny, r = 13) {
+      if (nx - r < 18 || nx + r > WORLD_W - 18 || ny - r < 245 || ny + r > 475) return false;
+      for (const b of SOLID_BOXES) {
+        if (nx + r > b.x && nx - r < b.x + b.w && ny + r > b.y && ny - r < b.y + b.h) return false;
+      }
+      return true;
+    }
+
+    const player = { x: 500, y: 278, speed: 3.1, flipX: false, moving: false, holding: null, stepTimer: 0 };
+    let customers = [], acceptedOrders = [], floatingCoins = [], steamParticles = [], dustParticles = [];
+    let selectedWrapper = WRAPPERS.at(0), selectedFilling = FILLINGS.at(0);
+
+    const windPetals = Array.from({ length: 20 }, () => ({
+      x: Math.random() * WORLD_W, y: Math.random() * WORLD_H,
+      vx: 0.55 + Math.random() * 0.65, vy: 0.14 + Math.random() * 0.24,
+      phase: Math.random() * Math.PI * 2, size: 2.5 + Math.random() * 2
+    }));
+
+    const keys = {};
+    window.addEventListener("keydown", e => {
+      const k = e.key.toLowerCase();
+      keys[k] = true;
+      if (k === " " || k === "e") handleInteract();
+    });
+    window.addEventListener("keyup", e => { keys[e.key.toLowerCase()] = false; });
+
+    const joy = { active: false, id: null, ox: 0, oy: 0, cx: 0, cy: 0, dx: 0, dy: 0 };
+    const JOY_MAX_R = 46;
+
+    function startJoy(id, clientX, clientY) {
+      if (document.querySelector(".modal-overlay.open")) return;
+      if (clientX > window.innerWidth * 0.62) return;
+      joy.active = true; joy.id = id;
+      joy.ox = joy.cx = clientX; joy.oy = joy.cy = clientY;
+      joy.dx = 0; joy.dy = 0;
+    }
+    function moveJoy(clientX, clientY) {
+      if (!joy.active) return;
+      joy.cx = clientX; joy.cy = clientY;
+      const vx = clientX - joy.ox, vy = clientY - joy.oy;
+      const dist = Math.hypot(vx, vy);
+      if (dist > 4) {
+        const clamped = Math.min(JOY_MAX_R, dist);
+        const ratio = clamped / JOY_MAX_R;
+        joy.dx = (vx / dist) * ratio;
+        joy.dy = (vy / dist) * ratio;
+        joy.cx = joy.ox + (vx / dist) * clamped;
+        joy.cy = joy.oy + (vy / dist) * clamped;
+      } else {
+        joy.dx = 0; joy.dy = 0;
+      }
+    }
+    function stopJoy() { joy.active = false; joy.id = null; joy.dx = 0; joy.dy = 0; }
+
+    canvas.addEventListener("touchstart", e => {
+      if (joy.active) return;
+      const t = e.changedTouches.item(0);
+      if (t) startJoy(t.identifier, t.clientX, t.clientY);
+    }, { passive: true });
+    canvas.addEventListener("touchmove", e => {
+      if (!joy.active) return;
+      for (const t of e.changedTouches) { if (t.identifier === joy.id) moveJoy(t.clientX, t.clientY); }
+    }, { passive: true });
+    canvas.addEventListener("touchend", e => {
+      for (const t of e.changedTouches) { if (t.identifier === joy.id) stopJoy(); }
+    });
+    canvas.addEventListener("touchcancel", stopJoy);
+
+    canvas.addEventListener("mousedown", e => { if (e.button === 0) startJoy("mouse", e.clientX, e.clientY); });
+    window.addEventListener("mousemove", e => { if (joy.active && joy.id === "mouse") moveJoy(e.clientX, e.clientY); });
+    window.addEventListener("mouseup", () => { if (joy.id === "mouse") stopJoy(); });
+
+    function spawnCustomerGroup() {
+      const emptyTables = TABLES.filter(t => t.customers.length === 0 && !t.dirty);
+      if (emptyTables.length === 0) return;
+
+      const tbl = emptyTables[Math.floor(Math.random() * emptyTables.length)];
+      const isPair = Math.random() < 0.45;
+      const groupSize = isPair ? 2 : 1;
+      const fromLeft = tbl.x < WORLD_W / 2;
+      const laneY = tbl.id <= 2 ? 276 : 374;
+
+      const chosenSeats = isPair ? [tbl.seats.at(0), tbl.seats.at(1)] : [fromLeft ? tbl.seats.at(0) : tbl.seats.at(1)];
+
+      chosenSeats.forEach((seat, idx) => {
+        const dish = DIMSUM_MENU[Math.floor(Math.random() * DIMSUM_MENU.length)];
+        const variant = CUSTOMER_VARIANTS[Math.floor(Math.random() * CUSTOMER_VARIANTS.length)];
+        const startX = fromLeft ? (-24 - idx * 34) : (WORLD_W + 24 + idx * 34);
+
+        const cust = {
+          id: "C_" + Date.now() + "_" + idx + "_" + Math.random(),
+          x: startX, y: laneY, laneY: laneY,
+          seatX: seat.x, seatY: seat.y, seatSide: seat.side,
+          faceRight: seat.side === "left",
+          tableId: tbl.id, groupSize: groupSize,
+          dish: dish, variant: variant,
+          state: "entering_x", patience: 100, eatTimer: 0, walkPhase: idx * 1.4
+        };
+        tbl.customers.push(cust);
+        customers.push(cust);
+      });
+      playSFX("bell");
+    }
+
+    function updateOrdersDockUI() {
+      const dock = document.getElementById("ordersDock");
+      dock.innerHTML = acceptedOrders.map(o => `
+        <div class="order-ticket">
+          <div class="order-ticket-title">Table ${o.tableId} — ${o.dish.name}</div>
+          <div class="order-ticket-sub">${o.dish.wrapper} + ${o.dish.filling}</div>
+        </div>
+      `).join("");
+    }
+
+    function updateCustomersAI(dt) {
+      customers.forEach(c => {
+        const tbl = TABLES.find(t => t.id === c.tableId);
+        if (!tbl) return;
+
+        if (c.state === "entering_x") {
+          const dx = c.seatX - c.x;
+          c.faceRight = dx > 0;
+          if (Math.abs(dx) > 3) {
+            c.x += Math.sign(dx) * 1.85;
+            c.walkPhase += 0.22;
+          } else {
+            c.x = c.seatX;
+            c.state = "entering_seat";
+          }
+        } else if (c.state === "entering_seat") {
+          const dy = c.seatY - c.y;
+          if (Math.abs(dy) > 2) {
+            c.y += Math.sign(dy) * 1.55;
+            c.walkPhase += 0.2;
+          } else {
+            c.y = c.seatY;
+            c.faceRight = c.seatX < tbl.x;
+            c.state = "ordering";
+            showToast(c.groupSize === 2 ? `2 guests at Table ${tbl.id} are ready to order` : `Guest at Table ${tbl.id} is ready to order`, 2000);
+          }
+        } else if (c.state === "ordering" || c.state === "waiting") {
+          c.patience -= dt * (c.state === "ordering" ? 1.45 : 1.1);
+          if (c.patience <= 0) {
+            showToast(`Guests at Table ${tbl.id} left due to long wait`);
+            acceptedOrders = acceptedOrders.filter(o => o.tableId !== tbl.id);
+            updateOrdersDockUI();
+            tbl.customers.forEach(member => { member.state = "leaving_lane"; });
+            tbl.customers = [];
+          }
+        } else if (c.state === "eating") {
+          c.eatTimer -= dt;
+          if (c.eatTimer <= 0) {
+            const tip = c.patience >= 55 ? 4 : 0;
+            const totalGain = c.dish.price + tip;
+            servedTotal++;
+            document.getElementById("hudServedCount").innerText = servedTotal;
+            playSFX("coin");
+            syncGemReward(totalGain);
+
+            floatingCoins.push({
+              x: c.seatX, y: c.seatY - 34,
+              text: tip > 0 ? `+${totalGain} GP (+${tip} Tip)` : `+${totalGain} GP`,
+              life: 82
+            });
+            showToast(`Table ${tbl.id} paid +${totalGain} GemPoint`, 2300);
+
+            c.state = "leaving_lane";
+            tbl.customers = tbl.customers.filter(m => m.id !== c.id);
+            if (tbl.customers.length === 0) tbl.dirty = true;
+          }
+        } else if (c.state === "leaving_lane") {
+          const dy = c.laneY - c.y;
+          if (Math.abs(dy) > 2) {
+            c.y += Math.sign(dy) * 1.55;
+            c.walkPhase += 0.2;
+          } else {
+            c.y = c.laneY;
+            c.state = "leaving_x";
+          }
+        } else if (c.state === "leaving_x") {
+          const exitX = c.x < WORLD_W / 2 ? -35 : WORLD_W + 35;
+          const dx = exitX - c.x;
+          c.faceRight = dx > 0;
+          if (Math.abs(dx) > 4) {
+            c.x += Math.sign(dx) * 2.05;
+            c.walkPhase += 0.22;
+          } else {
+            c.removed = true;
+          }
+        }
+      });
+      customers = customers.filter(c => !c.removed);
+    }
+    function isNearSteamers() {
+      return Math.hypot(player.x - 565, player.y - 252) < 98;
+    }
+
+    function openKitchenModal() {
+      const wGrid = document.getElementById("wrapperGrid");
+      const fGrid = document.getElementById("fillingGrid");
+      wGrid.innerHTML = WRAPPERS.map(w => `
+        <button type="button" class="ing-btn ${w === selectedWrapper ? 'selected' : ''}" onclick="pickWrapper('${w}')">${w}</button>
+      `).join("");
+      fGrid.innerHTML = FILLINGS.map(f => `
+        <button type="button" class="ing-btn ${f === selectedFilling ? 'selected' : ''}" onclick="pickFilling('${f}')">${f}</button>
+      `).join("");
+
+      const activeHints = acceptedOrders.length > 0
+        ? acceptedOrders.map(o => `Table ${o.tableId} (${o.dish.name}): ${o.dish.wrapper} + ${o.dish.filling}`).join("<br>")
+        : "No active orders yet. Walk up to a guest's table to take their order first.";
+      document.getElementById("kitchenRecipeHint").innerHTML = `<strong style="color:#991b1b;">Active Orders:</strong><br>${activeHints}`;
+      document.getElementById("kitchenModal").classList.add("open");
+    }
+
+    function closeKitchenModal() { document.getElementById("kitchenModal").classList.remove("open"); }
+    function pickWrapper(w) { selectedWrapper = w; openKitchenModal(); }
+    function pickFilling(f) { selectedFilling = f; openKitchenModal(); }
+
+    function confirmWrapAndSteam() {
+      const freeSteamer = STEAMERS.find(s => s.state === "empty");
+      if (!freeSteamer) {
+        showToast("All 3 bamboo steamers are full! Take cooked dishes out first.");
+        return;
+      }
+      const matchedDish = DIMSUM_MENU.find(m => m.wrapper === selectedWrapper && m.filling === selectedFilling);
+      if (!matchedDish) {
+        showToast("Wrapper and filling do not match any recipe. Check Recipe Book!");
+        return;
+      }
+      freeSteamer.dish = matchedDish;
+      freeSteamer.progress = 0;
+      freeSteamer.burnTimer = 0;
+      freeSteamer.sizzleCd = 0.2;
+      freeSteamer.state = "cooking";
+      playSFX("sizzle");
+      closeKitchenModal();
+      showToast(`Wrapped ${matchedDish.name} and placed on Steamer #${freeSteamer.id + 1}`);
+    }
+
+    function openRecipeBook() {
+      const listEl = document.getElementById("fullRecipeList");
+      const rbSize = DISH_SIZE_CONFIG.recipeBook;
+
+      listEl.innerHTML = DIMSUM_MENU.map(m => `
+        <div class="recipe-item">
+          <div class="recipe-thumb" id="thumb_${m.id}"></div>
+          <div class="recipe-info">
+            <div class="recipe-name-row">
+              <span class="recipe-name">${m.name}</span>
+              <span class="recipe-price">+${m.price} GP</span>
+            </div>
+            <div class="recipe-desc">${m.desc}</div>
+            <div class="recipe-formula">Recipe: ${m.wrapper} + ${m.filling}</div>
+          </div>
+        </div>
+      `).join("");
+
+      DIMSUM_MENU.forEach(m => {
+        const box = document.getElementById(`thumb_${m.id}`);
+        const miniC = document.createElement("canvas");
+        miniC.width = rbSize.w + 8;
+        miniC.height = rbSize.h + 8;
+        const mctx = miniC.getContext("2d");
+        drawPixelDishCustomSize(mctx, m, miniC.width / 2, miniC.height / 2, rbSize.w, rbSize.h, false);
+        box.appendChild(miniC);
+      });
+
+      document.getElementById("recipeModal").classList.add("open");
+    }
+    function closeRecipeBook() { document.getElementById("recipeModal").classList.remove("open"); }
+
+    function discardHoldingItem() {
+      if (!player.holding) { showToast("Your hands are empty"); return; }
+      player.holding = null;
+      showToast("Discarded held dish");
+    }
+
+    function handleInteract() {
+      if (document.querySelector(".modal-overlay.open")) return;
+
+      for (const tbl of TABLES) {
+        if (Math.hypot(player.x - tbl.x, player.y - tbl.y) < 82) {
+          if (tbl.dirty) {
+            tbl.dirty = false;
+            playSFX("cook");
+            showToast(`Cleaned Table ${tbl.id}! Ready for new guests.`);
+            return;
+          }
+
+          const orderingGuests = tbl.customers.filter(c => c.state === "ordering");
+          if (orderingGuests.length > 0) {
+            orderingGuests.forEach(c => {
+              c.state = "waiting";
+              c.patience = 100;
+              acceptedOrders.push({ custId: c.id, tableId: tbl.id, dish: c.dish });
+            });
+            updateOrdersDockUI();
+            playSFX("bell");
+            const names = orderingGuests.map(c => c.dish.name).join(" & ");
+            showToast(`Order confirmed for Table ${tbl.id}: ${names}`);
+            return;
+          }
+
+          const waitingGuests = tbl.customers.filter(c => c.state === "waiting");
+          if (waitingGuests.length > 0) {
+            if (!player.holding) {
+              const needed = waitingGuests.map(c => c.dish.name).join(" & ");
+              showToast(`Table ${tbl.id} is waiting for: ${needed}`);
+              return;
+            }
+            if (player.holding.burned) {
+              showToast("This dish is burned! Tap Discard and cook a fresh one.");
+              return;
+            }
+            const targetGuest = waitingGuests.find(c => c.dish.id === player.holding.dish.id);
+            if (!targetGuest) {
+              const needed = waitingGuests.map(c => c.dish.name).join(" & ");
+              showToast(`Wrong dish! Table ${tbl.id} ordered: ${needed}`);
+              return;
+            }
+
+            player.holding = null;
+            targetGuest.state = "eating";
+            targetGuest.eatTimer = 4.4;
+            acceptedOrders = acceptedOrders.filter(o => o.custId !== targetGuest.id);
+            updateOrdersDockUI();
+            playSFX("cook");
+            showToast(`Served ${targetGuest.dish.name} to Table ${tbl.id}!`);
+            return;
+          }
+        }
+      }
+
+      for (const st of STEAMERS) {
+        if (Math.hypot(player.x - st.x, player.y - (st.y + 42)) < 78) {
+          if (st.state === "ready" || st.state === "burned") {
+            if (player.holding) {
+              showToast("Your hands are already full!");
+              return;
+            }
+            player.holding = { dish: st.dish, burned: (st.state === "burned") };
+            st.dish = null; st.progress = 0; st.burnTimer = 0; st.state = "empty";
+            playSFX("cook");
+            showToast(player.holding.burned ? "Overcooked! Tap Discard to throw away." : `Picked up hot ${player.holding.dish.name}!`);
+            return;
+          }
+          if (st.state === "cooking") {
+            showToast(`Steamer #${st.id + 1} is steaming (${Math.floor(st.progress * 20)}%)...`);
+            return;
+          }
+        }
+      }
+
+      if (isNearSteamers()) {
+        openKitchenModal();
+      }
+    }
+    function drawPixelDishCustomSize(c, dish, x, y, width, height, burned = false) {
+      c.save();
+      c.translate(x, y);
+
+      const imgObj = DISH_IMAGES[dish.id];
+      if (!burned && imgObj && imgObj.isReady) {
+        const source = imgObj.cleanCanvas || imgObj;
+        c.drawImage(source, -width / 2, -height / 2, width, height);
+        c.restore();
+        return;
+      }
+
+      const rx = width * 0.44;
+      const ry = height * 0.42;
+
+      c.fillStyle = "rgba(0, 0, 0, 0.25)";
+      c.beginPath(); c.ellipse(0, ry * 0.35, rx, ry * 0.85, 0, 0, Math.PI * 2); c.fill();
+
+      c.fillStyle = "#ffffff";
+      c.strokeStyle = "#b91c1c";
+      c.lineWidth = 1.6;
+      c.beginPath(); c.ellipse(0, 0, rx, ry, 0, 0, Math.PI * 2); c.fill(); c.stroke();
+
+      c.fillStyle = "#f1f5f9";
+      c.beginPath(); c.ellipse(0, 0, rx * 0.72, ry * 0.68, 0, 0, Math.PI * 2); c.fill();
+
+      if (burned) {
+        c.fillStyle = "#1c1917";
+        c.fillRect(-rx * 0.35, -ry * 0.3, rx * 0.3, ry * 0.35);
+        c.fillRect(rx * 0.1, -ry * 0.2, rx * 0.3, ry * 0.35);
+        c.restore();
+        return;
+      }
+
+      const rBun = Math.min(rx, ry) * 0.38;
+      [[-rx * 0.26, -ry * 0.12], [rx * 0.26, -ry * 0.12], [0, ry * 0.16]].forEach(([ox, oy]) => {
+        c.fillStyle = dish.color;
+        c.beginPath(); c.arc(ox, oy, rBun, 0, Math.PI * 2); c.fill();
+        c.fillStyle = dish.accent;
+        c.fillRect(ox - rBun * 0.35, oy - rBun * 0.35, rBun * 0.7, rBun * 0.7);
+      });
+      c.restore();
+    }
+
+    function drawPixelPerson(x, y, spriteImg, shirt, pants, hair, hasHat, flipX, walkPhase, isChef = false) {
+      const bob = Math.sin(walkPhase) * 2.0;
+      const legSwing = Math.sin(walkPhase) * 3.5;
+
+      ctx.save();
+      ctx.translate(Math.round(x), Math.round(y));
+
+      ctx.fillStyle = "rgba(0, 0, 0, 0.36)";
+      ctx.beginPath(); ctx.ellipse(0, 22, 13, 5.5, 0, 0, Math.PI * 2); ctx.fill();
+
+      ctx.translate(0, Math.round(bob));
+      if (flipX) ctx.scale(-1, 1);
+
+      if (spriteImg && spriteImg.isReady) {
+        const src = spriteImg.cleanCanvas || spriteImg;
+        ctx.drawImage(src, -23, -46, 46, 68);
+        ctx.restore();
+        return;
+      }
+
+      ctx.fillStyle = pants;
+      ctx.fillRect(-7, 7 + legSwing * 0.4, 6, 13);
+      ctx.fillRect(1, 7 - legSwing * 0.4, 6, 13);
+      ctx.fillStyle = "#1c1917";
+      ctx.fillRect(-7, 19 + legSwing * 0.4, 7, 3);
+      ctx.fillRect(1, 19 - legSwing * 0.4, 7, 3);
+
+      ctx.fillStyle = shirt;
+      ctx.fillRect(-10, -13, 20, 21);
+      ctx.fillStyle = "rgba(0, 0, 0, 0.16)";
+      ctx.fillRect(-10, -13, 4, 21);
+
+      if (isChef) {
+        ctx.fillStyle = "#fffdf8";
+        ctx.fillRect(-8, -11, 16, 19);
+        ctx.fillStyle = "#991b1b";
+        ctx.fillRect(-9, 1, 18, 3);
+      }
+
+      ctx.fillStyle = isChef ? "#fffdf8" : shirt;
+      ctx.fillRect(-13, -10 - legSwing * 0.3, 4, 13);
+      ctx.fillRect(9, -10 + legSwing * 0.3, 4, 13);
+      ctx.fillStyle = "#fed7aa";
+      ctx.fillRect(-13, 2 - legSwing * 0.3, 4, 3);
+      ctx.fillRect(9, 2 + legSwing * 0.3, 4, 3);
+
+      ctx.fillStyle = "#fdba74";
+      ctx.fillRect(-3, -16, 6, 4);
+      ctx.fillStyle = "#fed7aa";
+      ctx.fillRect(-9, -32, 18, 17);
+
+      ctx.fillStyle = hair;
+      ctx.fillRect(-10, -35, 20, 6);
+      ctx.fillRect(-10, -30, 3, 9);
+      ctx.fillStyle = "#0f172a";
+      ctx.fillRect(3, -25, 2.5, 3);
+      ctx.fillStyle = "#f43f5e";
+      ctx.fillRect(4, -20, 3, 1.5);
+
+      if (isChef) {
+        ctx.fillStyle = "#ffffff";
+        ctx.fillRect(-9, -43, 18, 9);
+        ctx.fillRect(-7, -47, 14, 5);
+        ctx.fillStyle = "#d97706";
+        ctx.fillRect(-9, -35, 18, 2);
+      } else if (hasHat) {
+        ctx.fillStyle = "#b45309";
+        ctx.fillRect(-14, -36, 28, 3.5);
+        ctx.fillRect(-8, -40, 16, 4);
+      }
+      ctx.restore();
+    }
+    let lastFrameTime = performance.now();
+    let spawnTimer = 1.4;
+
+    function gameLoop(now) {
+      const dt = Math.min(0.1, (now - lastFrameTime) / 1000);
+      lastFrameTime = now;
+
+      let vx = joy.dx, vy = joy.dy;
+      if (keys.w || keys.arrowup) vy -= 1;
+      if (keys.s || keys.arrowdown) vy += 1;
+      if (keys.a || keys.arrowleft) vx -= 1;
+      if (keys.d || keys.arrowright) vx += 1;
+
+      const mag = Math.hypot(vx, vy);
+      player.moving = mag > 0.05;
+      if (player.moving) {
+        const norm = mag > 1 ? 1 / mag : 1;
+        vx *= norm * player.speed;
+        vy *= norm * player.speed;
+        if (vx < -0.1) player.flipX = true;
+        else if (vx > 0.1) player.flipX = false;
+        if (canMoveTo(player.x + vx, player.y)) player.x += vx;
+        if (canMoveTo(player.x, player.y + vy)) player.y += vy;
+
+        player.stepTimer -= dt;
+        if (player.stepTimer <= 0) {
+          player.stepTimer = 0.27;
+          playSFX("step");
+          dustParticles.push({
+            x: player.x + (Math.random() - 0.5) * 10, y: player.y + 20,
+            vx: -vx * 0.25 + (Math.random() - 0.5) * 0.4, vy: -0.3 - Math.random() * 0.3,
+            life: 18, maxLife: 18
+          });
+        }
+      } else {
+        player.stepTimer = 0;
+      }
+
+      document.getElementById("btnCookAction").classList.toggle("visible", isNearSteamers());
+
+      STEAMERS.forEach(st => {
+        if (st.state === "cooking") {
+          st.progress += dt;
+          st.sizzleCd -= dt;
+          if (st.sizzleCd <= 0) {
+            st.sizzleCd = 1.45 + Math.random() * 0.6;
+            playSFX("sizzle");
+          }
+          if (Math.random() < 0.46) {
+            steamParticles.push({
+              x: st.x + (Math.random() - 0.5) * 20, y: st.y - 8,
+              vy: -0.68 - Math.random() * 0.45, size: 3.5 + Math.random() * 3, life: 42, maxLife: 42
+            });
+          }
+          if (st.progress >= 5.0) {
+            st.state = "ready";
+            st.burnTimer = 0;
+            playSFX("bell");
+            showToast(`Steamer #${st.id + 1} (${st.dish.name}) is ready!`);
+          }
+        } else if (st.state === "ready") {
+          st.burnTimer += dt;
+          if (Math.random() < 0.68) {
+            steamParticles.push({
+              x: st.x + (Math.random() - 0.5) * 24, y: st.y - 10,
+              vy: -0.95 - Math.random() * 0.4, size: 4 + Math.random() * 3.5, life: 48, maxLife: 48
+            });
+          }
+          if (st.burnTimer >= 14.0) {
+            st.state = "burned";
+            playSFX("burn");
+            showToast(`Steamer #${st.id + 1} overcooked and burned!`);
+          }
+        }
+      });
+
+      spawnTimer -= dt;
+      if (spawnTimer <= 0) {
+        spawnCustomerGroup();
+        spawnTimer = 6.2 + Math.random() * 4.5;
+      }
+      updateCustomersAI(dt);
+
+      windPetals.forEach(wp => {
+        wp.phase += dt * 2.2;
+        wp.x += wp.vx;
+        wp.y += wp.vy + Math.sin(wp.phase) * 0.28;
+        if (wp.x > WORLD_W + 20) { wp.x = -20; wp.y = Math.random() * WORLD_H; }
+        if (wp.y > WORLD_H + 20) wp.y = -20;
+      });
+
+      dustParticles.forEach(d => { d.x += d.vx; d.y += d.vy; d.life--; });
+      dustParticles = dustParticles.filter(d => d.life > 0);
+      steamParticles.forEach(p => { p.y += p.vy; p.x += Math.sin(p.life * 0.2) * 0.25; p.life--; });
+      steamParticles = steamParticles.filter(p => p.life > 0);
+      floatingCoins.forEach(fc => { fc.y -= 0.5; fc.life--; });
+      floatingCoins = floatingCoins.filter(fc => fc.life > 0);
+
+      const bgGrad = ctx.createRadialGradient(
+        canvas.width / 2, canvas.height / 2, 120,
+        canvas.width / 2, canvas.height / 2, Math.max(canvas.width, canvas.height) * 0.72
+      );
+      bgGrad.addColorStop(0, "#522f1e");
+      bgGrad.addColorStop(0.55, "#2b1c18");
+      bgGrad.addColorStop(1, "#161012");
+      ctx.fillStyle = bgGrad;
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      const scale = Math.min(canvas.width / WORLD_W, canvas.height / WORLD_H) * 0.94;
+      const drawW = WORLD_W * scale, drawH = WORLD_H * scale;
+      const offsetX = (canvas.width - drawW) / 2;
+      const offsetY = (canvas.height - drawH) / 2;
+
+      ctx.save();
+      ctx.translate(offsetX, offsetY);
+      ctx.scale(scale, scale);
+
+      if (MAP_IMG.isReady) {
+        ctx.drawImage(MAP_IMG, 0, 0, WORLD_W, WORLD_H);
+      } else {
+        ctx.fillStyle = "#4a3b32";
+        ctx.fillRect(0, 0, WORLD_W, WORLD_H);
+        ctx.fillStyle = "#fde68a";
+        ctx.font = "bold 14px sans-serif";
+        ctx.textAlign = "center";
+        ctx.fillText("Waiting for mapdimsum.png in the same folder...", WORLD_W / 2, WORLD_H / 2);
+      }
+
+      const glowPulse = 0.16 + Math.sin(now * 0.003) * 0.04;
+      [[340, 145], [500, 130], [660, 145]].forEach(([lx, ly]) => {
+        const lg = ctx.createRadialGradient(lx, ly, 8, lx, ly, 135);
+        lg.addColorStop(0, `rgba(251, 191, 36, ${glowPulse.toFixed(2)})`);
+        lg.addColorStop(1, "rgba(251, 191, 36, 0)");
+        ctx.fillStyle = lg;
+        ctx.beginPath(); ctx.arc(lx, ly, 135, 0, Math.PI * 2); ctx.fill();
+      });
+
+      STEAMERS.forEach(st => {
+        if (st.state !== "empty") {
+          ctx.fillStyle = "rgba(69, 26, 3, 0.92)";
+          ctx.strokeStyle = "#fbbf24"; ctx.lineWidth = 1;
+          ctx.beginPath(); ctx.roundRect(st.x - 25, st.y - 36, 50, 16, 4); ctx.fill(); ctx.stroke();
+          ctx.fillStyle = st.state === "ready" ? "#86efac" : (st.state === "burned" ? "#fca5a5" : "#fef08a");
+          ctx.font = "bold 9px sans-serif"; ctx.textAlign = "center";
+          const txt = st.state === "cooking" ? `${Math.floor(st.progress * 20)}%` : (st.state === "ready" ? "READY" : "BURNED");
+          ctx.fillText(txt, st.x, st.y - 25);
+        }
+      });
+
+      dustParticles.forEach(d => {
+        const a = (d.life / d.maxLife) * 0.55;
+        ctx.fillStyle = `rgba(254, 243, 199, ${a.toFixed(2)})`;
+        ctx.fillRect(Math.round(d.x - 2), Math.round(d.y - 2), 4, 4);
+      });
+
+      steamParticles.forEach(p => {
+        const alpha = (p.life / p.maxLife) * 0.65;
+        ctx.fillStyle = `rgba(255, 255, 255, ${alpha.toFixed(2)})`;
+        ctx.fillRect(Math.round(p.x - p.size / 2), Math.round(p.y - p.size / 2), Math.round(p.size), Math.round(p.size));
+      });
+
+      TABLES.forEach(tbl => {
+        if (tbl.dirty) {
+          ctx.fillStyle = "rgba(127, 29, 29, 0.92)";
+          ctx.strokeStyle = "#fbbf24"; ctx.lineWidth = 1;
+          ctx.beginPath(); ctx.roundRect(tbl.x - 32, tbl.y - 13, 64, 17, 5); ctx.fill(); ctx.stroke();
+          ctx.fillStyle = "#fef3c7"; ctx.font = "bold 9.5px sans-serif"; ctx.textAlign = "center";
+          ctx.fillText("Clean Table", tbl.x, tbl.y - 1.5);
+        } else {
+          const eatingGuests = tbl.customers.filter(c => c.state === "eating");
+          eatingGuests.forEach(eg => {
+            const dishX = tbl.x + (eg.seatSide === "left" ? -14 : 14);
+            drawPixelDishCustomSize(ctx, eg.dish, dishX, tbl.y - 6, DISH_SIZE_CONFIG.onTable.w, DISH_SIZE_CONFIG.onTable.h, false);
+          });
+        }
+      });
+
+      const entities = [
+        { type: "player", y: player.y, obj: player },
+        ...customers.map(c => ({ type: "customer", y: c.y, obj: c }))
+      ].sort((a, b) => a.y - b.y);
+
+      entities.forEach(ent => {
+        if (ent.type === "player") {
+          drawPixelPerson(player.x, player.y, CHEF_IMG, "#d97706", "#1e293b", "#0f172a", false, player.flipX, player.moving ? now * 0.016 : 0, true);
+          if (player.holding) {
+            drawPixelDishCustomSize(ctx, player.holding.dish, player.x + (player.flipX ? -20 : 20), player.y - 10, DISH_SIZE_CONFIG.inHand.w, DISH_SIZE_CONFIG.inHand.h, player.holding.burned);
+          }
+        } else {
+          const c = ent.obj;
+          drawPixelPerson(c.x, c.y, c.variant.img, c.variant.shirt, c.variant.pants, c.variant.hair, c.variant.hat, !c.faceRight, c.walkPhase, false);
+
+          if (c.state === "ordering" || c.state === "waiting") {
+            const bx = c.x + (c.groupSize === 2 ? (c.seatSide === "left" ? -16 : 16) : 0);
+            const by = c.y - 68;
+            ctx.fillStyle = c.state === "ordering" ? "rgba(255, 253, 247, 0.97)" : "rgba(254, 243, 199, 0.95)";
+            ctx.strokeStyle = c.state === "ordering" ? "#991b1b" : "#b45309";
+            ctx.lineWidth = 2;
+            ctx.beginPath(); ctx.roundRect(bx - 66, by - 22, 132, 38, 8); ctx.fill(); ctx.stroke();
+
+            drawPixelDishCustomSize(ctx, c.dish, bx - 43, by - 3, DISH_SIZE_CONFIG.inBubble.w, DISH_SIZE_CONFIG.inBubble.h, false);
+
+            ctx.textAlign = "left";
+            ctx.fillStyle = "#451a03";
+            ctx.font = "bold 9.5px sans-serif";
+            ctx.fillText(c.dish.name, bx - 20, by - 6);
+
+            ctx.fillStyle = c.state === "ordering" ? "#991b1b" : "#92400e";
+            ctx.font = "bold 8.4px sans-serif";
+            ctx.fillText(c.state === "ordering" ? `Order (+${c.dish.price} GP)` : "Waiting...", bx - 20, by + 8);
+            ctx.textAlign = "center";
+
+            ctx.fillStyle = "rgba(69, 26, 3, 0.75)";
+            ctx.fillRect(bx - 25, c.y - 40, 50, 4);
+            ctx.fillStyle = c.patience > 40 ? "#16a34a" : "#dc2626";
+            ctx.fillRect(bx - 25, c.y - 40, Math.max(0, (c.patience / 100) * 50), 4);
+          }
+        }
+      });
+
+      windPetals.forEach(wp => {
+        ctx.fillStyle = "rgba(251, 207, 232, 0.74)";
+        ctx.fillRect(Math.round(wp.x), Math.round(wp.y), Math.round(wp.size), Math.round(wp.size * 0.7));
+      });
+
+      floatingCoins.forEach(fc => {
+        ctx.fillStyle = "#fef08a";
+        ctx.strokeStyle = "#7f1d1d";
+        ctx.lineWidth = 3;
+        ctx.font = "bold 14px sans-serif";
+        ctx.textAlign = "center";
+        ctx.strokeText(fc.text, fc.x, fc.y);
+        ctx.fillText(fc.text, fc.x, fc.y);
+      });
+
+      const leftFade = ctx.createLinearGradient(0, 0, 58, 0);
+      leftFade.addColorStop(0, "rgba(22, 16, 18, 0.95)");
+      leftFade.addColorStop(1, "rgba(22, 16, 18, 0)");
+      ctx.fillStyle = leftFade;
+      ctx.fillRect(0, 0, 58, WORLD_H);
+
+      const rightFade = ctx.createLinearGradient(WORLD_W - 58, 0, WORLD_W, 0);
+      rightFade.addColorStop(0, "rgba(22, 16, 18, 0)");
+      rightFade.addColorStop(1, "rgba(22, 16, 18, 0.95)");
+      ctx.fillStyle = rightFade;
+      ctx.fillRect(WORLD_W - 58, 0, 58, WORLD_H);
+
+      ctx.restore();
+
+      if (joy.active) {
+        ctx.save();
+        ctx.beginPath();
+        ctx.arc(joy.ox, joy.oy, JOY_MAX_R, 0, Math.PI * 2);
+        ctx.fillStyle = "rgba(254, 243, 199, 0.14)";
+        ctx.fill();
+        ctx.lineWidth = 2;
+        ctx.strokeStyle = "rgba(251, 191, 36, 0.68)";
+        ctx.stroke();
+
+        ctx.beginPath();
+        ctx.arc(joy.cx, joy.cy, 20, 0, Math.PI * 2);
+        ctx.fillStyle = "rgba(168, 28, 28, 0.82)";
+        ctx.fill();
+        ctx.lineWidth = 2;
+        ctx.strokeStyle = "#fde68a";
+        ctx.stroke();
+        ctx.restore();
+      }
+
+      requestAnimationFrame(gameLoop);
+    }
+
+    syncGemReward(0);
+    spawnCustomerGroup();
+    requestAnimationFrame(gameLoop);
+  </script>
+</body>
+</html>
